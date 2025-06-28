@@ -25,7 +25,7 @@ class MainApp extends StatelessWidget {
           Theme.of(context).textTheme,
         ),
       ),
-      initialRoute: AppRouter.tables,
+      initialRoute: AppRouter.getInitialRoute(),
       routes: AppRouter.routes,
     );
   }

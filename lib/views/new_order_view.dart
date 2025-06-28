@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import '../components/composite/transparent_app_bar.dart';
 import '../utils/logger.dart';
 
 class NewOrderView extends StatefulWidget {
@@ -420,6 +421,11 @@ class _NewOrderViewState extends State<NewOrderView> {
     final table = modalRoute?.settings.arguments as Map<String, dynamic>?;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: const TransparentAppBar(
+        backgroundColor: Color(0xFFF3E5F5),
+        statusBarIconBrightness: Brightness.dark,
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

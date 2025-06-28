@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../components/composite/transparent_app_bar.dart';
 import '../utils/logger.dart';
 
 class TablesView extends StatefulWidget {
@@ -26,6 +27,11 @@ class _TablesViewState extends State<TablesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: const TransparentAppBar(
+        backgroundColor: Color(0xFFF3E5F5),
+        statusBarIconBrightness: Brightness.dark,
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
