@@ -15,7 +15,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView> with SingleTickerProvider
   final TextEditingController _phoneController = TextEditingController();
   final FocusNode _phoneFocusNode = FocusNode();
   bool isLoading = false;
-  bool _isPhoneValid = false;
+  bool isKeyboardVisible = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -34,14 +34,6 @@ class _PhoneAuthViewState extends State<PhoneAuthView> with SingleTickerProvider
       curve: Curves.easeInOut,
     ));
     _animationController.forward();
-
-    _phoneController.addListener(_validatePhone);
-  }
-
-  void _validatePhone() {
-    setState(() {
-      _isPhoneValid = _phoneController.text.length == 9;
-    });
   }
 
   @override
@@ -54,12 +46,15 @@ class _PhoneAuthViewState extends State<PhoneAuthView> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: const TransparentAppBar(
         backgroundColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
       ),
+      resizeToAvoidBottomInset: true,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -284,95 +279,87 @@ class _PhoneAuthViewState extends State<PhoneAuthView> with SingleTickerProvider
   }
 
   Widget _buildBottomSection() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            child: _buildSendButton(),
-          ),
-          const SizedBox(height: 20),
-          _buildTermsText(),
+          _buildSendButton(),
+          if (!isKeyboardVisible) ...[
+            const SizedBox(height: 20),
+            _buildTermsText(),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildSendButton() {
-    return AnimatedScale(
-      scale: _isPhoneValid ? 1.0 : 0.95,
-      duration: const Duration(milliseconds: 200),
-      child: ElevatedButton(
-        onPressed: (isLoading || !_isPhoneValid) ? null : () async {
-          setState(() => isLoading = true);
-          AppLogger.log('Enviando SMS al: +51 ${_phoneController.text}', prefix: 'AUTH:');
+    return ElevatedButton(
+      onPressed: isLoading ? null : () async {
+        setState(() => isLoading = true);
+        AppLogger.log('Enviando SMS al: +51 ${_phoneController.text}', prefix: 'AUTH:');
 
-          await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(const Duration(seconds: 1));
 
-          if (mounted) {
-            Navigator.pushNamed(
-              context,
-              '/otp-verification',
-              arguments: {
-                'phoneNumber': '+51 ${_phoneController.text}',
-              },
-            );
-            setState(() => isLoading = false);
-          }
-        },
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          elevation: _isPhoneValid ? 10 : 0,
-          shadowColor: Colors.purple.withOpacity(0.4),
+        if (mounted) {
+          Navigator.pushNamed(
+            context,
+            '/otp-verification',
+            arguments: {
+              'phoneNumber': '+51 ${_phoneController.text}',
+            },
+          );
+          setState(() => isLoading = false);
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
         ),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          height: 60,
-          decoration: BoxDecoration(
-            gradient: _isPhoneValid
-                ? const LinearGradient(
-              colors: [
-                Color(0xFF9C27B0),
-                Color(0xFFE91E63),
-              ],
-            )
-                : null,
-            color: _isPhoneValid ? null : Colors.grey[300],
-            borderRadius: BorderRadius.circular(18),
+        elevation: 10,
+        shadowColor: Colors.purple.withOpacity(0.4),
+      ),
+      child: Container(
+        height: 60,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF9C27B0),
+              Color(0xFFE91E63),
+            ],
           ),
-          child: Center(
-            child: isLoading
-                ? const SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 3,
-              ),
-            )
-                : Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.message_rounded,
-                  color: _isPhoneValid ? Colors.white : Colors.grey[600],
-                  size: 22,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'Enviar código SMS',
-                  style: GoogleFonts.poppins(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    color: _isPhoneValid ? Colors.white : Colors.grey[600],
-                  ),
-                ),
-              ],
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Center(
+          child: isLoading
+              ? const SizedBox(
+            width: 28,
+            height: 28,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 3,
             ),
+          )
+              : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.message_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Enviar código SMS',
+                style: GoogleFonts.poppins(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
         ),
       ),

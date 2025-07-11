@@ -131,6 +131,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
         backgroundColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
       ),
+      resizeToAvoidBottomInset: true,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -361,19 +362,31 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
           border: InputBorder.none,
         ),
         onChanged: (value) {
-          if (value.isNotEmpty && index < 5) {
-            _focusNodes[index + 1].requestFocus();
+          if (value.isNotEmpty) {
+            // Si hay valor, seleccionar todo el texto para reemplazo fácil
+            _controllers[index].selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: value.length,
+            );
+
+            // Mover al siguiente campo si no es el último
+            if (index < 5) {
+              _focusNodes[index + 1].requestFocus();
+            }
           } else if (value.isEmpty && index > 0) {
+            // Si borra, ir al campo anterior
             _focusNodes[index - 1].requestFocus();
           }
           setState(() {});
-
-          if (_controllers.every((controller) => controller.text.isNotEmpty)) {
-            AppLogger.log('Código OTP completo', prefix: 'AUTH:');
-            _verifyOtp();
-          }
         },
         onTap: () {
+          // Seleccionar todo el texto cuando se hace tap
+          if (_controllers[index].text.isNotEmpty) {
+            _controllers[index].selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: _controllers[index].text.length,
+            );
+          }
           setState(() {});
         },
       ),
@@ -452,67 +465,57 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
   }
 
   Widget _buildBottomSection() {
-    final isComplete = _controllers.every((controller) => controller.text.isNotEmpty);
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-      child: AnimatedScale(
-        scale: isComplete ? 1.0 : 0.95,
-        duration: const Duration(milliseconds: 200),
-        child: ElevatedButton(
-          onPressed: (isLoading || !isComplete) ? null : _verifyOtp,
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
-            elevation: isComplete ? 10 : 0,
-            shadowColor: Colors.purple.withOpacity(0.4),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
+      child: ElevatedButton(
+        onPressed: isLoading ? null : _verifyOtp,
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
           ),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: 60,
-            decoration: BoxDecoration(
-              gradient: isComplete
-                  ? const LinearGradient(
-                colors: [
-                  Color(0xFF9C27B0),
-                  Color(0xFFE91E63),
-                ],
-              )
-                  : null,
-              color: isComplete ? null : Colors.grey[300],
-              borderRadius: BorderRadius.circular(18),
+          elevation: 10,
+          shadowColor: Colors.purple.withOpacity(0.4),
+        ),
+        child: Container(
+          height: 60,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF9C27B0),
+                Color(0xFFE91E63),
+              ],
             ),
-            child: Center(
-              child: isLoading
-                  ? const SizedBox(
-                width: 28,
-                height: 28,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 3,
-                ),
-              )
-                  : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: isComplete ? Colors.white : Colors.grey[600],
-                    size: 24,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Verificar código',
-                    style: GoogleFonts.poppins(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: isComplete ? Colors.white : Colors.grey[600],
-                    ),
-                  ),
-                ],
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Center(
+            child: isLoading
+                ? const SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 3,
               ),
+            )
+                : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Verificar código',
+                  style: GoogleFonts.poppins(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -529,14 +532,15 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
     await Future.delayed(const Duration(seconds: 2));
 
     if (mounted) {
-      if (code != '123456') {
-        _shakeError();
-        for (var controller in _controllers) {
-          controller.clear();
-        }
-        _focusNodes[0].requestFocus();
-      }
       setState(() => isLoading = false);
+
+      // TODO: Ajustar navegación según el rol del usuario
+      // Por ahora navega directamente a kitchen-orders
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/kitchen-orders',
+            (route) => false,
+      );
     }
   }
 }
