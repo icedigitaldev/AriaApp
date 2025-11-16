@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
-import '../views/otp_verification_view.dart';
+
+// Vistas de autenticación
 import '../views/phone_auth_view.dart';
+import '../views/otp_verification_view.dart';
+
+// Vistas del mesero
 import '../views/tables_view.dart';
 import '../views/new_order_view.dart';
 import '../views/order_details_view.dart';
+
+// Vistas de cocina
 import '../views/kitchen_orders_view.dart';
 import '../views/kitchen_order_details_view.dart';
 import '../views/kitchen_history_view.dart';
 
 class AppRouter {
-
   // Rutas de autenticación
   static const String phoneAuth = '/phone-auth';
   static const String otpVerification = '/otp-verification';
 
   // Rutas del mesero
-  static const String tables = '/';
+  static const String tables = '/tables';
   static const String newOrder = '/new-order';
   static const String orderDetails = '/order-details';
 
@@ -24,11 +29,10 @@ class AppRouter {
   static const String kitchenOrderDetails = '/kitchen-order-details';
   static const String kitchenHistory = '/kitchen-history';
 
-  // Cambiar esta línea para probar diferentes vistas
-  static String getInitialRoute() => phoneAuth; // Cambiar a kitchenOrders para probar cocina
+  // Ruta inicial de la aplicación
+  static String getInitialRoute() => kitchenOrders;
 
   static Map<String, WidgetBuilder> routes = {
-
     // Rutas de autenticación
     phoneAuth: (context) => const PhoneAuthView(),
     otpVerification: (context) => const OtpVerificationView(),

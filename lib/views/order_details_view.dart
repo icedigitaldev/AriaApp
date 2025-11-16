@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../components/composite/transparent_app_bar.dart';
-import '../utils/logger.dart';
+import '../design/colors/app_colors.dart';
+import '../design/colors/app_gradients.dart';
+import '../design/responsive/responsive_scaler.dart';
+import '../design/themes/app_themes.dart';
 
 class OrderDetailsView extends StatefulWidget {
   const OrderDetailsView({Key? key}) : super(key: key);
@@ -13,25 +16,18 @@ class OrderDetailsView extends StatefulWidget {
 class _OrderDetailsViewState extends State<OrderDetailsView> {
   @override
   Widget build(BuildContext context) {
+    AppThemes.init(context);
+    ResponsiveSize.init(context);
     final table = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: const TransparentAppBar(
-        backgroundColor: Color(0xFFF3E5F5),
-        statusBarIconBrightness: Brightness.dark,
+      appBar: TransparentAppBar(
+        backgroundColor: AppColors.appBarBackground,
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFF3E5F5),
-              Color(0xFFFCE4EC),
-              Color(0xFFE3F2FD),
-            ],
-          ),
+        decoration: BoxDecoration(
+          color: AppColors.background,
         ),
         child: SafeArea(
           child: Column(
@@ -43,9 +39,9 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
                     'Detalles de la orden\nMesa ${table?['number'] ?? ''}',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
-                      fontSize: 24,
+                      fontSize: ResponsiveSize.font(24),
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -59,28 +55,28 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
 
   Widget _buildHeader(Map<String, dynamic>? table) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: ResponsiveSize.padding(const EdgeInsets.all(20)),
       child: Row(
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
             icon: Container(
-              padding: const EdgeInsets.all(8),
+              padding: ResponsiveSize.padding(const EdgeInsets.all(8)),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.card.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: AppColors.shadow,
                     blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    offset: Offset(0, ResponsiveSize.height(4)),
                   ),
                 ],
               ),
-              child: const Icon(Icons.arrow_back, color: Colors.black87),
+              child: Icon(Icons.arrow_back, color: AppColors.textPrimary),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: ResponsiveSize.width(12)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,22 +84,18 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
                 Text(
                   'Mesa ${table?['number'] ?? ''}',
                   style: GoogleFonts.poppins(
-                    fontSize: 28,
+                    fontSize: ResponsiveSize.font(28),
                     fontWeight: FontWeight.bold,
                     foreground: Paint()
-                      ..shader = const LinearGradient(
-                        colors: [
-                          Color(0xFF7B1FA2),
-                          Color(0xFFE91E63),
-                        ],
-                      ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                      ..shader = AppGradients.headerText
+                          .createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
                   ),
                 ),
                 Text(
                   'Total: \$${table?['orderTotal']?.toStringAsFixed(2) ?? '0.00'}',
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.grey[600],
+                    fontSize: ResponsiveSize.font(14),
+                    color: AppColors.textMuted,
                   ),
                 ),
               ],

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../components/composite/transparent_app_bar.dart';
-import '../utils/logger.dart';
+import '../components/ui/app_loader.dart';
+import '../design/colors/app_colors.dart';
+import '../design/colors/app_gradients.dart';
+import '../design/responsive/responsive_scaler.dart';
+import '../features/authentication/components/ui/phone_input_field.dart';
+import '../features/authentication/components/composite/auth_header.dart';
 
 class PhoneAuthView extends StatefulWidget {
   const PhoneAuthView({Key? key}) : super(key: key);
@@ -46,247 +50,61 @@ class _PhoneAuthViewState extends State<PhoneAuthView> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    ResponsiveSize.init(context);
     isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: const TransparentAppBar(
-        backgroundColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-      ),
+      backgroundColor: AppColors.background,
       resizeToAvoidBottomInset: true,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFF3E5F5),
-              Color(0xFFFCE4EC),
-              Color(0xFFE3F2FD),
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: ResponsiveSize.padding(const EdgeInsets.symmetric(horizontal: 24.0)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(height: ResponsiveSize.height(60)),
+                        // Header reutilizable
+                        const AuthHeader(
+                          icon: Icons.phone_android_rounded,
+                          title: 'Bienvenido',
+                          subtitle: 'Ingresa tu número de teléfono\npara continuar',
+                        ),
+                        SizedBox(height: ResponsiveSize.height(80)),
+                        // Campo de entrada modular
+                        PhoneInputField(
+                          controller: _phoneController,
+                          focusNode: _phoneFocusNode,
+                          onTap: () => setState(() {}),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              _buildBottomSection(),
             ],
           ),
         ),
-        child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SizedBox(height: 60),
-                          _buildHeader(),
-                          const SizedBox(height: 80),
-                          _buildPhoneInputSection(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                _buildBottomSection(),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        Hero(
-          tag: 'auth-icon',
-          child: Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF9C27B0),
-                  Color(0xFFE91E63),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.purple.withOpacity(0.3),
-                  blurRadius: 30,
-                  offset: const Offset(0, 15),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.phone_android_rounded,
-              color: Colors.white,
-              size: 50,
-            ),
-          ),
-        ),
-        const SizedBox(height: 32),
-        Text(
-          'Bienvenido',
-          style: GoogleFonts.poppins(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            foreground: Paint()
-              ..shader = const LinearGradient(
-                colors: [
-                  Color(0xFF7B1FA2),
-                  Color(0xFFE91E63),
-                ],
-              ).createShader(const Rect.fromLTWH(0.0, 0.0, 300.0, 70.0)),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'Ingresa tu número de teléfono\npara continuar',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.poppins(
-            fontSize: 17,
-            color: Colors.grey[700],
-            height: 1.5,
-            letterSpacing: 0.3,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPhoneInputSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 25,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.phone_rounded,
-                  size: 20,
-                  color: Colors.grey[700],
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Número de teléfono',
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-            decoration: BoxDecoration(
-              color: _phoneFocusNode.hasFocus
-                  ? const Color(0xFFF3E5F5).withOpacity(0.5)
-                  : Colors.grey[50],
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: _phoneFocusNode.hasFocus
-                    ? const Color(0xFF9C27B0).withOpacity(0.5)
-                    : Colors.grey[300]!,
-                width: 2,
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Text(
-                        '🇵🇪',
-                        style: const TextStyle(fontSize: 26),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        '+51',
-                        style: GoogleFonts.poppins(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 1,
-                  height: 35,
-                  color: Colors.grey[300],
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _phoneController,
-                    focusNode: _phoneFocusNode,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(9),
-                      _PhoneNumberFormatter(),
-                    ],
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.2,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: '999 999 999',
-                      hintStyle: GoogleFonts.poppins(
-                        color: Colors.grey[400],
-                        fontSize: 18,
-                        letterSpacing: 1.2,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 18,
-                      ),
-                    ),
-                    onTap: () {
-                      setState(() {});
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
 
   Widget _buildBottomSection() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
+      padding: ResponsiveSize.padding(const EdgeInsets.fromLTRB(24, 30, 24, 24)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildSendButton(),
           if (!isKeyboardVisible) ...[
-            const SizedBox(height: 20),
+            SizedBox(height: ResponsiveSize.height(20)),
             _buildTermsText(),
           ],
         ],
@@ -298,8 +116,8 @@ class _PhoneAuthViewState extends State<PhoneAuthView> with SingleTickerProvider
     return ElevatedButton(
       onPressed: isLoading ? null : () async {
         setState(() => isLoading = true);
-        AppLogger.log('Enviando SMS al: +51 ${_phoneController.text}', prefix: 'AUTH:');
 
+        // Simular proceso de envío
         await Future.delayed(const Duration(seconds: 1));
 
         if (mounted) {
@@ -316,47 +134,37 @@ class _PhoneAuthViewState extends State<PhoneAuthView> with SingleTickerProvider
       style: ElevatedButton.styleFrom(
         padding: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(ResponsiveSize.radius(18)),
         ),
         elevation: 10,
-        shadowColor: Colors.purple.withOpacity(0.4),
+        shadowColor: AppColors.shadowPurple,
       ),
       child: Container(
-        height: 60,
+        height: ResponsiveSize.height(60),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFF9C27B0),
-              Color(0xFFE91E63),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(18),
+          gradient: AppGradients.primaryButton,
+          borderRadius: BorderRadius.circular(ResponsiveSize.radius(18)),
         ),
         child: Center(
           child: isLoading
-              ? const SizedBox(
-            width: 28,
-            height: 28,
-            child: CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 3,
-            ),
+              ? AppLoader(
+            size: ResponsiveSize.width(28),
           )
               : Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.message_rounded,
-                color: Colors.white,
-                size: 22,
+                color: AppColors.iconOnPrimary,
+                size: ResponsiveSize.icon(22),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: ResponsiveSize.width(10)),
               Text(
                 'Enviar código SMS',
                 style: GoogleFonts.poppins(
-                  fontSize: 17,
+                  fontSize: ResponsiveSize.font(17),
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: AppColors.textOnPrimary,
                 ),
               ),
             ],
@@ -368,13 +176,13 @@ class _PhoneAuthViewState extends State<PhoneAuthView> with SingleTickerProvider
 
   Widget _buildTermsText() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: ResponsiveSize.padding(const EdgeInsets.symmetric(horizontal: 24)),
       child: RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
           style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: Colors.grey[600],
+            fontSize: ResponsiveSize.font(13),
+            color: AppColors.textMuted,
             height: 1.5,
           ),
           children: [
@@ -382,16 +190,16 @@ class _PhoneAuthViewState extends State<PhoneAuthView> with SingleTickerProvider
             TextSpan(
               text: 'Términos de Servicio',
               style: TextStyle(
-                color: const Color(0xFF9C27B0),
+                color: AppColors.primary,
                 fontWeight: FontWeight.w600,
                 decoration: TextDecoration.underline,
               ),
             ),
-            const TextSpan(text: '\ny '),
+            const TextSpan(text: ' y '),
             TextSpan(
               text: 'Política de Privacidad',
               style: TextStyle(
-                color: const Color(0xFF9C27B0),
+                color: AppColors.primary,
                 fontWeight: FontWeight.w600,
                 decoration: TextDecoration.underline,
               ),
@@ -400,31 +208,5 @@ class _PhoneAuthViewState extends State<PhoneAuthView> with SingleTickerProvider
         ),
       ),
     );
-  }
-}
-
-class _PhoneNumberFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
-    final text = newValue.text;
-
-    if (text.length <= 3) {
-      return newValue;
-    } else if (text.length <= 6) {
-      final formatted = '${text.substring(0, 3)} ${text.substring(3)}';
-      return TextEditingValue(
-        text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
-      );
-    } else {
-      final formatted = '${text.substring(0, 3)} ${text.substring(3, 6)} ${text.substring(6)}';
-      return TextEditingValue(
-        text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
-      );
-    }
   }
 }
