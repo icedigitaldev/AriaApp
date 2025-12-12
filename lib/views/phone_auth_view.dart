@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 import '../components/ui/app_loader.dart';
@@ -9,6 +8,8 @@ import '../design/responsive/responsive_scaler.dart';
 import '../features/authentication/components/ui/phone_input_field.dart';
 import '../features/authentication/controllers/auth_controller.dart';
 import '../router/app_router.dart';
+import '../components/composite/transparent_app_bar.dart';
+import '../components/ui/transparent_video_player.dart';
 
 class PhoneAuthView extends StatefulWidget {
   const PhoneAuthView({Key? key}) : super(key: key);
@@ -19,13 +20,11 @@ class PhoneAuthView extends StatefulWidget {
 
 class _PhoneAuthViewState extends State<PhoneAuthView>
     with SingleTickerProviderStateMixin {
-  // TickerProviderStateMixin para animaciones
   final TextEditingController _phoneController = TextEditingController();
   final FocusNode _phoneFocusNode = FocusNode();
   bool isKeyboardVisible = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  late VideoPlayerController _videoController;
 
   @override
   void initState() {
@@ -38,15 +37,6 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.forward();
-
-    // Inicializar video
-    _videoController = VideoPlayerController.asset('assets/media/aria.mp4')
-      ..initialize().then((_) {
-        _videoController.setLooping(true);
-        _videoController.setVolume(0);
-        _videoController.play();
-        setState(() {}); // Actualizar para mostrar el video
-      });
   }
 
   @override
@@ -54,7 +44,6 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
     _animationController.dispose();
     _phoneController.dispose();
     _phoneFocusNode.dispose();
-    _videoController.dispose();
     super.dispose();
   }
 
@@ -89,6 +78,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
         return Scaffold(
           backgroundColor: AppColors.background,
           resizeToAvoidBottomInset: true,
+          appBar: const TransparentAppBar(),
           body: SafeArea(
             child: FadeTransition(
               opacity: _fadeAnimation,
@@ -104,13 +94,17 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            SizedBox(height: ResponsiveScaler.height(60)),
+                            SizedBox(
+                              height: ResponsiveScaler.height(
+                                isKeyboardVisible ? 20 : 40,
+                              ),
+                            ),
 
-                            // Video Container estilo "Sidebar"
+                            // GIF Container estilo "Sidebar"
                             Center(
                               child: Container(
-                                width: ResponsiveScaler.width(120),
-                                height: ResponsiveScaler.height(120),
+                                width: ResponsiveScaler.width(160),
+                                height: ResponsiveScaler.height(160),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(
                                     ResponsiveScaler.radius(30),
@@ -129,57 +123,40 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                                   ],
                                 ),
                                 child: Container(
-                                  padding: const EdgeInsets.all(
-                                    3,
-                                  ), // Anillo exterior (ring-2)
+                                  padding: const EdgeInsets.all(3),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withOpacity(
-                                      0.2,
-                                    ), // Color del anillo (purple-200 approx)
+                                    color: AppColors.primary.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(
                                       ResponsiveScaler.radius(30),
                                     ),
                                   ),
                                   child: Container(
-                                    padding: const EdgeInsets.all(
-                                      2,
-                                    ), // Offset (ring-offset-1)
+                                    padding: const EdgeInsets.all(2),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(
                                         ResponsiveScaler.radius(27),
                                       ),
                                     ),
-                                    child: ClipRRect(
+                                    child: TransparentVideoPlayer(
+                                      assetPath: 'assets/media/aria.webm',
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
                                       borderRadius: BorderRadius.circular(
                                         ResponsiveScaler.radius(25),
                                       ),
-                                      child:
-                                          _videoController.value.isInitialized
-                                          ? FittedBox(
-                                              fit: BoxFit.cover,
-                                              child: SizedBox(
-                                                width: _videoController
-                                                    .value
-                                                    .size
-                                                    .width,
-                                                height: _videoController
-                                                    .value
-                                                    .size
-                                                    .height,
-                                                child: VideoPlayer(
-                                                  _videoController,
-                                                ),
-                                              ),
-                                            )
-                                          : Container(color: Colors.white),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
 
-                            SizedBox(height: ResponsiveScaler.height(32)),
+                            SizedBox(
+                              height: ResponsiveScaler.height(
+                                isKeyboardVisible ? 16 : 24,
+                              ),
+                            ),
 
                             // Título
                             Text(
@@ -201,7 +178,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                               ),
                             ),
 
-                            SizedBox(height: ResponsiveScaler.height(12)),
+                            SizedBox(height: ResponsiveScaler.height(8)),
 
                             // Subtítulo
                             Text(
@@ -215,7 +192,11 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                               ),
                             ),
 
-                            SizedBox(height: ResponsiveScaler.height(80)),
+                            SizedBox(
+                              height: ResponsiveScaler.height(
+                                isKeyboardVisible ? 24 : 48,
+                              ),
+                            ),
 
                             PhoneInputField(
                               controller: _phoneController,
@@ -271,9 +252,12 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
   }
 
   Widget _buildBottomSection(bool isLoading, AuthController authController) {
+    // Padding más compacto cuando el teclado está visible (efecto acordeón)
+    final topPadding = isKeyboardVisible ? 0.0 : 30.0;
+
     return Padding(
       padding: ResponsiveScaler.padding(
-        const EdgeInsets.fromLTRB(24, 30, 24, 24),
+        EdgeInsets.fromLTRB(24, topPadding, 24, 24),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

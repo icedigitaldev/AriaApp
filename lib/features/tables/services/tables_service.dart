@@ -31,7 +31,7 @@ class TablesService {
 
     return gateway.streamDocuments(query: query).map((snapshot) {
       final tables = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         data['id'] = doc.id;
         return data;
       }).toList();
@@ -64,7 +64,7 @@ class TablesService {
       final snapshot = await gateway.getDocuments(query: query);
 
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         data['id'] = doc.id;
         return data;
       }).toList();

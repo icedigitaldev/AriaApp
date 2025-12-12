@@ -32,7 +32,7 @@ class MenuService {
 
     return gateway.streamDocuments(query: query).map((snapshot) {
       final dishes = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         data['id'] = doc.id;
         return data;
       }).toList();
@@ -66,7 +66,7 @@ class MenuService {
 
     return gateway.streamDocuments(query: query).map((snapshot) {
       return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         data['id'] = doc.id;
         return data;
       }).toList();
@@ -94,10 +94,7 @@ class MenuService {
       final snapshot = await gateway.getDocuments(query: query);
 
       final categories = snapshot.docs
-          .map(
-            (doc) =>
-                (doc.data() as Map<String, dynamic>)['category'] as String?,
-          )
+          .map((doc) => doc.data()['category'] as String?)
           .where((cat) => cat != null)
           .toSet()
           .cast<String>()
@@ -124,7 +121,8 @@ class MenuService {
 
       if (!doc.exists) return null;
 
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data();
+      if (data == null) return null;
       data['id'] = doc.id;
       return data;
     } catch (e) {

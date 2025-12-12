@@ -56,7 +56,7 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
 
       if (snapshot.docs.isNotEmpty) {
         final doc = snapshot.docs.first;
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         data['id'] = doc.id;
         setState(() {
           _order = data;

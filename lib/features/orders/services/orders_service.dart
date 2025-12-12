@@ -32,7 +32,7 @@ class OrdersService {
 
     return gateway.streamDocuments(query: query).map((snapshot) {
       final orders = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         data['id'] = doc.id;
         return data;
       }).toList();
@@ -82,7 +82,8 @@ class OrdersService {
 
       if (!doc.exists) return null;
 
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data();
+      if (data == null) return null;
       data['id'] = doc.id;
       return data;
     } catch (e) {
@@ -175,7 +176,7 @@ class OrdersService {
 
       if (snapshot.docs.isNotEmpty) {
         final doc = snapshot.docs.first;
-        final data = doc.data() as Map<String, dynamic>;
+        final data = doc.data();
         data['id'] = doc.id;
         return data;
       }
