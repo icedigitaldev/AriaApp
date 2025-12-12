@@ -19,16 +19,16 @@ class DateSelector extends StatelessWidget {
     final bool isToday = _isToday(selectedDate);
 
     return Container(
-      padding: ResponsiveSize.padding(
+      padding: ResponsiveScaler.padding(
           const EdgeInsets.symmetric(vertical: 8, horizontal: 16)),
       decoration: BoxDecoration(
         color: AppColors.card.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(16)),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 10,
-            offset: Offset(0, ResponsiveSize.height(4)),
+            offset: Offset(0, ResponsiveScaler.height(4)),
           ),
         ],
       ),
@@ -54,25 +54,25 @@ class DateSelector extends StatelessWidget {
               }
             },
             child: Container(
-              padding: ResponsiveSize.padding(
+              padding: ResponsiveScaler.padding(
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               ),
               decoration: BoxDecoration(
                 gradient: AppGradients.totalAmountBackground,
-                borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+                borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.calendar_today,
-                    size: ResponsiveSize.icon(18),
+                    size: ResponsiveScaler.icon(18),
                     color: AppColors.primary,
                   ),
-                  SizedBox(width: ResponsiveSize.width(8)),
+                  SizedBox(width: ResponsiveScaler.width(8)),
                   Text(
                     _formatDate(selectedDate),
                     style: GoogleFonts.poppins(
-                      fontSize: ResponsiveSize.font(14),
+                      fontSize: ResponsiveScaler.font(14),
                       fontWeight: FontWeight.w600,
                       color: AppColors.primary,
                     ),

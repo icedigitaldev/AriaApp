@@ -51,10 +51,10 @@ class OrderCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: ResponsiveSize.margin(const EdgeInsets.only(bottom: 16)),
+        margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 16)),
         decoration: BoxDecoration(
           color: AppColors.card,
-          borderRadius: BorderRadius.circular(ResponsiveSize.radius(20)),
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(20)),
           border: Border.all(
             color: _getStatusBorderColor(order['status']),
             width: 2,
@@ -63,7 +63,7 @@ class OrderCard extends StatelessWidget {
             BoxShadow(
               color: AppColors.shadow,
               blurRadius: 10,
-              offset: Offset(0, ResponsiveSize.height(4)),
+              offset: Offset(0, ResponsiveScaler.height(4)),
             ),
           ],
         ),
@@ -79,11 +79,11 @@ class OrderCard extends StatelessWidget {
 
   Widget _buildHeader() {
     return Container(
-      padding: ResponsiveSize.padding(const EdgeInsets.all(16)),
+      padding: ResponsiveScaler.padding(const EdgeInsets.all(16)),
       decoration: BoxDecoration(
         color: _getStatusBackgroundColor(order['status']).withOpacity(0.3),
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(ResponsiveSize.radius(18)),
+          top: Radius.circular(ResponsiveScaler.radius(18)),
         ),
       ),
       child: Row(
@@ -93,11 +93,11 @@ class OrderCard extends StatelessWidget {
             children: [
               OrderStatusBadge(status: order['status']),
               if (showTableNumber) ...[
-                SizedBox(width: ResponsiveSize.width(12)),
+                SizedBox(width: ResponsiveScaler.width(12)),
                 Text(
                   'Mesa ${order['tableNumber']}',
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(18),
+                    fontSize: ResponsiveScaler.font(18),
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
@@ -122,7 +122,7 @@ class OrderCard extends StatelessWidget {
     final remainingItems = items.length - maxItemsToShow;
 
     return Padding(
-      padding: ResponsiveSize.padding(const EdgeInsets.all(16)),
+      padding: ResponsiveScaler.padding(const EdgeInsets.all(16)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -131,21 +131,21 @@ class OrderCard extends StatelessWidget {
               children: [
                 Icon(
                   Icons.person,
-                  size: ResponsiveSize.icon(16),
+                  size: ResponsiveScaler.icon(16),
                   color: AppColors.iconMuted,
                 ),
-                SizedBox(width: ResponsiveSize.width(4)),
+                SizedBox(width: ResponsiveScaler.width(4)),
                 Text(
                   order['waiter'],
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(14),
+                    fontSize: ResponsiveScaler.font(14),
                     color: AppColors.textMuted,
                   ),
                 ),
               ],
             ),
           if (showWaiterInfo && showItems)
-            SizedBox(height: ResponsiveSize.height(12)),
+            SizedBox(height: ResponsiveScaler.height(12)),
           if (showItems) ...[
             ...itemsToShow.map<Widget>(
                   (item) => OrderItemTile(
@@ -155,13 +155,13 @@ class OrderCard extends StatelessWidget {
             ).toList(),
             if (remainingItems > 0)
               Container(
-                padding: ResponsiveSize.padding(
+                padding: ResponsiveScaler.padding(
                   const EdgeInsets.symmetric(vertical: 8),
                 ),
                 child: Text(
                   '+ $remainingItems elementos más',
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(14),
+                    fontSize: ResponsiveScaler.font(14),
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                   ),

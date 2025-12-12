@@ -29,17 +29,17 @@ class _KitchenActionButtonsState extends State<KitchenActionButtons> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: ResponsiveSize.padding(const EdgeInsets.all(20)),
+      padding: ResponsiveScaler.padding(const EdgeInsets.all(20)),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(ResponsiveSize.radius(30)),
+          top: Radius.circular(ResponsiveScaler.radius(30)),
         ),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 10,
-            offset: Offset(0, ResponsiveSize.height(-4)),
+            offset: Offset(0, ResponsiveScaler.height(-4)),
           ),
         ],
       ),
@@ -66,7 +66,7 @@ class _KitchenActionButtonsState extends State<KitchenActionButtons> {
                 textColor: AppColors.textSecondary,
               ),
             ),
-            SizedBox(width: ResponsiveSize.width(12)),
+            SizedBox(width: ResponsiveScaler.width(12)),
             Expanded(
               flex: 2,
               child: _buildButton(
@@ -96,17 +96,17 @@ class _KitchenActionButtonsState extends State<KitchenActionButtons> {
     return GestureDetector(
       onTap: isLoading ? null : onTap,
       child: Container(
-        padding: ResponsiveSize.padding(const EdgeInsets.symmetric(vertical: 16)),
+        padding: ResponsiveScaler.padding(const EdgeInsets.symmetric(vertical: 16)),
         decoration: BoxDecoration(
           gradient: gradient,
           color: color,
-          borderRadius: BorderRadius.circular(ResponsiveSize.radius(16)),
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
           boxShadow: shadowColor != null
               ? [
             BoxShadow(
               color: shadowColor,
               blurRadius: 12,
-              offset: Offset(0, ResponsiveSize.height(4)),
+              offset: Offset(0, ResponsiveScaler.height(4)),
             ),
           ]
               : null,
@@ -121,14 +121,14 @@ class _KitchenActionButtonsState extends State<KitchenActionButtons> {
                 Icon(
                   icon,
                   color: AppColors.iconOnPrimary,
-                  size: ResponsiveSize.icon(20),
+                  size: ResponsiveScaler.icon(20),
                 ),
-                SizedBox(width: ResponsiveSize.width(8)),
+                SizedBox(width: ResponsiveScaler.width(8)),
               ],
               Text(
                 text,
                 style: GoogleFonts.poppins(
-                  fontSize: ResponsiveSize.font(16),
+                  fontSize: ResponsiveScaler.font(16),
                   fontWeight: FontWeight.bold,
                   color: textColor ?? AppColors.textOnPrimary,
                 ),

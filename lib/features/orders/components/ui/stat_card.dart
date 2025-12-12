@@ -34,36 +34,36 @@ class StatCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: ResponsiveSize.padding(
+          padding: ResponsiveScaler.padding(
               EdgeInsets.all(compact ? 6.0 : 10.0)
           ),
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(
-                ResponsiveSize.radius(compact ? 8 : 12)
+                ResponsiveScaler.radius(compact ? 8 : 12)
             ),
           ),
           child: Icon(
             icon,
             color: color,
-            size: ResponsiveSize.icon(compact ? 20 : 24),
+            size: ResponsiveScaler.icon(compact ? 20 : 24),
           ),
         ),
-        SizedBox(height: ResponsiveSize.height(compact ? 6 : 10)),
+        SizedBox(height: ResponsiveScaler.height(compact ? 6 : 10)),
         Text(
           value,
           style: GoogleFonts.poppins(
-            fontSize: ResponsiveSize.font(compact ? 16 : 20),
+            fontSize: ResponsiveScaler.font(compact ? 16 : 20),
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: ResponsiveSize.height(2)),
+        SizedBox(height: ResponsiveScaler.height(2)),
         Text(
           label,
           style: GoogleFonts.poppins(
-            fontSize: ResponsiveSize.font(compact ? 10 : 12),
+            fontSize: ResponsiveScaler.font(compact ? 10 : 12),
             color: AppColors.textSecondary,
           ),
           textAlign: TextAlign.center,
@@ -81,17 +81,17 @@ class StatCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: ResponsiveSize.padding(
+        padding: ResponsiveScaler.padding(
           EdgeInsets.all(compact ? 12.0 : 16.0),
         ),
         decoration: BoxDecoration(
           color: AppColors.card,
-          borderRadius: BorderRadius.circular(ResponsiveSize.radius(16)),
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
           boxShadow: [
             BoxShadow(
               color: AppColors.shadow,
               blurRadius: 10,
-              offset: Offset(0, ResponsiveSize.height(4)),
+              offset: Offset(0, ResponsiveScaler.height(4)),
             ),
           ],
         ),

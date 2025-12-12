@@ -29,22 +29,22 @@ class OrderHeader extends StatelessWidget {
 
     return Container(
       color: backgroundColor ?? AppColors.transparent,
-      padding: ResponsiveSize.padding(const EdgeInsets.all(20)),
+      padding: ResponsiveScaler.padding(const EdgeInsets.all(20)),
       child: Row(
         children: [
           if (showBackButton && onBack != null)
             IconButton(
               onPressed: onBack,
               icon: Container(
-                padding: ResponsiveSize.padding(const EdgeInsets.all(8)),
+                padding: ResponsiveScaler.padding(const EdgeInsets.all(8)),
                 decoration: BoxDecoration(
                   color: AppColors.card.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+                  borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.shadow,
                       blurRadius: 10,
-                      offset: Offset(0, ResponsiveSize.height(4)),
+                      offset: Offset(0, ResponsiveScaler.height(4)),
                     ),
                   ],
                 ),
@@ -55,7 +55,7 @@ class OrderHeader extends StatelessWidget {
             leadingIcon!,
 
           if (showBackButton || leadingIcon != null)
-            SizedBox(width: ResponsiveSize.width(16)),
+            SizedBox(width: ResponsiveScaler.width(16)),
 
           Expanded(
             child: Column(
@@ -64,7 +64,7 @@ class OrderHeader extends StatelessWidget {
                 Text(
                   title,
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(24),
+                    fontSize: ResponsiveScaler.font(24),
                     fontWeight: FontWeight.bold,
                     foreground: Paint()
                       ..shader = AppGradients.headerText
@@ -75,7 +75,7 @@ class OrderHeader extends StatelessWidget {
                   Text(
                     subtitle!,
                     style: GoogleFonts.poppins(
-                      fontSize: ResponsiveSize.font(14),
+                      fontSize: ResponsiveScaler.font(14),
                       color: AppColors.textMuted,
                     ),
                   ),

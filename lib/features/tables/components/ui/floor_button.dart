@@ -27,13 +27,13 @@ class FloorButton extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: isSelected ? AppGradients.primaryButton : null,
             color: isSelected ? null : AppColors.backgroundGrey,
-            borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+            borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
             boxShadow: isSelected
                 ? [
               BoxShadow(
                 color: AppColors.shadowPurple,
                 blurRadius: 8,
-                offset: Offset(0, ResponsiveSize.height(2)),
+                offset: Offset(0, ResponsiveScaler.height(2)),
               ),
             ]
                 : null,
@@ -43,7 +43,7 @@ class FloorButton extends StatelessWidget {
               label,
               style: GoogleFonts.poppins(
                 color: isSelected ? AppColors.textOnPrimary : AppColors.textMuted,
-                fontSize: ResponsiveSize.font(14),
+                fontSize: ResponsiveScaler.font(14),
                 fontWeight: FontWeight.w600,
               ),
             ),

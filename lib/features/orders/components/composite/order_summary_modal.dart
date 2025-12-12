@@ -8,7 +8,7 @@ import '../../../../components/ui/app_loader.dart';
 class OrderSummaryModal extends StatefulWidget {
   final List<Map<String, dynamic>> orderItems;
   final Function(int, int) onUpdateQuantity;
-  final VoidCallback onConfirm;
+  final Future<bool> Function(String responsibleName) onConfirm;
   final double totalAmount;
 
   const OrderSummaryModal({
@@ -20,12 +20,12 @@ class OrderSummaryModal extends StatefulWidget {
   }) : super(key: key);
 
   static Future<void> show(
-      BuildContext context, {
-        required List<Map<String, dynamic>> orderItems,
-        required Function(int, int) onUpdateQuantity,
-        required VoidCallback onConfirm,
-        required double totalAmount,
-      }) {
+    BuildContext context, {
+    required List<Map<String, dynamic>> orderItems,
+    required Function(int, int) onUpdateQuantity,
+    required Future<bool> Function(String responsibleName) onConfirm,
+    required double totalAmount,
+  }) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -45,26 +45,57 @@ class OrderSummaryModal extends StatefulWidget {
 
 class _OrderSummaryModalState extends State<OrderSummaryModal> {
   bool isLoading = false;
+  String? expandedItemId;
+  final _responsibleController = TextEditingController();
+
+  @override
+  void dispose() {
+    _responsibleController.dispose();
+    super.dispose();
+  }
+
+  String _formatItemPrice(Map<String, dynamic> item) {
+    final variantPrice = item['variantPrice'];
+    final price = item['price'];
+    final quantity = item['quantity'] ?? 1;
+
+    double itemPrice = 0.0;
+    if (variantPrice != null) {
+      itemPrice = (variantPrice as num).toDouble();
+    } else if (price != null) {
+      itemPrice = (price as num).toDouble();
+    }
+
+    final variantName = item['variantName'];
+
+    String text = 'S/ ${itemPrice.toStringAsFixed(2)} x $quantity';
+    if (variantName != null && variantName.toString().isNotEmpty) {
+      text = '$variantName - $text';
+    }
+    return text;
+  }
 
   void _handleConfirm() async {
     setState(() => isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
-    widget.onConfirm();
+
+    final success = await widget.onConfirm(_responsibleController.text.trim());
+
     if (mounted) {
       setState(() => isLoading = false);
-      Navigator.pop(context);
+      if (!success) {
+        Navigator.pop(context);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
-      height: MediaQuery.of(context).size.height * 0.75,
+      height: MediaQuery.of(context).size.height * 0.8,
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(ResponsiveSize.radius(30)),
+          top: Radius.circular(ResponsiveScaler.radius(30)),
         ),
       ),
       child: Column(
@@ -80,21 +111,21 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
 
   Widget _buildHandle() {
     return Container(
-      width: ResponsiveSize.width(40),
-      height: ResponsiveSize.height(4),
-      margin: ResponsiveSize.margin(
-        const EdgeInsets.only(top: 12, bottom: 20),
+      width: ResponsiveScaler.width(40),
+      height: ResponsiveScaler.height(4),
+      margin: ResponsiveScaler.margin(
+        const EdgeInsets.only(top: 12, bottom: 16),
       ),
       decoration: BoxDecoration(
         color: AppColors.inputBorder,
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(2)),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(2)),
       ),
     );
   }
 
   Widget _buildHeader() {
     return Padding(
-      padding: ResponsiveSize.padding(
+      padding: ResponsiveScaler.padding(
         const EdgeInsets.symmetric(horizontal: 20),
       ),
       child: Row(
@@ -103,7 +134,7 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
           Text(
             'Resumen del Pedido',
             style: GoogleFonts.poppins(
-              fontSize: ResponsiveSize.font(22),
+              fontSize: ResponsiveScaler.font(22),
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
@@ -111,7 +142,7 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
           Text(
             '${widget.orderItems.length} items',
             style: GoogleFonts.poppins(
-              fontSize: ResponsiveSize.font(16),
+              fontSize: ResponsiveScaler.font(16),
               color: AppColors.textMuted,
             ),
           ),
@@ -122,66 +153,203 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
 
   Widget _buildItemsList() {
     return ListView.builder(
-      padding: ResponsiveSize.padding(
-        const EdgeInsets.all(20),
-      ),
+      padding: ResponsiveScaler.padding(const EdgeInsets.all(20)),
       itemCount: widget.orderItems.length,
       itemBuilder: (context, index) {
         final item = widget.orderItems[index];
-        return _buildOrderItem(item);
+        return _buildOrderItem(item, index);
       },
     );
   }
 
-  Widget _buildOrderItem(Map<String, dynamic> item) {
-    return Container(
-      margin: ResponsiveSize.margin(const EdgeInsets.only(bottom: 16)),
-      padding: ResponsiveSize.padding(const EdgeInsets.all(12)),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundGrey,
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(16)),
-      ),
-      child: Row(
-        children: [
-          if (item['image'] != null)
-            Container(
-              width: ResponsiveSize.width(60),
-              height: ResponsiveSize.height(60),
-              margin: ResponsiveSize.margin(
-                const EdgeInsets.only(right: 12),
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
-                image: DecorationImage(
-                  image: NetworkImage(item['image']),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildOrderItem(Map<String, dynamic> item, int index) {
+    final itemId = item['id']?.toString() ?? index.toString();
+    final isExpanded = expandedItemId == itemId;
+    final imageUrl = item['dishImage'] ?? item['imageUrl'] ?? item['image'];
+    final hasImage = imageUrl != null && imageUrl.toString().isNotEmpty;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (expandedItemId == itemId) {
+            expandedItemId = null;
+          } else {
+            expandedItemId = itemId;
+          }
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 12)),
+        padding: ResponsiveScaler.padding(const EdgeInsets.all(12)),
+        decoration: BoxDecoration(
+          color: isExpanded
+              ? AppColors.backgroundAlternate
+              : AppColors.backgroundGrey,
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
+          border: isExpanded
+              ? Border.all(
+                  color: AppColors.primary.withOpacity(0.3),
+                  width: 1.5,
+                )
+              : null,
+        ),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  item['name'],
-                  style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(16),
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                Container(
+                  width: ResponsiveScaler.width(56),
+                  height: ResponsiveScaler.height(56),
+                  margin: ResponsiveScaler.margin(
+                    const EdgeInsets.only(right: 12),
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveScaler.radius(12),
+                    ),
+                    color: hasImage ? null : AppColors.inputBorder,
+                    image: hasImage
+                        ? DecorationImage(
+                            image: NetworkImage(imageUrl),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: !hasImage
+                      ? Icon(
+                          Icons.restaurant,
+                          color: AppColors.iconMuted,
+                          size: ResponsiveScaler.icon(22),
+                        )
+                      : null,
+                ),
+                Expanded(
+                  child: SizedBox(
+                    height: ResponsiveScaler.height(56),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item['dishName'] ?? item['name'] ?? '',
+                          style: GoogleFonts.poppins(
+                            fontSize: ResponsiveScaler.font(15),
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: ResponsiveScaler.height(2)),
+                        Text(
+                          _formatItemPrice(item),
+                          style: GoogleFonts.poppins(
+                            fontSize: ResponsiveScaler.font(13),
+                            color: AppColors.textMuted,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                SizedBox(height: ResponsiveSize.height(4)),
-                Text(
-                  '\$${item['price']} x ${item['quantity']}',
-                  style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(14),
-                    color: AppColors.textMuted,
-                  ),
+                _buildQuantityControls(item),
+                Icon(
+                  isExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: AppColors.iconMuted,
+                  size: ResponsiveScaler.icon(22),
                 ),
               ],
             ),
+            if (isExpanded) _buildExpandedDetails(item),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandedDetails(Map<String, dynamic> item) {
+    final variantName = item['variantName'];
+    final customerName = item['customerName'];
+    final category = item['category'];
+    final description = item['description'];
+
+    return Container(
+      margin: ResponsiveScaler.margin(const EdgeInsets.only(top: 10)),
+      padding: ResponsiveScaler.padding(const EdgeInsets.all(10)),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(10)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (customerName != null && customerName.toString().isNotEmpty)
+            _buildDetailRow(Icons.person, 'Cliente', customerName.toString()),
+          if (variantName != null && variantName.toString().isNotEmpty)
+            _buildDetailRow(
+              Icons.local_offer,
+              'Variante',
+              variantName.toString(),
+            ),
+          if (category != null && category.toString().isNotEmpty)
+            _buildDetailRow(Icons.category, 'Categoría', category.toString()),
+          if (description != null && description.toString().isNotEmpty)
+            Text(
+              description.toString(),
+              style: GoogleFonts.poppins(
+                fontSize: ResponsiveScaler.font(12),
+                color: AppColors.textMuted,
+                fontStyle: FontStyle.italic,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          if (customerName == null &&
+              variantName == null &&
+              category == null &&
+              description == null)
+            Text(
+              'Sin detalles adicionales',
+              style: GoogleFonts.poppins(
+                fontSize: ResponsiveScaler.font(12),
+                color: AppColors.textMuted,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: ResponsiveScaler.padding(const EdgeInsets.only(bottom: 4)),
+      child: Row(
+        children: [
+          Icon(icon, size: ResponsiveScaler.icon(14), color: AppColors.primary),
+          SizedBox(width: ResponsiveScaler.width(6)),
+          Text(
+            '$label: ',
+            style: GoogleFonts.poppins(
+              fontSize: ResponsiveScaler.font(12),
+              color: AppColors.textMuted,
+            ),
           ),
-          _buildQuantityControls(item),
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.poppins(
+                fontSize: ResponsiveScaler.font(12),
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -189,46 +357,55 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
 
   Widget _buildQuantityControls(Map<String, dynamic> item) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          onPressed: () {
+        GestureDetector(
+          onTap: () {
             widget.onUpdateQuantity(item['id'], item['quantity'] - 1);
             setState(() {});
             if (widget.orderItems.isEmpty) Navigator.pop(context);
           },
-          icon: Icon(
-            Icons.remove_circle_outline,
-            size: ResponsiveSize.icon(24),
-            color: AppColors.primary,
+          child: Container(
+            padding: ResponsiveScaler.padding(const EdgeInsets.all(6)),
+            child: Icon(
+              Icons.remove_circle_outline,
+              size: ResponsiveScaler.icon(22),
+              color: AppColors.primary,
+            ),
           ),
         ),
         Container(
-          width: ResponsiveSize.width(40),
-          padding: ResponsiveSize.padding(const EdgeInsets.symmetric(vertical: 4)),
+          width: ResponsiveScaler.width(32),
+          padding: ResponsiveScaler.padding(
+            const EdgeInsets.symmetric(vertical: 4),
+          ),
           decoration: BoxDecoration(
             color: AppColors.backgroundAlternate,
-            borderRadius: BorderRadius.circular(ResponsiveSize.radius(8)),
+            borderRadius: BorderRadius.circular(ResponsiveScaler.radius(6)),
           ),
           child: Center(
             child: Text(
               item['quantity'].toString(),
               style: GoogleFonts.poppins(
-                fontSize: ResponsiveSize.font(16),
+                fontSize: ResponsiveScaler.font(14),
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
               ),
             ),
           ),
         ),
-        IconButton(
-          onPressed: () {
+        GestureDetector(
+          onTap: () {
             widget.onUpdateQuantity(item['id'], item['quantity'] + 1);
             setState(() {});
           },
-          icon: Icon(
-            Icons.add_circle_outline,
-            size: ResponsiveSize.icon(24),
-            color: AppColors.primary,
+          child: Container(
+            padding: ResponsiveScaler.padding(const EdgeInsets.all(6)),
+            child: Icon(
+              Icons.add_circle_outline,
+              size: ResponsiveScaler.icon(22),
+              color: AppColors.primary,
+            ),
           ),
         ),
       ],
@@ -237,27 +414,71 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
 
   Widget _buildFooter() {
     return Container(
-      padding: ResponsiveSize.padding(const EdgeInsets.all(20)),
+      padding: ResponsiveScaler.padding(
+        EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+      ),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(ResponsiveSize.radius(20)),
+          top: Radius.circular(ResponsiveScaler.radius(20)),
         ),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 10,
-            offset: Offset(0, ResponsiveSize.height(-4)),
+            offset: Offset(0, ResponsiveScaler.height(-4)),
           ),
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          // Campo responsable de pago
+          TextField(
+            controller: _responsibleController,
+            textCapitalization: TextCapitalization.words,
+            style: GoogleFonts.poppins(
+              fontSize: ResponsiveScaler.font(15),
+              color: AppColors.textPrimary,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Responsable del pago (opcional)',
+              hintStyle: GoogleFonts.poppins(
+                fontSize: ResponsiveScaler.font(14),
+                color: AppColors.textMuted,
+              ),
+              prefixIcon: Icon(
+                Icons.account_circle_outlined,
+                color: AppColors.primary,
+                size: ResponsiveScaler.icon(22),
+              ),
+              filled: true,
+              fillColor: AppColors.backgroundGrey,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                  ResponsiveScaler.radius(12),
+                ),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: ResponsiveScaler.padding(
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+          ),
+          SizedBox(height: ResponsiveScaler.height(16)),
+          // Total
           Container(
-            padding: ResponsiveSize.padding(const EdgeInsets.all(20)),
+            padding: ResponsiveScaler.padding(
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            ),
             decoration: BoxDecoration(
               gradient: AppGradients.totalAmountBackground,
-              borderRadius: BorderRadius.circular(ResponsiveSize.radius(20)),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -265,15 +486,15 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
                 Text(
                   'Total',
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(20),
+                    fontSize: ResponsiveScaler.font(18),
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
                 ),
                 Text(
-                  '\$${widget.totalAmount.toStringAsFixed(2)}',
+                  'S/ ${widget.totalAmount.toStringAsFixed(2)}',
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(28),
+                    fontSize: ResponsiveScaler.font(24),
                     fontWeight: FontWeight.bold,
                     foreground: AppGradients.totalAmountText,
                   ),
@@ -281,38 +502,42 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
               ],
             ),
           ),
-          SizedBox(height: ResponsiveSize.height(20)),
+          SizedBox(height: ResponsiveScaler.height(16)),
+          // Botón confirmar
           GestureDetector(
             onTap: isLoading ? null : _handleConfirm,
             child: Container(
-              padding: ResponsiveSize.padding(
-                const EdgeInsets.symmetric(vertical: 18),
+              width: double.infinity,
+              padding: ResponsiveScaler.padding(
+                const EdgeInsets.symmetric(vertical: 16),
               ),
               decoration: BoxDecoration(
                 gradient: isLoading ? null : AppGradients.primaryButton,
                 color: isLoading ? AppColors.backgroundDisabled : null,
-                borderRadius: BorderRadius.circular(ResponsiveSize.radius(16)),
+                borderRadius: BorderRadius.circular(
+                  ResponsiveScaler.radius(14),
+                ),
                 boxShadow: !isLoading
                     ? [
-                  BoxShadow(
-                    color: AppColors.shadowPurple,
-                    blurRadius: 12,
-                    offset: Offset(0, ResponsiveSize.height(4)),
-                  ),
-                ]
+                        BoxShadow(
+                          color: AppColors.shadowPurple,
+                          blurRadius: 12,
+                          offset: Offset(0, ResponsiveScaler.height(4)),
+                        ),
+                      ]
                     : null,
               ),
               child: Center(
                 child: isLoading
-                    ? AppLoader(size: 24)
+                    ? AppLoader(size: 22)
                     : Text(
-                  'Confirmar Pedido',
-                  style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(18),
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textOnPrimary,
-                  ),
-                ),
+                        'Confirmar Pedido',
+                        style: GoogleFonts.poppins(
+                          fontSize: ResponsiveScaler.font(16),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textOnPrimary,
+                        ),
+                      ),
               ),
             ),
           ),

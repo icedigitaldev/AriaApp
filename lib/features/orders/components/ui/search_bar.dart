@@ -16,25 +16,25 @@ class SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: ResponsiveSize.padding(
+      padding: ResponsiveScaler.padding(
           const EdgeInsets.symmetric(horizontal: 20)
       ),
       decoration: BoxDecoration(
         color: AppColors.backgroundGrey,
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(15)),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(15)),
         border: Border.all(color: AppColors.inputBorder),
       ),
       child: TextField(
         onChanged: onChanged,
         style: GoogleFonts.poppins(
           color: AppColors.textPrimary,
-          fontSize: ResponsiveSize.font(14),
+          fontSize: ResponsiveScaler.font(14),
         ),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: GoogleFonts.poppins(
             color: AppColors.textHint,
-            fontSize: ResponsiveSize.font(14),
+            fontSize: ResponsiveScaler.font(14),
           ),
           border: InputBorder.none,
           icon: Icon(Icons.search, color: AppColors.iconMuted),

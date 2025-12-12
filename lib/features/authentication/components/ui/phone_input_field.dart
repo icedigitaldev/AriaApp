@@ -21,12 +21,12 @@ class PhoneInputField extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(24)),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(24)),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 25,
-            offset: Offset(0, ResponsiveSize.height(10)),
+            offset: Offset(0, ResponsiveScaler.height(10)),
           ),
         ],
       ),
@@ -35,19 +35,19 @@ class PhoneInputField extends StatelessWidget {
         children: [
           // Etiqueta del campo
           Padding(
-            padding: ResponsiveSize.padding(const EdgeInsets.fromLTRB(24, 24, 24, 12)),
+            padding: ResponsiveScaler.padding(const EdgeInsets.fromLTRB(24, 24, 24, 12)),
             child: Row(
               children: [
                 Icon(
                   Icons.phone_rounded,
-                  size: ResponsiveSize.icon(20),
+                  size: ResponsiveScaler.icon(20),
                   color: AppColors.icon,
                 ),
-                SizedBox(width: ResponsiveSize.width(8)),
+                SizedBox(width: ResponsiveScaler.width(8)),
                 Text(
                   'Número de teléfono',
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(15),
+                    fontSize: ResponsiveScaler.font(15),
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
@@ -57,12 +57,12 @@ class PhoneInputField extends StatelessWidget {
           ),
           // Campo de entrada
           Container(
-            margin: ResponsiveSize.margin(const EdgeInsets.fromLTRB(24, 0, 24, 24)),
+            margin: ResponsiveScaler.margin(const EdgeInsets.fromLTRB(24, 0, 24, 24)),
             decoration: BoxDecoration(
               color: focusNode.hasFocus
                   ? AppColors.backgroundAlternate.withOpacity(0.5)
                   : AppColors.backgroundGrey,
-              borderRadius: BorderRadius.circular(ResponsiveSize.radius(16)),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
               border: Border.all(
                 color: focusNode.hasFocus
                     ? AppColors.inputFocusedBorder.withOpacity(0.5)
@@ -74,18 +74,18 @@ class PhoneInputField extends StatelessWidget {
               children: [
                 // Prefijo del país
                 Padding(
-                  padding: ResponsiveSize.padding(const EdgeInsets.symmetric(horizontal: 20)),
+                  padding: ResponsiveScaler.padding(const EdgeInsets.symmetric(horizontal: 20)),
                   child: Row(
                     children: [
                       Image.asset(
                         'assets/images/flag-peru.png',
-                        width: ResponsiveSize.width(30),
+                        width: ResponsiveScaler.width(30),
                       ),
-                      SizedBox(width: ResponsiveSize.width(10)),
+                      SizedBox(width: ResponsiveScaler.width(10)),
                       Text(
                         '+51',
                         style: GoogleFonts.poppins(
-                          fontSize: ResponsiveSize.font(17),
+                          fontSize: ResponsiveScaler.font(17),
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
                         ),
@@ -96,7 +96,7 @@ class PhoneInputField extends StatelessWidget {
                 // Separador
                 Container(
                   width: 1,
-                  height: ResponsiveSize.height(35),
+                  height: ResponsiveScaler.height(35),
                   color: AppColors.inputBorder,
                 ),
                 // Campo de texto
@@ -111,7 +111,7 @@ class PhoneInputField extends StatelessWidget {
                       _PhoneNumberFormatter(),
                     ],
                     style: GoogleFonts.poppins(
-                      fontSize: ResponsiveSize.font(18),
+                      fontSize: ResponsiveScaler.font(18),
                       fontWeight: FontWeight.w500,
                       letterSpacing: 1.2,
                       color: AppColors.textPrimary,
@@ -120,11 +120,11 @@ class PhoneInputField extends StatelessWidget {
                       hintText: '999 999 999',
                       hintStyle: GoogleFonts.poppins(
                         color: AppColors.textHint,
-                        fontSize: ResponsiveSize.font(18),
+                        fontSize: ResponsiveScaler.font(18),
                         letterSpacing: 1.2,
                       ),
                       border: InputBorder.none,
-                      contentPadding: ResponsiveSize.padding(const EdgeInsets.symmetric(
+                      contentPadding: ResponsiveScaler.padding(const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 18,
                       )),

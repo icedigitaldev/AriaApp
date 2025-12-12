@@ -61,13 +61,10 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
   @override
   Widget build(BuildContext context) {
     AppThemes.init(context);
-    ResponsiveSize.init(context);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: TransparentAppBar(
-        backgroundColor: AppColors.appBarBackground,
-      ),
+      appBar: TransparentAppBar(backgroundColor: AppColors.appBarBackground),
       body: Container(
         color: AppColors.background,
         child: SafeArea(
@@ -82,8 +79,8 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
 
               // Selector de fecha con componente separado
               Container(
-                margin: ResponsiveSize.margin(
-                    const EdgeInsets.symmetric(horizontal: 20)
+                margin: ResponsiveScaler.margin(
+                  const EdgeInsets.symmetric(horizontal: 20),
                 ),
                 child: DateSelector(
                   selectedDate: selectedDate,
@@ -92,9 +89,7 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
               ),
 
               // Lista de órdenes
-              Expanded(
-                child: _buildOrdersList(),
-              ),
+              Expanded(child: _buildOrdersList()),
             ],
           ),
         ),
@@ -104,7 +99,7 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
 
   Widget _buildOrdersList() {
     return ListView.builder(
-      padding: ResponsiveSize.padding(
+      padding: ResponsiveScaler.padding(
         const EdgeInsets.fromLTRB(20, 20, 20, 20),
       ),
       itemCount: completedOrders.length,
@@ -114,27 +109,27 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
 
   Widget _buildOrderCard(Map<String, dynamic> order) {
     return Container(
-      margin: ResponsiveSize.margin(const EdgeInsets.only(bottom: 16)),
-      padding: ResponsiveSize.padding(const EdgeInsets.all(16)),
+      margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 16)),
+      padding: ResponsiveScaler.padding(const EdgeInsets.all(16)),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(16)),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 10,
-            offset: Offset(0, ResponsiveSize.height(4)),
+            offset: Offset(0, ResponsiveScaler.height(4)),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            width: ResponsiveSize.width(60),
-            height: ResponsiveSize.height(60),
+            width: ResponsiveScaler.width(60),
+            height: ResponsiveScaler.height(60),
             decoration: BoxDecoration(
               gradient: AppGradients.success,
-              borderRadius: BorderRadius.circular(ResponsiveSize.radius(16)),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -142,12 +137,12 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
                 Icon(
                   Icons.check_circle,
                   color: AppColors.textOnPrimary,
-                  size: ResponsiveSize.icon(24),
+                  size: ResponsiveScaler.icon(24),
                 ),
                 Text(
                   order['completedTime'],
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(10),
+                    fontSize: ResponsiveScaler.font(10),
                     fontWeight: FontWeight.w600,
                     color: AppColors.textOnPrimary.withOpacity(0.8),
                   ),
@@ -155,7 +150,7 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
               ],
             ),
           ),
-          SizedBox(width: ResponsiveSize.width(16)),
+          SizedBox(width: ResponsiveScaler.width(16)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,7 +161,7 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
                     Text(
                       'Orden #${order['id']}',
                       style: GoogleFonts.poppins(
-                        fontSize: ResponsiveSize.font(16),
+                        fontSize: ResponsiveScaler.font(16),
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
@@ -174,46 +169,46 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
                     Text(
                       '\$${order['total'].toStringAsFixed(2)}',
                       style: GoogleFonts.poppins(
-                        fontSize: ResponsiveSize.font(16),
+                        fontSize: ResponsiveScaler.font(16),
                         fontWeight: FontWeight.bold,
                         color: AppColors.success,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: ResponsiveSize.height(4)),
+                SizedBox(height: ResponsiveScaler.height(4)),
                 Row(
                   children: [
                     Icon(
                       Icons.table_bar,
-                      size: ResponsiveSize.icon(14),
+                      size: ResponsiveScaler.icon(14),
                       color: AppColors.iconMuted,
                     ),
-                    SizedBox(width: ResponsiveSize.width(4)),
+                    SizedBox(width: ResponsiveScaler.width(4)),
                     Text(
                       'Mesa ${order['tableNumber']}',
                       style: GoogleFonts.poppins(
-                        fontSize: ResponsiveSize.font(14),
+                        fontSize: ResponsiveScaler.font(14),
                         color: AppColors.textMuted,
                       ),
                     ),
-                    SizedBox(width: ResponsiveSize.width(12)),
+                    SizedBox(width: ResponsiveScaler.width(12)),
                     Icon(
                       Icons.person,
-                      size: ResponsiveSize.icon(14),
+                      size: ResponsiveScaler.icon(14),
                       color: AppColors.iconMuted,
                     ),
-                    SizedBox(width: ResponsiveSize.width(4)),
+                    SizedBox(width: ResponsiveScaler.width(4)),
                     Text(
                       order['waiter'],
                       style: GoogleFonts.poppins(
-                        fontSize: ResponsiveSize.font(14),
+                        fontSize: ResponsiveScaler.font(14),
                         color: AppColors.textMuted,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: ResponsiveSize.height(8)),
+                SizedBox(height: ResponsiveScaler.height(8)),
                 Row(
                   children: [
                     InfoChip(
@@ -221,7 +216,7 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
                       text: order['preparationTime'],
                       color: AppColors.info,
                     ),
-                    SizedBox(width: ResponsiveSize.width(8)),
+                    SizedBox(width: ResponsiveScaler.width(8)),
                     InfoChip(
                       text: '${order['items']} items',
                       color: AppColors.textMuted,

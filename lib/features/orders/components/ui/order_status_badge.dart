@@ -20,7 +20,7 @@ class OrderStatusBadge extends StatelessWidget {
     final config = _getStatusConfig(status);
 
     return Container(
-      padding: ResponsiveSize.padding(
+      padding: ResponsiveScaler.padding(
         EdgeInsets.symmetric(
           horizontal: compact ? 8.0 : 12.0,
           vertical: compact ? 4.0 : 6.0,
@@ -28,26 +28,26 @@ class OrderStatusBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: config['backgroundColor'],
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(20)),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(20)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (showDot) ...[
             Container(
-              width: ResponsiveSize.width(8),
-              height: ResponsiveSize.height(8),
+              width: ResponsiveScaler.width(8),
+              height: ResponsiveScaler.height(8),
               decoration: BoxDecoration(
                 color: config['dotColor'],
                 shape: BoxShape.circle,
               ),
             ),
-            SizedBox(width: ResponsiveSize.width(6)),
+            SizedBox(width: ResponsiveScaler.width(6)),
           ],
           Text(
             config['text']!,
             style: GoogleFonts.poppins(
-              fontSize: ResponsiveSize.font(compact ? 11 : 12),
+              fontSize: ResponsiveScaler.font(compact ? 11 : 12),
               fontWeight: FontWeight.w600,
               color: config['textColor'],
             ),

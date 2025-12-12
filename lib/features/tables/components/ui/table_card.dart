@@ -24,15 +24,15 @@ class TableCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: ResponsiveSize.height(140),
+        height: ResponsiveScaler.height(140),
         decoration: BoxDecoration(
           color: AppColors.card.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(ResponsiveSize.radius(20)),
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(20)),
           boxShadow: [
             BoxShadow(
               color: AppColors.shadow,
               blurRadius: 10,
-              offset: Offset(0, ResponsiveSize.height(4)),
+              offset: Offset(0, ResponsiveScaler.height(4)),
             ),
           ],
         ),
@@ -40,12 +40,12 @@ class TableCard extends StatelessWidget {
           children: [
             if (isLeftColumn)
               Container(
-                width: ResponsiveSize.width(24),
+                width: ResponsiveScaler.width(24),
                 decoration: BoxDecoration(
                   color: statusConfig['borderColor'],
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(ResponsiveSize.radius(20)),
-                    bottomLeft: Radius.circular(ResponsiveSize.radius(20)),
+                    topLeft: Radius.circular(ResponsiveScaler.radius(20)),
+                    bottomLeft: Radius.circular(ResponsiveScaler.radius(20)),
                   ),
                 ),
                 child: Center(
@@ -54,7 +54,7 @@ class TableCard extends StatelessWidget {
                     child: Text(
                       statusConfig['text']!,
                       style: GoogleFonts.poppins(
-                        fontSize: ResponsiveSize.font(10),
+                        fontSize: ResponsiveScaler.font(10),
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                         letterSpacing: 0.5,
@@ -66,29 +66,29 @@ class TableCard extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: EdgeInsets.only(
-                  left: ResponsiveSize.width(isLeftColumn ? 12 : 16),
-                  right: ResponsiveSize.width(!isLeftColumn ? 12 : 16),
-                  top: ResponsiveSize.height(20),
-                  bottom: ResponsiveSize.height(20),
+                  left: ResponsiveScaler.width(isLeftColumn ? 12 : 16),
+                  right: ResponsiveScaler.width(!isLeftColumn ? 12 : 16),
+                  top: ResponsiveScaler.height(20),
+                  bottom: ResponsiveScaler.height(20),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(height: ResponsiveSize.height(2)),
+                    SizedBox(height: ResponsiveScaler.height(2)),
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.restaurant,
-                          size: ResponsiveSize.icon(32),
+                          size: ResponsiveScaler.icon(32),
                           color: statusConfig['iconColor'] ?? AppColors.iconMuted,
                         ),
-                        SizedBox(height: ResponsiveSize.height(8)),
+                        SizedBox(height: ResponsiveScaler.height(8)),
                         Text(
                           'Mesa ${table['number']}',
                           style: GoogleFonts.poppins(
-                            fontSize: ResponsiveSize.font(22),
+                            fontSize: ResponsiveScaler.font(22),
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                             height: 1.2,
@@ -96,7 +96,7 @@ class TableCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: ResponsiveSize.height(8)),
+                    SizedBox(height: ResponsiveScaler.height(8)),
                     _buildBottomInfo(statusConfig),
                   ],
                 ),
@@ -104,12 +104,12 @@ class TableCard extends StatelessWidget {
             ),
             if (!isLeftColumn)
               Container(
-                width: ResponsiveSize.width(24),
+                width: ResponsiveScaler.width(24),
                 decoration: BoxDecoration(
                   color: statusConfig['borderColor'],
                   borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(ResponsiveSize.radius(20)),
-                    bottomRight: Radius.circular(ResponsiveSize.radius(20)),
+                    topRight: Radius.circular(ResponsiveScaler.radius(20)),
+                    bottomRight: Radius.circular(ResponsiveScaler.radius(20)),
                   ),
                 ),
                 child: Center(
@@ -118,7 +118,7 @@ class TableCard extends StatelessWidget {
                     child: Text(
                       statusConfig['text']!,
                       style: GoogleFonts.poppins(
-                        fontSize: ResponsiveSize.font(10),
+                        fontSize: ResponsiveScaler.font(10),
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                         letterSpacing: 0.5,
@@ -137,25 +137,25 @@ class TableCard extends StatelessWidget {
     if (table['status'] == 'occupied' && table['orderTotal'] != null) {
       return Container(
         padding: EdgeInsets.symmetric(
-          horizontal: ResponsiveSize.width(10),
-          vertical: ResponsiveSize.height(6),
+          horizontal: ResponsiveScaler.width(10),
+          vertical: ResponsiveScaler.height(6),
         ),
         decoration: BoxDecoration(
           color: statusConfig['textColor']?.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(ResponsiveSize.radius(10)),
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(10)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.attach_money,
-              size: ResponsiveSize.icon(16),
+              size: ResponsiveScaler.icon(16),
               color: statusConfig['textColor'],
             ),
             Text(
               '${table['orderTotal'].toStringAsFixed(2)}',
               style: GoogleFonts.poppins(
-                fontSize: ResponsiveSize.font(16),
+                fontSize: ResponsiveScaler.font(16),
                 fontWeight: FontWeight.w600,
                 color: statusConfig['textColor'],
                 height: 1.1,
@@ -172,14 +172,14 @@ class TableCard extends StatelessWidget {
       children: [
         Icon(
           Icons.people,
-          size: ResponsiveSize.icon(14),
+          size: ResponsiveScaler.icon(14),
           color: AppColors.textMuted,
         ),
-        SizedBox(width: ResponsiveSize.width(6)),
+        SizedBox(width: ResponsiveScaler.width(6)),
         Text(
           '${table['capacity']} personas',
           style: GoogleFonts.poppins(
-            fontSize: ResponsiveSize.font(12),
+            fontSize: ResponsiveScaler.font(12),
             color: AppColors.textMuted,
             height: 1.1,
           ),

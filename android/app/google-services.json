@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "809558675396",
+    "project_id": "aria-console",
+    "storage_bucket": "aria-console.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809558675396:android:8f246d61847999d0b4de91",
+        "android_client_info": {
+          "package_name": "com.icedigital.aria"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD66C4rMPqbxvr4ELL2uI5nB1YW1NbqqxI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

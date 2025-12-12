@@ -27,54 +27,54 @@ class OrderItemTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: ResponsiveSize.margin(
+        margin: ResponsiveScaler.margin(
           EdgeInsets.only(bottom: compact ? 8.0 : 12.0),
         ),
-        padding: ResponsiveSize.padding(
+        padding: ResponsiveScaler.padding(
           EdgeInsets.all(compact ? 10.0 : 12.0),
         ),
         decoration: BoxDecoration(
           color: AppColors.backgroundGrey,
-          borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
         ),
         child: Row(
           children: [
             // Imagen opcional
             if (showImage && item['image'] != null) ...[
               Container(
-                width: ResponsiveSize.width(50),
-                height: ResponsiveSize.height(50),
+                width: ResponsiveScaler.width(50),
+                height: ResponsiveScaler.height(50),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(ResponsiveSize.radius(8)),
+                  borderRadius: BorderRadius.circular(ResponsiveScaler.radius(8)),
                   image: DecorationImage(
                     image: NetworkImage(item['image']),
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
-              SizedBox(width: ResponsiveSize.width(12)),
+              SizedBox(width: ResponsiveScaler.width(12)),
             ],
 
             // Cantidad
             Container(
-              width: ResponsiveSize.width(compact ? 28 : 32),
-              height: ResponsiveSize.height(compact ? 28 : 32),
+              width: ResponsiveScaler.width(compact ? 28 : 32),
+              height: ResponsiveScaler.height(compact ? 28 : 32),
               decoration: BoxDecoration(
                 color: AppColors.backgroundAlternate,
-                borderRadius: BorderRadius.circular(ResponsiveSize.radius(8)),
+                borderRadius: BorderRadius.circular(ResponsiveScaler.radius(8)),
               ),
               child: Center(
                 child: Text(
                   item['quantity'].toString(),
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(compact ? 14 : 16),
+                    fontSize: ResponsiveScaler.font(compact ? 14 : 16),
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
                   ),
                 ),
               ),
             ),
-            SizedBox(width: ResponsiveSize.width(12)),
+            SizedBox(width: ResponsiveScaler.width(12)),
 
             // Información del item
             Expanded(
@@ -84,7 +84,7 @@ class OrderItemTile extends StatelessWidget {
                   Text(
                     item['name'],
                     style: GoogleFonts.poppins(
-                      fontSize: ResponsiveSize.font(compact ? 14 : 16),
+                      fontSize: ResponsiveScaler.font(compact ? 14 : 16),
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
@@ -93,7 +93,7 @@ class OrderItemTile extends StatelessWidget {
                     Text(
                       item['notes'],
                       style: GoogleFonts.poppins(
-                        fontSize: ResponsiveSize.font(compact ? 12 : 14),
+                        fontSize: ResponsiveScaler.font(compact ? 12 : 14),
                         color: AppColors.warning,
                         fontStyle: FontStyle.italic,
                       ),
@@ -102,7 +102,7 @@ class OrderItemTile extends StatelessWidget {
                     Text(
                       '\$${(item['price'] * item['quantity']).toStringAsFixed(2)}',
                       style: GoogleFonts.poppins(
-                        fontSize: ResponsiveSize.font(14),
+                        fontSize: ResponsiveScaler.font(14),
                         color: AppColors.textMuted,
                       ),
                     ),

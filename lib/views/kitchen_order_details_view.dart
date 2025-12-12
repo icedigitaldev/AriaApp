@@ -15,7 +15,8 @@ class KitchenOrderDetailsView extends StatefulWidget {
   const KitchenOrderDetailsView({Key? key}) : super(key: key);
 
   @override
-  State<KitchenOrderDetailsView> createState() => _KitchenOrderDetailsViewState();
+  State<KitchenOrderDetailsView> createState() =>
+      _KitchenOrderDetailsViewState();
 }
 
 class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
@@ -26,9 +27,9 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
   @override
   Widget build(BuildContext context) {
     AppThemes.init(context);
-    ResponsiveSize.init(context);
 
-    final order = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    final order =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
     if (order == null) {
       return const Scaffold(
         body: Center(child: Text('No se encontró información de la orden')),
@@ -38,7 +39,8 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
     if (!_isInitialized) {
       _currentOrderStatus = order['status'];
       // Si la orden ya está en preparación o completada, marca todos los items.
-      if (_currentOrderStatus == 'preparing' || _currentOrderStatus == 'completed') {
+      if (_currentOrderStatus == 'preparing' ||
+          _currentOrderStatus == 'completed') {
         final items = order['items'] as List;
         for (var i = 0; i < items.length; i++) {
           itemStatus[i] = true;
@@ -49,16 +51,14 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
 
     // Verifica si todos los items están completados
     final allItemsCompleted = order['items'].asMap().entries.every(
-          (e) => itemStatus[e.key] ?? false,
+      (e) => itemStatus[e.key] ?? false,
     );
 
     final isOrderFinalized = _currentOrderStatus == 'completed';
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: TransparentAppBar(
-        backgroundColor: AppColors.appBarBackground,
-      ),
+      appBar: TransparentAppBar(backgroundColor: AppColors.appBarBackground),
       body: Container(
         color: AppColors.background,
         child: SafeArea(
@@ -83,20 +83,20 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
               // Lista de items con componente compartido
               Expanded(
                 child: Padding(
-                  padding: ResponsiveSize.padding(
+                  padding: ResponsiveScaler.padding(
                     const EdgeInsets.symmetric(horizontal: 20),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: ResponsiveSize.padding(
+                        padding: ResponsiveScaler.padding(
                           const EdgeInsets.only(left: 4.0, bottom: 16.0),
                         ),
                         child: Text(
                           'Elementos del pedido',
                           style: GoogleFonts.poppins(
-                            fontSize: ResponsiveSize.font(20),
+                            fontSize: ResponsiveScaler.font(20),
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                           ),
@@ -153,11 +153,11 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
 
   Widget _buildTimeInfo(Map<String, dynamic> order) {
     return Container(
-      margin: ResponsiveSize.margin(const EdgeInsets.all(20)),
-      padding: ResponsiveSize.padding(const EdgeInsets.all(16)),
+      margin: ResponsiveScaler.margin(const EdgeInsets.all(20)),
+      padding: ResponsiveScaler.padding(const EdgeInsets.all(16)),
       decoration: BoxDecoration(
         color: AppColors.card.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(16)),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -168,7 +168,7 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
             value: order['time'],
           ),
           Container(
-            height: ResponsiveSize.height(40),
+            height: ResponsiveScaler.height(40),
             width: 1,
             color: AppColors.inputBorder,
           ),
@@ -177,13 +177,13 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
               Icon(
                 Icons.timer,
                 color: AppColors.iconMuted,
-                size: ResponsiveSize.icon(20),
+                size: ResponsiveScaler.icon(20),
               ),
-              SizedBox(height: ResponsiveSize.height(4)),
+              SizedBox(height: ResponsiveScaler.height(4)),
               Text(
                 'Tiempo transcurrido',
                 style: GoogleFonts.poppins(
-                  fontSize: ResponsiveSize.font(12),
+                  fontSize: ResponsiveScaler.font(12),
                   color: AppColors.textMuted,
                 ),
               ),
@@ -206,19 +206,19 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
   }) {
     return Column(
       children: [
-        Icon(icon, color: AppColors.iconMuted, size: ResponsiveSize.icon(20)),
-        SizedBox(height: ResponsiveSize.height(4)),
+        Icon(icon, color: AppColors.iconMuted, size: ResponsiveScaler.icon(20)),
+        SizedBox(height: ResponsiveScaler.height(4)),
         Text(
           label,
           style: GoogleFonts.poppins(
-            fontSize: ResponsiveSize.font(12),
+            fontSize: ResponsiveScaler.font(12),
             color: AppColors.textMuted,
           ),
         ),
         Text(
           value,
           style: GoogleFonts.poppins(
-            fontSize: ResponsiveSize.font(16),
+            fontSize: ResponsiveScaler.font(16),
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
           ),

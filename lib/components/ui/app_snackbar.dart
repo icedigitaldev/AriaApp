@@ -18,7 +18,7 @@ class AppSnackbar {
     SnackbarType type = SnackbarType.info,
     Duration duration = const Duration(seconds: 3),
   }) {
-    ResponsiveSize.init(context);
+    ResponsiveScaler.init(context);
 
     // Obtener color según el tipo
     final Color backgroundColor = _getBackgroundColor(type);
@@ -32,7 +32,7 @@ class AppSnackbar {
         content: Text(
           message,
           style: GoogleFonts.poppins(
-            fontSize: ResponsiveSize.font(14),
+            fontSize: ResponsiveScaler.font(14),
             color: AppColors.textOnPrimary,
             fontWeight: FontWeight.w500,
           ),
@@ -41,9 +41,9 @@ class AppSnackbar {
         duration: duration,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
         ),
-        margin: ResponsiveSize.margin(
+        margin: ResponsiveScaler.margin(
           const EdgeInsets.only(left: 20, right: 20, bottom: 20),
         ),
       ),

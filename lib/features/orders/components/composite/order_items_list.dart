@@ -63,10 +63,10 @@ class OrderItemsList extends StatelessWidget {
         }
 
         return Container(
-          margin: ResponsiveSize.margin(const EdgeInsets.only(bottom: 16)),
+          margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 16)),
           decoration: BoxDecoration(
             color: AppColors.card,
-            borderRadius: BorderRadius.circular(ResponsiveSize.radius(16)),
+            borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
             border: Border.all(
               color: getBorderColor(),
               width: 2,
@@ -75,7 +75,7 @@ class OrderItemsList extends StatelessWidget {
               BoxShadow(
                 color: AppColors.shadow,
                 blurRadius: 10,
-                offset: Offset(0, ResponsiveSize.height(4)),
+                offset: Offset(0, ResponsiveScaler.height(4)),
               ),
             ],
           ),
@@ -85,36 +85,36 @@ class OrderItemsList extends StatelessWidget {
               onTap: isOrderFinalized ? null : () { // Bloquea el tap si la orden está finalizada
                 onItemChecked?.call(index, !isCompleted);
               },
-              borderRadius: BorderRadius.circular(ResponsiveSize.radius(16)),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
               child: Padding(
-                padding: ResponsiveSize.padding(const EdgeInsets.all(16)),
+                padding: ResponsiveScaler.padding(const EdgeInsets.all(16)),
                 child: Row(
                   children: [
                     Container(
-                      width: ResponsiveSize.width(48),
-                      height: ResponsiveSize.height(48),
+                      width: ResponsiveScaler.width(48),
+                      height: ResponsiveScaler.height(48),
                       decoration: BoxDecoration(
                         gradient: getQuantityGradient(),
-                        borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+                        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
                       ),
                       child: Center(
                         child: isCompleted
                             ? Icon(
                           Icons.check,
                           color: AppColors.iconOnPrimary,
-                          size: ResponsiveSize.icon(24),
+                          size: ResponsiveScaler.icon(24),
                         )
                             : Text(
                           item['quantity'].toString(),
                           style: GoogleFonts.poppins(
-                            fontSize: ResponsiveSize.font(20),
+                            fontSize: ResponsiveScaler.font(20),
                             fontWeight: FontWeight.bold,
                             color: AppColors.primary,
                           ),
                         ),
                       ),
                     ),
-                    SizedBox(width: ResponsiveSize.width(16)),
+                    SizedBox(width: ResponsiveScaler.width(16)),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,7 +122,7 @@ class OrderItemsList extends StatelessWidget {
                           Text(
                             item['name'],
                             style: GoogleFonts.poppins(
-                              fontSize: ResponsiveSize.font(18),
+                              fontSize: ResponsiveScaler.font(18),
                               fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                               decoration: isCompleted
@@ -134,14 +134,14 @@ class OrderItemsList extends StatelessWidget {
                           if (showNotes &&
                               item['notes'] != null &&
                               item['notes'].toString().isNotEmpty) ...[
-                            SizedBox(height: ResponsiveSize.height(4)),
+                            SizedBox(height: ResponsiveScaler.height(4)),
                             Container(
-                              padding: ResponsiveSize.padding(
+                              padding: ResponsiveScaler.padding(
                                 const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               ),
                               decoration: BoxDecoration(
                                 color: StatusColors.pendingBackground,
-                                borderRadius: BorderRadius.circular(ResponsiveSize.radius(8)),
+                                borderRadius: BorderRadius.circular(ResponsiveScaler.radius(8)),
                                 border: Border.all(color: StatusColors.pendingBorder),
                               ),
                               child: Row(
@@ -149,14 +149,14 @@ class OrderItemsList extends StatelessWidget {
                                 children: [
                                   Icon(
                                     Icons.info_outline,
-                                    size: ResponsiveSize.icon(16),
+                                    size: ResponsiveScaler.icon(16),
                                     color: StatusColors.pendingText,
                                   ),
-                                  SizedBox(width: ResponsiveSize.width(6)),
+                                  SizedBox(width: ResponsiveScaler.width(6)),
                                   Text(
                                     item['notes'],
                                     style: GoogleFonts.poppins(
-                                      fontSize: ResponsiveSize.font(14),
+                                      fontSize: ResponsiveScaler.font(14),
                                       color: StatusColors.pendingText,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -169,7 +169,7 @@ class OrderItemsList extends StatelessWidget {
                             Text(
                               '\$${(item['price'] * item['quantity']).toStringAsFixed(2)}',
                               style: GoogleFonts.poppins(
-                                fontSize: ResponsiveSize.font(14),
+                                fontSize: ResponsiveScaler.font(14),
                                 color: AppColors.textMuted,
                               ),
                             ),
@@ -181,7 +181,7 @@ class OrderItemsList extends StatelessWidget {
                           ? Icons.check_circle
                           : Icons.radio_button_unchecked,
                       color: getCheckIconColor(),
-                      size: ResponsiveSize.icon(28),
+                      size: ResponsiveScaler.icon(28),
                     ),
                   ],
                 ),

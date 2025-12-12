@@ -22,35 +22,35 @@ class ResendCodeSection extends StatelessWidget {
         Text(
           '¿No recibiste el código?',
           style: GoogleFonts.poppins(
-            fontSize: ResponsiveSize.font(15),
+            fontSize: ResponsiveScaler.font(15),
             color: AppColors.textSecondary,
           ),
         ),
-        SizedBox(height: ResponsiveSize.height(12)),
+        SizedBox(height: ResponsiveScaler.height(12)),
         // Animación entre timer y botón de reenvío
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: !canResend
               ? Container(
             key: const ValueKey('timer'),
-            padding: ResponsiveSize.padding(const EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
+            padding: ResponsiveScaler.padding(const EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
             decoration: BoxDecoration(
               color: AppColors.backgroundGrey,
-              borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.timer_outlined,
-                  size: ResponsiveSize.icon(20),
+                  size: ResponsiveScaler.icon(20),
                   color: AppColors.iconMuted,
                 ),
-                SizedBox(width: ResponsiveSize.width(8)),
+                SizedBox(width: ResponsiveScaler.width(8)),
                 Text(
                   'Reenviar en $resendTimer segundos',
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(15),
+                    fontSize: ResponsiveScaler.font(15),
                     color: AppColors.textMuted,
                     fontWeight: FontWeight.w500,
                   ),
@@ -62,7 +62,7 @@ class ResendCodeSection extends StatelessWidget {
             key: const ValueKey('resend'),
             onPressed: onResend,
             style: TextButton.styleFrom(
-              padding: ResponsiveSize.padding(const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
+              padding: ResponsiveScaler.padding(const EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -70,13 +70,13 @@ class ResendCodeSection extends StatelessWidget {
                 Icon(
                   Icons.refresh_rounded,
                   color: AppColors.primary,
-                  size: ResponsiveSize.icon(24),
+                  size: ResponsiveScaler.icon(24),
                 ),
-                SizedBox(width: ResponsiveSize.width(8)),
+                SizedBox(width: ResponsiveScaler.width(8)),
                 Text(
                   'Reenviar código',
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(16),
+                    fontSize: ResponsiveScaler.font(16),
                     fontWeight: FontWeight.w600,
                     color: AppColors.primary,
                   ),

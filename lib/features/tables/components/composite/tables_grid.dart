@@ -6,41 +6,65 @@ import '../ui/table_card.dart';
 class TablesGrid extends StatelessWidget {
   final List<Map<String, dynamic>> tables;
   final int selectedFloor;
+  final Function(Map<String, dynamic>)? onTableTap;
+  final Function(String, String)? onStatusChange;
 
   const TablesGrid({
     Key? key,
     required this.tables,
     required this.selectedFloor,
+    this.onTableTap,
+    this.onStatusChange,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final filteredTables = tables.where((table) => table['floor'] == selectedFloor).toList();
+    // Las mesas ya vienen filtradas del controlador
+    final displayTables = tables;
+
+    if (displayTables.isEmpty) {
+      return Center(
+        child: Text(
+          'No hay mesas en este piso',
+          style: TextStyle(
+            fontSize: ResponsiveScaler.font(16),
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
 
     return GridView.builder(
-      padding: ResponsiveSize.padding(const EdgeInsets.all(20)),
+      padding: ResponsiveScaler.padding(const EdgeInsets.all(20)),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 1.0,
-        crossAxisSpacing: ResponsiveSize.width(16),
-        mainAxisSpacing: ResponsiveSize.height(16),
+        crossAxisSpacing: ResponsiveScaler.width(16),
+        mainAxisSpacing: ResponsiveScaler.height(16),
       ),
-      itemCount: filteredTables.length,
+      itemCount: displayTables.length,
       itemBuilder: (context, index) {
-        final table = filteredTables[index];
+        final table = displayTables[index];
         final bool isLeft = index % 2 == 0;
 
         return TableCard(
           table: table,
           isLeftColumn: isLeft,
           onTap: () {
-            AppLogger.log('Mesa seleccionada: ${table['number']}', prefix: 'MESA:');
-            final status = table['status'];
-            Navigator.pushNamed(
-              context,
-              status == 'occupied' ? '/order-details' : '/new-order',
-              arguments: table,
+            AppLogger.log(
+              'Mesa seleccionada: ${table['number']}',
+              prefix: 'MESA:',
             );
+            if (onTableTap != null) {
+              onTableTap!(table);
+            } else {
+              final status = table['status'];
+              Navigator.pushNamed(
+                context,
+                status == 'occupied' ? '/order-details' : '/new-order',
+                arguments: table,
+              );
+            }
           },
         );
       },

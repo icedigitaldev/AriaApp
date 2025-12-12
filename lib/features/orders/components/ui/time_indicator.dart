@@ -49,14 +49,14 @@ class TimeIndicator extends StatelessWidget {
             if (showIcon)
               Icon(
                 Icons.access_time,
-                size: ResponsiveSize.icon(compact ? 14 : 16),
+                size: ResponsiveScaler.icon(compact ? 14 : 16),
                 color: _getTimeColor(timeDiff),
               ),
-            if (showIcon) SizedBox(width: ResponsiveSize.width(4)),
+            if (showIcon) SizedBox(width: ResponsiveScaler.width(4)),
             Text(
               timeDiff,
               style: GoogleFonts.poppins(
-                fontSize: ResponsiveSize.font(compact ? 14 : 16),
+                fontSize: ResponsiveScaler.font(compact ? 14 : 16),
                 fontWeight: FontWeight.bold,
                 color: _getTimeColor(timeDiff),
               ),
@@ -67,7 +67,7 @@ class TimeIndicator extends StatelessWidget {
           Text(
             displayTime!,
             style: GoogleFonts.poppins(
-              fontSize: ResponsiveSize.font(compact ? 10 : 12),
+              fontSize: ResponsiveScaler.font(compact ? 10 : 12),
               color: AppColors.textMuted,
             ),
           ),

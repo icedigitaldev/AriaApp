@@ -26,20 +26,20 @@ class FilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: ResponsiveSize.margin(const EdgeInsets.only(right: 12)),
-        padding: ResponsiveSize.padding(
+        margin: ResponsiveScaler.margin(const EdgeInsets.only(right: 12)),
+        padding: ResponsiveScaler.padding(
           const EdgeInsets.symmetric(horizontal: 16),
         ),
         decoration: BoxDecoration(
           gradient: isSelected ? AppGradients.primaryButton : null,
           color: isSelected ? null : AppColors.backgroundGrey,
-          borderRadius: BorderRadius.circular(ResponsiveSize.radius(25)),
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(25)),
           boxShadow: isSelected
               ? [
             BoxShadow(
               color: AppColors.shadowPurple,
               blurRadius: 8,
-              offset: Offset(0, ResponsiveSize.height(2)),
+              offset: Offset(0, ResponsiveScaler.height(2)),
             ),
           ]
               : null,
@@ -50,7 +50,7 @@ class FilterChip extends StatelessWidget {
             Text(
               label,
               style: GoogleFonts.poppins(
-                fontSize: ResponsiveSize.font(14),
+                fontSize: ResponsiveScaler.font(14),
                 color: isSelected
                     ? AppColors.textOnPrimary
                     : AppColors.textMuted,
@@ -58,21 +58,21 @@ class FilterChip extends StatelessWidget {
               ),
             ),
             if (count != null) ...[
-              SizedBox(width: ResponsiveSize.width(6)),
+              SizedBox(width: ResponsiveScaler.width(6)),
               Container(
-                padding: ResponsiveSize.padding(
+                padding: ResponsiveScaler.padding(
                   const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.background.withOpacity(0.2)
                       : AppColors.inputBorder,
-                  borderRadius: BorderRadius.circular(ResponsiveSize.radius(10)),
+                  borderRadius: BorderRadius.circular(ResponsiveScaler.radius(10)),
                 ),
                 child: Text(
                   count.toString(),
                   style: GoogleFonts.poppins(
-                    fontSize: ResponsiveSize.font(11),
+                    fontSize: ResponsiveScaler.font(11),
                     color: isSelected
                         ? AppColors.textOnPrimary
                         : AppColors.textMuted,

@@ -5,12 +5,14 @@ import '../../../../design/colors/app_colors.dart';
 import '../../../../design/colors/app_gradients.dart';
 import '../../../../design/colors/status_colors.dart';
 import '../../../../design/responsive/responsive_scaler.dart';
+import 'variant_selection_sheet.dart';
 
 class DishGrid extends StatelessWidget {
   final List<Map<String, dynamic>> dishes;
   final Map<int, int> orderQuantities;
   final Function(Map<String, dynamic>) onAddDish;
   final Function(int, int) onUpdateQuantity;
+  final Function(Map<String, dynamic> orderItem)? onAddVariantItem;
   final bool showRating;
   final bool showCategory;
 
@@ -20,39 +22,72 @@ class DishGrid extends StatelessWidget {
     required this.orderQuantities,
     required this.onAddDish,
     required this.onUpdateQuantity,
+    this.onAddVariantItem,
     this.showRating = true,
     this.showCategory = true,
   }) : super(key: key);
 
+  // Formatea el precio considerando variantes
+  String _formatPrice(Map<String, dynamic> dish) {
+    final hasVariants = dish['hasVariants'] == true;
+    final variants = dish['variants'] as List<dynamic>?;
+
+    if (hasVariants && variants != null && variants.isNotEmpty) {
+      // Obtener precios de las variantes
+      final prices = variants
+          .map((v) => (v['price'] as num?)?.toDouble() ?? 0.0)
+          .where((p) => p > 0)
+          .toList();
+
+      if (prices.isEmpty) return 'S/ --';
+
+      prices.sort();
+      if (prices.length == 1) {
+        return 'S/ ${prices.first.toStringAsFixed(2)}';
+      }
+      // Mostrar rango de precios
+      return 'S/ ${prices.first.toStringAsFixed(2)} - ${prices.last.toStringAsFixed(2)}';
+    }
+
+    // Precio único
+    final price = (dish['price'] as num?)?.toDouble();
+    if (price == null) return 'S/ --';
+    return 'S/ ${price.toStringAsFixed(2)}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return MasonryGridView.count(
-      padding: ResponsiveSize.padding(
+      padding: ResponsiveScaler.padding(
         const EdgeInsets.fromLTRB(20, 0, 20, 80),
       ),
       crossAxisCount: 2,
-      mainAxisSpacing: ResponsiveSize.height(16),
-      crossAxisSpacing: ResponsiveSize.width(16),
+      mainAxisSpacing: ResponsiveScaler.height(16),
+      crossAxisSpacing: ResponsiveScaler.width(16),
       itemCount: dishes.length,
       itemBuilder: (context, index) {
         final dish = dishes[index];
         final quantity = orderQuantities[dish['id']] ?? 0;
-        return _buildDishCard(dish, quantity);
+        return _buildDishCard(context, dish, quantity);
       },
     );
   }
 
-  Widget _buildDishCard(Map<String, dynamic> dish, int quantity) {
+  Widget _buildDishCard(
+    BuildContext context,
+    Map<String, dynamic> dish,
+    int quantity,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(20)),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(20)),
         border: Border.all(color: AppColors.inputBorder),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 10,
-            offset: Offset(0, ResponsiveSize.height(4)),
+            offset: Offset(0, ResponsiveScaler.height(4)),
           ),
         ],
       ),
@@ -60,51 +95,68 @@ class DishGrid extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildDishImage(dish),
-          _buildDishContent(dish, quantity),
+          _buildDishContent(context, dish, quantity),
         ],
       ),
     );
   }
 
   Widget _buildDishImage(Map<String, dynamic> dish) {
+    final imageUrl = dish['imageUrl'] ?? dish['image'];
+    final hasImage = imageUrl != null && imageUrl.toString().isNotEmpty;
+
     return Stack(
       children: [
         Container(
-          height: ResponsiveSize.height(140),
+          height: ResponsiveScaler.height(140),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.vertical(
-              top: Radius.circular(ResponsiveSize.radius(20)),
+              top: Radius.circular(ResponsiveScaler.radius(20)),
             ),
-            image: DecorationImage(
-              image: NetworkImage(dish['image'] ?? ''),
-              fit: BoxFit.cover,
-            ),
+            color: hasImage ? null : AppColors.backgroundGrey,
+            image: hasImage
+                ? DecorationImage(
+                    image: NetworkImage(imageUrl),
+                    fit: BoxFit.cover,
+                  )
+                : null,
           ),
+          child: !hasImage
+              ? Center(
+                  child: Icon(
+                    Icons.restaurant,
+                    size: ResponsiveScaler.icon(48),
+                    color: AppColors.iconMuted,
+                  ),
+                )
+              : null,
         ),
         if (showRating && dish['rating'] != null)
           Positioned(
-            bottom: ResponsiveSize.height(10),
-            left: ResponsiveSize.width(10),
+            bottom: ResponsiveScaler.height(10),
+            left: ResponsiveScaler.width(10),
             child: Container(
-              padding: ResponsiveSize.padding(
+              padding: ResponsiveScaler.padding(
                 const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               ),
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+                borderRadius: BorderRadius.circular(
+                  ResponsiveScaler.radius(12),
+                ),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.star,
                     color: Colors.amber,
-                    size: ResponsiveSize.icon(14),
+                    size: ResponsiveScaler.icon(14),
                   ),
-                  SizedBox(width: ResponsiveSize.width(4)),
+                  SizedBox(width: ResponsiveScaler.width(4)),
                   Text(
                     dish['rating'].toString(),
                     style: GoogleFonts.poppins(
-                      fontSize: ResponsiveSize.font(12),
+                      fontSize: ResponsiveScaler.font(12),
                       fontWeight: FontWeight.w600,
                       color: AppColors.textOnPrimary,
                     ),
@@ -117,16 +169,20 @@ class DishGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildDishContent(Map<String, dynamic> dish, int quantity) {
+  Widget _buildDishContent(
+    BuildContext context,
+    Map<String, dynamic> dish,
+    int quantity,
+  ) {
     return Padding(
-      padding: ResponsiveSize.padding(const EdgeInsets.all(12)),
+      padding: ResponsiveScaler.padding(const EdgeInsets.all(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             dish['name'],
             style: GoogleFonts.poppins(
-              fontSize: ResponsiveSize.font(16),
+              fontSize: ResponsiveScaler.font(16),
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
@@ -134,11 +190,11 @@ class DishGrid extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           if (dish['description'] != null) ...[
-            SizedBox(height: ResponsiveSize.height(4)),
+            SizedBox(height: ResponsiveScaler.height(4)),
             Text(
               dish['description'],
               style: GoogleFonts.poppins(
-                fontSize: ResponsiveSize.font(12),
+                fontSize: ResponsiveScaler.font(12),
                 color: AppColors.textMuted,
               ),
               maxLines: 3,
@@ -146,49 +202,55 @@ class DishGrid extends StatelessWidget {
             ),
           ],
           if (showCategory && dish['category'] != null) ...[
-            SizedBox(height: ResponsiveSize.height(8)),
+            SizedBox(height: ResponsiveScaler.height(8)),
             Container(
-              padding: ResponsiveSize.padding(
+              padding: ResponsiveScaler.padding(
                 const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               ),
               decoration: BoxDecoration(
                 color: AppColors.backgroundGrey,
-                borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+                borderRadius: BorderRadius.circular(
+                  ResponsiveScaler.radius(12),
+                ),
               ),
               child: Text(
                 dish['category'],
                 style: GoogleFonts.poppins(
-                  fontSize: ResponsiveSize.font(10),
+                  fontSize: ResponsiveScaler.font(10),
                   color: AppColors.textMuted,
                 ),
               ),
             ),
           ],
-          SizedBox(height: ResponsiveSize.height(12)),
+          SizedBox(height: ResponsiveScaler.height(12)),
           Text(
-            '\$${dish['price']}',
+            _formatPrice(dish),
             style: GoogleFonts.poppins(
-              fontSize: ResponsiveSize.font(20),
+              fontSize: ResponsiveScaler.font(18),
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          SizedBox(height: ResponsiveSize.height(12)),
-          _buildActionButton(dish, quantity),
+          SizedBox(height: ResponsiveScaler.height(12)),
+          _buildActionButton(context, dish, quantity),
         ],
       ),
     );
   }
 
-  Widget _buildActionButton(Map<String, dynamic> dish, int quantity) {
+  Widget _buildActionButton(
+    BuildContext context,
+    Map<String, dynamic> dish,
+    int quantity,
+  ) {
     if (dish['status'] == 'unavailable') {
       return Container(
-        padding: ResponsiveSize.padding(
+        padding: ResponsiveScaler.padding(
           const EdgeInsets.symmetric(vertical: 12),
         ),
         decoration: BoxDecoration(
           color: StatusColors.unavailableBackground,
-          borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
         ),
         child: Center(
           child: Text(
@@ -196,7 +258,7 @@ class DishGrid extends StatelessWidget {
             style: GoogleFonts.poppins(
               color: StatusColors.unavailableText,
               fontWeight: FontWeight.w600,
-              fontSize: ResponsiveSize.font(14),
+              fontSize: ResponsiveScaler.font(14),
             ),
           ),
         ),
@@ -204,20 +266,31 @@ class DishGrid extends StatelessWidget {
     }
 
     if (quantity == 0) {
+      final hasVariants = dish['hasVariants'] == true;
       return GestureDetector(
-        onTap: () => onAddDish(dish),
+        onTap: () {
+          if (hasVariants && onAddVariantItem != null) {
+            VariantSelectionSheet.show(
+              context,
+              dish: dish,
+              onAddToOrder: onAddVariantItem!,
+            );
+          } else {
+            onAddDish(dish);
+          }
+        },
         child: Container(
-          padding: ResponsiveSize.padding(
+          padding: ResponsiveScaler.padding(
             const EdgeInsets.symmetric(vertical: 12),
           ),
           decoration: BoxDecoration(
             gradient: AppGradients.primaryButton,
-            borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+            borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
             boxShadow: [
               BoxShadow(
                 color: AppColors.primary.withOpacity(0.2),
                 blurRadius: 8,
-                offset: Offset(0, ResponsiveSize.height(2)),
+                offset: Offset(0, ResponsiveScaler.height(2)),
               ),
             ],
           ),
@@ -227,7 +300,7 @@ class DishGrid extends StatelessWidget {
               style: GoogleFonts.poppins(
                 color: AppColors.textOnPrimary,
                 fontWeight: FontWeight.w600,
-                fontSize: ResponsiveSize.font(14),
+                fontSize: ResponsiveScaler.font(14),
               ),
             ),
           ),
@@ -238,7 +311,7 @@ class DishGrid extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.backgroundAlternate,
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -247,14 +320,14 @@ class DishGrid extends StatelessWidget {
             onPressed: () => onUpdateQuantity(dish['id'], quantity - 1),
             icon: Icon(
               Icons.remove,
-              size: ResponsiveSize.icon(20),
+              size: ResponsiveScaler.icon(20),
               color: AppColors.primary,
             ),
           ),
           Text(
             quantity.toString(),
             style: GoogleFonts.poppins(
-              fontSize: ResponsiveSize.font(16),
+              fontSize: ResponsiveScaler.font(16),
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
             ),
@@ -263,7 +336,7 @@ class DishGrid extends StatelessWidget {
             onPressed: () => onUpdateQuantity(dish['id'], quantity + 1),
             icon: Icon(
               Icons.add,
-              size: ResponsiveSize.icon(20),
+              size: ResponsiveScaler.icon(20),
               color: AppColors.primary,
             ),
           ),

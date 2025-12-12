@@ -24,14 +24,14 @@ class CancelPreparationDialog extends StatelessWidget {
     return AlertDialog(
       backgroundColor: AppColors.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(20)),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(20)),
       ),
       title: Text(
         'Cancelar preparación',
         textAlign: TextAlign.center,
         style: GoogleFonts.poppins(
           fontWeight: FontWeight.bold,
-          fontSize: ResponsiveSize.font(18),
+          fontSize: ResponsiveScaler.font(18),
           color: AppColors.textPrimary,
         ),
       ),
@@ -41,14 +41,14 @@ class CancelPreparationDialog extends StatelessWidget {
           Icon(
             Icons.warning_amber_rounded,
             color: AppColors.error,
-            size: ResponsiveSize.icon(50),
+            size: ResponsiveScaler.icon(50),
           ),
-          SizedBox(height: ResponsiveSize.height(16)),
+          SizedBox(height: ResponsiveScaler.height(16)),
           Text(
             '¿Estás seguro de que deseas cancelar la preparación de esta orden?',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
-              fontSize: ResponsiveSize.font(14),
+              fontSize: ResponsiveScaler.font(14),
               color: AppColors.textSecondary,
             ),
           ),
@@ -56,9 +56,9 @@ class CancelPreparationDialog extends StatelessWidget {
       ),
       actionsAlignment: MainAxisAlignment.center,
       actionsPadding: EdgeInsets.only(
-        left: ResponsiveSize.width(24),
-        right: ResponsiveSize.width(24),
-        bottom: ResponsiveSize.height(24),
+        left: ResponsiveScaler.width(24),
+        right: ResponsiveScaler.width(24),
+        bottom: ResponsiveScaler.height(24),
       ),
       actions: [
         Row(
@@ -67,10 +67,10 @@ class CancelPreparationDialog extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () => Navigator.pop(context),
                 style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: ResponsiveSize.height(12)),
+                  padding: EdgeInsets.symmetric(vertical: ResponsiveScaler.height(12)),
                   side: BorderSide(color: AppColors.textMuted.withOpacity(0.5)),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+                    borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
                   ),
                 ),
                 child: Text(
@@ -82,7 +82,7 @@ class CancelPreparationDialog extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: ResponsiveSize.width(12)),
+            SizedBox(width: ResponsiveScaler.width(12)),
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
@@ -92,9 +92,9 @@ class CancelPreparationDialog extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.error,
                   foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: ResponsiveSize.height(12)),
+                  padding: EdgeInsets.symmetric(vertical: ResponsiveScaler.height(12)),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(ResponsiveSize.radius(12)),
+                    borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
                   ),
                   elevation: 0,
                 ),

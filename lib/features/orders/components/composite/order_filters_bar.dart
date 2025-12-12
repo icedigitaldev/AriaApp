@@ -71,7 +71,7 @@ class OrderFiltersBarState extends State<OrderFiltersBar> {
 
     if (selectedIndex == -1) return;
 
-    final double chipWidth = ResponsiveSize.width(120);
+    final double chipWidth = ResponsiveScaler.width(120);
     final double targetPosition = selectedIndex * chipWidth;
     final double viewportWidth = _scrollController.position.viewportDimension;
     final double scrollPosition = targetPosition - (viewportWidth / 2) + (chipWidth / 2);
@@ -95,8 +95,8 @@ class OrderFiltersBarState extends State<OrderFiltersBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: ResponsiveSize.height(50),
-      margin: ResponsiveSize.margin(
+      height: ResponsiveScaler.height(50),
+      margin: ResponsiveScaler.margin(
         const EdgeInsets.symmetric(horizontal: 20),
       ),
       child: ListView.builder(

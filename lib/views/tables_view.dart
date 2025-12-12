@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:refena_flutter/refena_flutter.dart';
 import '../components/composite/transparent_app_bar.dart';
+import '../components/ui/app_loader.dart';
 import '../design/colors/app_colors.dart';
 import '../design/responsive/responsive_scaler.dart';
 import '../features/tables/components/composite/restaurant_header.dart';
 import '../features/tables/components/composite/floor_selector.dart';
 import '../features/tables/components/composite/tables_grid.dart';
+import '../features/tables/controllers/tables_controller.dart';
 
 class TablesView extends StatefulWidget {
   const TablesView({Key? key}) : super(key: key);
@@ -14,62 +17,81 @@ class TablesView extends StatefulWidget {
 }
 
 class _TablesViewState extends State<TablesView> {
-  // Datos de ejemplo - En producción vendrían del controller/service
-  final List<Map<String, dynamic>> tables = [
-    {'id': 1, 'number': 1, 'capacity': 4, 'status': 'available', 'floor': 1},
-    {'id': 2, 'number': 2, 'capacity': 2, 'status': 'occupied', 'floor': 1, 'orderTotal': 45.50},
-    {'id': 3, 'number': 3, 'capacity': 6, 'status': 'available', 'floor': 1},
-    {'id': 4, 'number': 4, 'capacity': 4, 'status': 'reserved', 'floor': 1},
-    {'id': 5, 'number': 5, 'capacity': 2, 'status': 'occupied', 'floor': 1, 'orderTotal': 23.99},
-    {'id': 6, 'number': 6, 'capacity': 8, 'status': 'available', 'floor': 2},
-    {'id': 7, 'number': 7, 'capacity': 4, 'status': 'occupied', 'floor': 2, 'orderTotal': 67.80},
-    {'id': 8, 'number': 8, 'capacity': 4, 'status': 'available', 'floor': 2},
-  ];
-
-  int selectedFloor = 1;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.notifier(tablesControllerProvider).initialize();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    ResponsiveSize.init(context);
+    return Consumer(
+      builder: (context, ref) {
+        final tablesState = ref.watch(tablesControllerProvider);
+        final tablesController = ref.notifier(tablesControllerProvider);
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: TransparentAppBar(
-        backgroundColor: AppColors.appBarBackground,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          color: AppColors.background,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header del restaurante
-              RestaurantHeader(
-                onProfileTap: () {
-                  // Navegar al perfil o mostrar opciones
-                },
-              ),
-              // Selector de pisos
-              FloorSelector(
-                selectedFloor: selectedFloor,
-                onFloorChanged: (floor) {
-                  setState(() {
-                    selectedFloor = floor;
-                  });
-                },
-              ),
-              // Grid de mesas
-              Expanded(
-                child: TablesGrid(
-                  tables: tables,
-                  selectedFloor: selectedFloor,
-                ),
-              ),
-            ],
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: TransparentAppBar(
+            backgroundColor: AppColors.appBarBackground,
           ),
-        ),
-      ),
+          body: Container(
+            decoration: BoxDecoration(color: AppColors.background),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  RestaurantHeader(
+                    onProfileTap: () {
+                      // Navegar al perfil o cerrar sesión
+                    },
+                  ),
+                  FloorSelector(
+                    selectedFloor: tablesState.selectedFloor,
+                    availableFloors: tablesState.availableFloors,
+                    onFloorChanged: (floor) {
+                      tablesController.selectFloor(floor);
+                    },
+                  ),
+                  Expanded(
+                    child: tablesState.isLoading
+                        ? Center(
+                            child: AppLoader(size: ResponsiveScaler.width(40)),
+                          )
+                        : TablesGrid(
+                            tables: tablesState.filteredTables,
+                            selectedFloor: tablesState.selectedFloor,
+                            onTableTap: (table) {
+                              final status =
+                                  table['status']?.toString() ?? 'available';
+                              // Si la mesa está ocupada, ir a ver la orden existente
+                              if (status == 'occupied') {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/order-details',
+                                  arguments: table,
+                                );
+                              } else {
+                                // Mesa disponible, crear nueva orden
+                                Navigator.pushNamed(
+                                  context,
+                                  '/new-order',
+                                  arguments: table,
+                                );
+                              }
+                            },
+                            onStatusChange: (tableId, newStatus) {
+                              tablesController.changeStatus(tableId, newStatus);
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

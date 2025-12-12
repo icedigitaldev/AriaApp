@@ -108,10 +108,10 @@ class OrderStatsContainer extends StatelessWidget {
     }
 
     return Container(
-      margin: ResponsiveSize.margin(
+      margin: ResponsiveScaler.margin(
           const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
       ),
-      padding: ResponsiveSize.padding(
+      padding: ResponsiveScaler.padding(
         EdgeInsets.symmetric(
           horizontal: 16,
           vertical: activeStatsCount > 3 ? 12 : 16,
@@ -119,12 +119,12 @@ class OrderStatsContainer extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(ResponsiveSize.radius(20)),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(20)),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadowPurple,
             blurRadius: 12,
-            offset: Offset(0, ResponsiveSize.height(4)),
+            offset: Offset(0, ResponsiveScaler.height(4)),
           ),
         ],
       ),
@@ -151,7 +151,7 @@ class OrderStatsContainer extends StatelessWidget {
   // Construye el divider vertical
   Widget _buildDivider() {
     return Container(
-      margin: ResponsiveSize.margin(
+      margin: ResponsiveScaler.margin(
           const EdgeInsets.symmetric(horizontal: 12)
       ),
       width: 1,
