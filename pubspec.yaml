@@ -16,6 +16,7 @@ dependencies:
   google_fonts: ^6.2.1
   ice_storage: ^1.4.5
   refena_flutter: ^3.2.0
+  rxdart: ^0.28.0
   video_player: ^2.10.1
 
 dev_dependencies:

@@ -4,7 +4,7 @@ import '../../../../design/colors/app_colors.dart';
 import '../../../../design/colors/status_colors.dart';
 import '../../../../design/responsive/responsive_scaler.dart';
 
-class TableCard extends StatelessWidget {
+class TableCard extends StatefulWidget {
   final Map<String, dynamic> table;
   final VoidCallback onTap;
   final bool isLeftColumn;
@@ -17,35 +17,106 @@ class TableCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<TableCard> createState() => _TableCardState();
+}
+
+class _TableCardState extends State<TableCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _glowController;
+  late Animation<double> _glowAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    // Controlador para animación de glow pulsante
+    _glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _glowAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
+
+    _updateAnimation();
+  }
+
+  @override
+  void didUpdateWidget(TableCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateAnimation();
+  }
+
+  void _updateAnimation() {
+    final orderStatus = widget.table['orderStatus']?.toString();
+    if (orderStatus == 'completed') {
+      _glowController.repeat(reverse: true);
+    } else {
+      _glowController.stop();
+      _glowController.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _glowController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final status = table['status'];
+    final status = widget.table['status'];
+    final orderStatus = widget.table['orderStatus']?.toString();
     final statusConfig = _getStatusConfig(status);
+    final isReadyToServe = orderStatus == 'completed';
 
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: ResponsiveScaler.height(140),
-        decoration: BoxDecoration(
-          color: AppColors.card.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(20)),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadow,
-              blurRadius: 10,
-              offset: Offset(0, ResponsiveScaler.height(4)),
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: _glowAnimation,
+        builder: (context, child) {
+          final glowValue = _glowAnimation.value;
+          return Container(
+            height: ResponsiveScaler.height(140),
+            decoration: BoxDecoration(
+              color: AppColors.card.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(20)),
+              border: isReadyToServe
+                  ? Border.all(
+                      color: StatusColors.readyDot.withValues(alpha: glowValue),
+                      width: 2.5,
+                    )
+                  : null,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 10,
+                  offset: Offset(0, ResponsiveScaler.height(4)),
+                ),
+                // Glow pulsante cuando está listo
+                if (isReadyToServe)
+                  BoxShadow(
+                    color: StatusColors.readyDot.withValues(
+                      alpha: glowValue * 0.5,
+                    ),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                  ),
+              ],
             ),
-          ],
-        ),
+            child: child,
+          );
+        },
         child: Row(
           children: [
-            if (isLeftColumn)
+            if (widget.isLeftColumn)
               Container(
                 width: ResponsiveScaler.width(24),
                 decoration: BoxDecoration(
                   color: statusConfig['borderColor'],
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(ResponsiveScaler.radius(20)),
-                    bottomLeft: Radius.circular(ResponsiveScaler.radius(20)),
+                    topLeft: Radius.circular(ResponsiveScaler.radius(18)),
+                    bottomLeft: Radius.circular(ResponsiveScaler.radius(18)),
                   ),
                 ),
                 child: Center(
@@ -66,8 +137,8 @@ class TableCard extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: EdgeInsets.only(
-                  left: ResponsiveScaler.width(isLeftColumn ? 12 : 16),
-                  right: ResponsiveScaler.width(!isLeftColumn ? 12 : 16),
+                  left: ResponsiveScaler.width(widget.isLeftColumn ? 12 : 16),
+                  right: ResponsiveScaler.width(!widget.isLeftColumn ? 12 : 16),
                   top: ResponsiveScaler.height(20),
                   bottom: ResponsiveScaler.height(20),
                 ),
@@ -82,11 +153,12 @@ class TableCard extends StatelessWidget {
                         Icon(
                           Icons.restaurant,
                           size: ResponsiveScaler.icon(32),
-                          color: statusConfig['iconColor'] ?? AppColors.iconMuted,
+                          color:
+                              statusConfig['iconColor'] ?? AppColors.iconMuted,
                         ),
                         SizedBox(height: ResponsiveScaler.height(8)),
                         Text(
-                          'Mesa ${table['number']}',
+                          'Mesa ${widget.table['number']}',
                           style: GoogleFonts.poppins(
                             fontSize: ResponsiveScaler.font(22),
                             fontWeight: FontWeight.bold,
@@ -102,14 +174,14 @@ class TableCard extends StatelessWidget {
                 ),
               ),
             ),
-            if (!isLeftColumn)
+            if (!widget.isLeftColumn)
               Container(
                 width: ResponsiveScaler.width(24),
                 decoration: BoxDecoration(
                   color: statusConfig['borderColor'],
                   borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(ResponsiveScaler.radius(20)),
-                    bottomRight: Radius.circular(ResponsiveScaler.radius(20)),
+                    topRight: Radius.circular(ResponsiveScaler.radius(18)),
+                    bottomRight: Radius.circular(ResponsiveScaler.radius(18)),
                   ),
                 ),
                 child: Center(
@@ -134,7 +206,49 @@ class TableCard extends StatelessWidget {
   }
 
   Widget _buildBottomInfo(Map<String, dynamic> statusConfig) {
-    if (table['status'] == 'occupied' && table['orderTotal'] != null) {
+    final orderStatus = widget.table['orderStatus']?.toString();
+
+    // Orden en preparación
+    if (widget.table['status'] == 'occupied' && orderStatus == 'preparing') {
+      return Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: ResponsiveScaler.width(10),
+          vertical: ResponsiveScaler.height(6),
+        ),
+        decoration: BoxDecoration(
+          color: StatusColors.preparingBackground,
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(10)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: ResponsiveScaler.width(12),
+              height: ResponsiveScaler.height(12),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  StatusColors.preparingText,
+                ),
+              ),
+            ),
+            SizedBox(width: ResponsiveScaler.width(6)),
+            Text(
+              'Preparando',
+              style: GoogleFonts.poppins(
+                fontSize: ResponsiveScaler.font(11),
+                fontWeight: FontWeight.w500,
+                color: StatusColors.preparingText,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Total de orden si existe
+    if (widget.table['status'] == 'occupied' &&
+        widget.table['orderTotal'] != null) {
       return Container(
         padding: EdgeInsets.symmetric(
           horizontal: ResponsiveScaler.width(10),
@@ -153,7 +267,7 @@ class TableCard extends StatelessWidget {
               color: statusConfig['textColor'],
             ),
             Text(
-              '${table['orderTotal'].toStringAsFixed(2)}',
+              '${widget.table['orderTotal'].toStringAsFixed(2)}',
               style: GoogleFonts.poppins(
                 fontSize: ResponsiveScaler.font(16),
                 fontWeight: FontWeight.w600,
@@ -177,7 +291,7 @@ class TableCard extends StatelessWidget {
         ),
         SizedBox(width: ResponsiveScaler.width(6)),
         Text(
-          '${table['capacity']} personas',
+          '${widget.table['capacity']} personas',
           style: GoogleFonts.poppins(
             fontSize: ResponsiveScaler.font(12),
             color: AppColors.textMuted,

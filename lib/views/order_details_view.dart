@@ -29,6 +29,9 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
   bool _isLoading = true;
   StreamSubscription? _orderSubscription;
 
+  // Almacena los items marcados como servidos localmente
+  final Set<int> _servedItems = {};
+
   final OrdersService _ordersService = OrdersService();
   final TablesService _tablesService = TablesService();
 
@@ -161,6 +164,17 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     }
   }
 
+  // Marca un item como servido
+  void _toggleServedItem(int index) {
+    setState(() {
+      if (_servedItems.contains(index)) {
+        _servedItems.remove(index);
+      } else {
+        _servedItems.add(index);
+      }
+    });
+  }
+
   void _navigateToAddItems() {
     Navigator.pushNamed(context, '/new-order', arguments: _table);
   }
@@ -185,9 +199,9 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
       case 'pending':
         return 'PENDIENTE';
       case 'preparing':
-        return 'EN PREPARACIÓN';
+        return 'PREPARANDO';
       case 'completed':
-        return 'LISTO PARA SERVIR';
+        return 'LISTO';
       default:
         return status.toUpperCase();
     }
@@ -220,11 +234,6 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
           child: Column(
             children: [
               _buildHeader(),
-              // Banner de estado cuando la orden está en preparación o lista
-              if (_order != null &&
-                  (_order!['status'] == 'preparing' ||
-                      _order!['status'] == 'completed'))
-                _buildStatusBanner(_order!['status']),
               Expanded(
                 child: _isLoading
                     ? Center(child: AppLoader(size: ResponsiveScaler.width(40)))
@@ -237,64 +246,6 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
         ),
       ),
       bottomNavigationBar: _order != null ? _buildBottomBar() : null,
-    );
-  }
-
-  // Banner que muestra el estado actual de la orden
-  Widget _buildStatusBanner(String status) {
-    final color = _getStatusColor(status);
-    final text = _getStatusText(status);
-    final icon = _getStatusIcon(status);
-
-    return Container(
-      margin: ResponsiveScaler.margin(
-        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      ),
-      padding: ResponsiveScaler.padding(
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      ),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: ResponsiveScaler.icon(24)),
-          SizedBox(width: ResponsiveScaler.width(12)),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  text,
-                  style: GoogleFonts.poppins(
-                    fontSize: ResponsiveScaler.font(14),
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-                if (status == 'completed')
-                  Text(
-                    'El pedido está listo para ser entregado al cliente',
-                    style: GoogleFonts.poppins(
-                      fontSize: ResponsiveScaler.font(12),
-                      color: color.withOpacity(0.8),
-                    ),
-                  ),
-                if (status == 'preparing')
-                  Text(
-                    'La cocina está preparando el pedido',
-                    style: GoogleFonts.poppins(
-                      fontSize: ResponsiveScaler.font(12),
-                      color: color.withOpacity(0.8),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -487,6 +438,8 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     final status = _order!['status']?.toString() ?? 'pending';
     // Solo permite eliminar items si la orden está pendiente
     final canDeleteItems = status == 'pending';
+    // Permite marcar items como servidos si la orden está completada
+    final canMarkServed = status == 'completed';
 
     return ListView.builder(
       padding: ResponsiveScaler.padding(
@@ -501,12 +454,18 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
           items[index] as Map<String, dynamic>,
           index,
           canDeleteItems,
+          canMarkServed,
         );
       },
     );
   }
 
-  Widget _buildOrderItem(Map<String, dynamic> item, int index, bool canDelete) {
+  Widget _buildOrderItem(
+    Map<String, dynamic> item,
+    int index,
+    bool canDelete,
+    bool canMarkServed,
+  ) {
     final variantName = item['variantName'];
     final customerName = item['customerName'];
     final price = (item['price'] as num?)?.toDouble() ?? 0.0;
@@ -515,101 +474,112 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     final hasVariant = variantName != null && variantName.toString().isNotEmpty;
     final hasCustomer =
         customerName != null && customerName.toString().isNotEmpty;
+    final isServed = _servedItems.contains(index);
 
-    final child = Container(
-      margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 10)),
-      padding: ResponsiveScaler.padding(
-        const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: ResponsiveScaler.width(36),
-            height: ResponsiveScaler.height(36),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(10)),
-            ),
-            child: Center(
-              child: Text(
-                'x$quantity',
-                style: GoogleFonts.poppins(
-                  fontSize: ResponsiveScaler.font(14),
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+    final child = GestureDetector(
+      onTap: canMarkServed ? () => _toggleServedItem(index) : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 10)),
+        padding: ResponsiveScaler.padding(
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        ),
+        decoration: BoxDecoration(
+          // Fondo verdecito suave cuando está servido
+          color: isServed
+              ? AppColors.success.withValues(alpha: 0.15)
+              : AppColors.card,
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: ResponsiveScaler.width(36),
+              height: ResponsiveScaler.height(36),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(
+                  ResponsiveScaler.radius(10),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  'x$quantity',
+                  style: GoogleFonts.poppins(
+                    fontSize: ResponsiveScaler.font(14),
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(width: ResponsiveScaler.width(12)),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['name'] ?? '',
-                  style: GoogleFonts.poppins(
-                    fontSize: ResponsiveScaler.font(15),
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+            SizedBox(width: ResponsiveScaler.width(12)),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item['name'] ?? '',
+                    style: GoogleFonts.poppins(
+                      fontSize: ResponsiveScaler.font(15),
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                      decoration: isServed ? TextDecoration.lineThrough : null,
+                    ),
                   ),
-                ),
-                if (hasVariant) ...[
-                  SizedBox(height: ResponsiveScaler.height(2)),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.local_offer,
-                        size: ResponsiveScaler.icon(12),
-                        color: AppColors.primary,
-                      ),
-                      SizedBox(width: ResponsiveScaler.width(4)),
-                      Text(
-                        variantName.toString(),
-                        style: GoogleFonts.poppins(
-                          fontSize: ResponsiveScaler.font(12),
+                  if (hasVariant) ...[
+                    SizedBox(height: ResponsiveScaler.height(2)),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.local_offer,
+                          size: ResponsiveScaler.icon(12),
                           color: AppColors.primary,
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-                if (hasCustomer) ...[
-                  SizedBox(height: ResponsiveScaler.height(2)),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.person,
-                        size: ResponsiveScaler.icon(12),
-                        color: AppColors.textMuted,
-                      ),
-                      SizedBox(width: ResponsiveScaler.width(4)),
-                      Text(
-                        customerName.toString(),
-                        style: GoogleFonts.poppins(
-                          fontSize: ResponsiveScaler.font(12),
+                        SizedBox(width: ResponsiveScaler.width(4)),
+                        Text(
+                          variantName.toString(),
+                          style: GoogleFonts.poppins(
+                            fontSize: ResponsiveScaler.font(12),
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (hasCustomer) ...[
+                    SizedBox(height: ResponsiveScaler.height(2)),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.person,
+                          size: ResponsiveScaler.icon(12),
                           color: AppColors.textMuted,
                         ),
-                      ),
-                    ],
-                  ),
+                        SizedBox(width: ResponsiveScaler.width(4)),
+                        Text(
+                          customerName.toString(),
+                          style: GoogleFonts.poppins(
+                            fontSize: ResponsiveScaler.font(12),
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-          Text(
-            'S/ ${subtotal.toStringAsFixed(2)}',
-            style: GoogleFonts.poppins(
-              fontSize: ResponsiveScaler.font(15),
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+            Text(
+              'S/ ${subtotal.toStringAsFixed(2)}',
+              style: GoogleFonts.poppins(
+                fontSize: ResponsiveScaler.font(15),
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
 
@@ -676,7 +646,7 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
           Text(
             'Total a pagar',
             style: GoogleFonts.poppins(
-              fontSize: ResponsiveScaler.font(16),
+              fontSize: ResponsiveScaler.font(14),
               fontWeight: FontWeight.w500,
               color: AppColors.textMuted,
             ),
