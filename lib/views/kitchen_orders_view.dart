@@ -12,6 +12,7 @@ import '../features/orders/components/composite/order_filters_bar.dart';
 import '../features/orders/components/composite/order_stats_container.dart';
 import '../features/orders/controllers/orders_controller.dart';
 import '../utils/app_logger.dart';
+import '../auth/current_user.dart';
 
 class KitchenOrdersView extends StatefulWidget {
   const KitchenOrdersView({Key? key}) : super(key: key);
@@ -87,6 +88,13 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
           );
         }
 
+        // Lógica de selección de imagen (Prioridad: imageUrl > avatarUrl)
+        final String? imageUrl = CurrentUserAuth.instance.imageUrl;
+        final String? avatarUrl = CurrentUserAuth.instance.avatarUrl;
+        final String? displayImage = (imageUrl != null && imageUrl.isNotEmpty)
+            ? imageUrl
+            : (avatarUrl != null && avatarUrl.isNotEmpty ? avatarUrl : null);
+
         return Scaffold(
           extendBodyBehindAppBar: true,
           appBar: TransparentAppBar(
@@ -105,10 +113,19 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                       width: ResponsiveScaler.width(48),
                       height: ResponsiveScaler.height(48),
                       decoration: BoxDecoration(
-                        gradient: AppGradients.primaryButton,
+                        gradient: (displayImage == null)
+                            ? AppGradients.primaryButton
+                            : null,
+                        color: (displayImage != null) ? AppColors.card : null,
                         borderRadius: BorderRadius.circular(
                           ResponsiveScaler.radius(16),
                         ),
+                        image: (displayImage != null)
+                            ? DecorationImage(
+                                image: NetworkImage(displayImage),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.shadowPurple,
@@ -117,11 +134,13 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                           ),
                         ],
                       ),
-                      child: Icon(
-                        Icons.restaurant_menu,
-                        color: AppColors.iconOnPrimary,
-                        size: ResponsiveScaler.icon(28),
-                      ),
+                      child: (displayImage == null)
+                          ? Icon(
+                              Icons.restaurant_menu,
+                              color: AppColors.iconOnPrimary,
+                              size: ResponsiveScaler.icon(28),
+                            )
+                          : null,
                     ),
                     actions: [
                       IconButton(

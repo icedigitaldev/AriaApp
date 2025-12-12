@@ -1,12 +1,12 @@
-/// Estado inmutable del menú
-class MenuState {
+/// Estado inmutable de los platillos
+class DishesState {
   final List<Map<String, dynamic>> dishes;
   final List<String> categories;
   final String selectedCategory;
   final bool isLoading;
   final String? error;
 
-  const MenuState({
+  const DishesState({
     this.dishes = const [],
     this.categories = const [],
     this.selectedCategory = 'all',
@@ -14,14 +14,14 @@ class MenuState {
     this.error,
   });
 
-  MenuState copyWith({
+  DishesState copyWith({
     List<Map<String, dynamic>>? dishes,
     List<String>? categories,
     String? selectedCategory,
     bool? isLoading,
     String? error,
   }) {
-    return MenuState(
+    return DishesState(
       dishes: dishes ?? this.dishes,
       categories: categories ?? this.categories,
       selectedCategory: selectedCategory ?? this.selectedCategory,

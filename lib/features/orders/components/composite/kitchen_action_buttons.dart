@@ -4,12 +4,12 @@ import '../../../../components/ui/app_loader.dart';
 import '../../../../design/colors/app_colors.dart';
 import '../../../../design/colors/app_gradients.dart';
 import '../../../../design/responsive/responsive_scaler.dart';
-import '../../../../utils/app_logger.dart';
 import 'cancel_preparation_dialog.dart';
 
-class KitchenActionButtons extends StatefulWidget {
+class KitchenActionButtons extends StatelessWidget {
   final String orderStatus;
   final bool allItemsCompleted;
+  final bool isLoading;
   final Function(String newStatus) onStatusUpdate;
 
   const KitchenActionButtons({
@@ -17,14 +17,8 @@ class KitchenActionButtons extends StatefulWidget {
     required this.orderStatus,
     required this.allItemsCompleted,
     required this.onStatusUpdate,
+    this.isLoading = false,
   }) : super(key: key);
-
-  @override
-  State<KitchenActionButtons> createState() => _KitchenActionButtonsState();
-}
-
-class _KitchenActionButtonsState extends State<KitchenActionButtons> {
-  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,22 +39,22 @@ class _KitchenActionButtonsState extends State<KitchenActionButtons> {
       ),
       child: Row(
         children: [
-          // Botón para comenzar preparación cuando el estado es "pending"
-          if (widget.orderStatus == 'pending')
+          if (orderStatus == 'pending')
             Expanded(
               child: _buildButton(
-                onTap: () => _handleStatusUpdate('preparing'),
+                onTap: isLoading ? null : () => onStatusUpdate('preparing'),
                 gradient: AppGradients.info,
                 text: 'Comenzar Preparación',
                 shadowColor: AppColors.info.withOpacity(0.3),
               ),
             ),
 
-          // Botones cuando el estado es "preparing"
-          if (widget.orderStatus == 'preparing') ...[
+          if (orderStatus == 'preparing') ...[
             Expanded(
               child: _buildButton(
-                onTap: _handleCancelPreparation,
+                onTap: isLoading
+                    ? null
+                    : () => _handleCancelPreparation(context),
                 text: 'Cancelar',
                 color: AppColors.backgroundGrey,
                 textColor: AppColors.textSecondary,
@@ -70,11 +64,15 @@ class _KitchenActionButtonsState extends State<KitchenActionButtons> {
             Expanded(
               flex: 2,
               child: _buildButton(
-                onTap: !widget.allItemsCompleted ? null : () => _handleStatusUpdate('completed'),
-                gradient: widget.allItemsCompleted ? AppGradients.success : null,
-                color: !widget.allItemsCompleted ? AppColors.backgroundDisabled : null,
+                onTap: (!allItemsCompleted || isLoading)
+                    ? null
+                    : () => onStatusUpdate('completed'),
+                gradient: allItemsCompleted ? AppGradients.success : null,
+                color: !allItemsCompleted ? AppColors.backgroundDisabled : null,
                 text: 'Marcar como Listo',
-                shadowColor: widget.allItemsCompleted ? AppColors.success.withOpacity(0.3) : null,
+                shadowColor: allItemsCompleted
+                    ? AppColors.success.withOpacity(0.3)
+                    : null,
                 icon: Icons.check_circle,
               ),
             ),
@@ -94,89 +92,58 @@ class _KitchenActionButtonsState extends State<KitchenActionButtons> {
     IconData? icon,
   }) {
     return GestureDetector(
-      onTap: isLoading ? null : onTap,
+      onTap: onTap,
       child: Container(
-        padding: ResponsiveScaler.padding(const EdgeInsets.symmetric(vertical: 16)),
+        padding: ResponsiveScaler.padding(
+          const EdgeInsets.symmetric(vertical: 16),
+        ),
         decoration: BoxDecoration(
           gradient: gradient,
           color: color,
           borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
           boxShadow: shadowColor != null
               ? [
-            BoxShadow(
-              color: shadowColor,
-              blurRadius: 12,
-              offset: Offset(0, ResponsiveScaler.height(4)),
-            ),
-          ]
+                  BoxShadow(
+                    color: shadowColor,
+                    blurRadius: 12,
+                    offset: Offset(0, ResponsiveScaler.height(4)),
+                  ),
+                ]
               : null,
         ),
         child: Center(
           child: isLoading
               ? AppLoader(size: 24)
               : Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (icon != null) ...[
-                Icon(
-                  icon,
-                  color: AppColors.iconOnPrimary,
-                  size: ResponsiveScaler.icon(20),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (icon != null) ...[
+                      Icon(
+                        icon,
+                        color: AppColors.iconOnPrimary,
+                        size: ResponsiveScaler.icon(20),
+                      ),
+                      SizedBox(width: ResponsiveScaler.width(8)),
+                    ],
+                    Text(
+                      text,
+                      style: GoogleFonts.poppins(
+                        fontSize: ResponsiveScaler.font(16),
+                        fontWeight: FontWeight.bold,
+                        color: textColor ?? AppColors.textOnPrimary,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(width: ResponsiveScaler.width(8)),
-              ],
-              Text(
-                text,
-                style: GoogleFonts.poppins(
-                  fontSize: ResponsiveScaler.font(16),
-                  fontWeight: FontWeight.bold,
-                  color: textColor ?? AppColors.textOnPrimary,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
 
-  void _handleStatusUpdate(String newStatus) async {
-    setState(() => isLoading = true);
-
-    // Simulación de llamada a API
-    await Future.delayed(const Duration(seconds: 2));
-
-    setState(() => isLoading = false);
-
-    AppLogger.log('Estado actualizado a: $newStatus', prefix: 'COCINA:');
-
-    // Muestra mensaje de confirmación
-    if (mounted) {
-      String message;
-      if (newStatus == 'preparing') {
-        message = 'Preparación iniciada';
-      } else if (newStatus == 'completed') {
-        message = 'Orden marcada como completada';
-      } else {
-        message = 'Orden devuelta a pendiente';
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message, style: GoogleFonts.poppins()),
-          backgroundColor: AppColors.success,
-        ),
-      );
-
-      // Llama al callback para actualizar el estado en el padre
-      widget.onStatusUpdate(newStatus);
-    }
-  }
-
-  void _handleCancelPreparation() {
+  void _handleCancelPreparation(BuildContext context) {
     CancelPreparationDialog.show(
       context,
-      onConfirm: () => _handleStatusUpdate('pending'),
+      onConfirm: () => onStatusUpdate('pending'),
     );
   }
 }

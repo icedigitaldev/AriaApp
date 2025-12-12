@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,6 +27,7 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
   Map<String, dynamic>? _table;
   Map<String, dynamic>? _order;
   bool _isLoading = true;
+  StreamSubscription? _orderSubscription;
 
   final OrdersService _ordersService = OrdersService();
   final TablesService _tablesService = TablesService();
@@ -36,11 +38,18 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is Map<String, dynamic> && _table == null) {
       _table = args;
-      _loadOrder();
+      _subscribeToOrder();
     }
   }
 
-  Future<void> _loadOrder() async {
+  @override
+  void dispose() {
+    _orderSubscription?.cancel();
+    super.dispose();
+  }
+
+  // Suscribe a cambios de la orden en tiempo real
+  void _subscribeToOrder() {
     if (_table == null) return;
 
     final gateway = IceStorage.instance.gateway;
@@ -49,43 +58,57 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
       return;
     }
 
-    try {
-      final businessId = CurrentUserAuth.instance.businessId;
-      final query = FirebaseFirestore.instance
-          .collection('orders')
-          .where('businessId', isEqualTo: businessId)
-          .where('tableId', isEqualTo: _table!['id'])
-          .where('status', isEqualTo: 'pending')
-          .orderBy('createdAt', descending: true)
-          .limit(1);
+    final businessId = CurrentUserAuth.instance.businessId;
 
-      final snapshot = await gateway.getDocuments(query: query);
+    // Busca órdenes activas (pending, preparing, completed)
+    final query = FirebaseFirestore.instance
+        .collection('orders')
+        .where('businessId', isEqualTo: businessId)
+        .where('tableId', isEqualTo: _table!['id'])
+        .where('status', whereIn: ['pending', 'preparing', 'completed'])
+        .orderBy('createdAt', descending: true)
+        .limit(1);
 
-      if (snapshot.docs.isNotEmpty) {
-        final doc = snapshot.docs.first;
-        final data = doc.data();
-        data['id'] = doc.id;
-        setState(() {
-          _order = data;
-          _isLoading = false;
-        });
-        AppLogger.log('Orden cargada: ${doc.id}', prefix: 'ORDEN:');
-      } else {
-        setState(() => _isLoading = false);
-      }
-    } catch (e) {
-      AppLogger.log('Error cargando orden: $e', prefix: 'ORDEN_ERROR:');
-      setState(() => _isLoading = false);
-    }
+    _orderSubscription = gateway
+        .streamDocuments(query: query)
+        .listen(
+          (snapshot) {
+            if (snapshot.docs.isNotEmpty) {
+              final doc = snapshot.docs.first;
+              final data = doc.data();
+              data['id'] = doc.id;
+              setState(() {
+                _order = data;
+                _isLoading = false;
+              });
+              AppLogger.log(
+                'Orden actualizada: ${doc.id} - Estado: ${data['status']}',
+                prefix: 'ORDEN:',
+              );
+            } else {
+              setState(() {
+                _order = null;
+                _isLoading = false;
+              });
+            }
+          },
+          onError: (e) {
+            AppLogger.log(
+              'Error en stream de orden: $e',
+              prefix: 'ORDEN_ERROR:',
+            );
+            setState(() => _isLoading = false);
+          },
+        );
   }
 
+  // Elimina un item de la orden
   Future<void> _removeItem(int index) async {
     if (_order == null) return;
 
     final items = List<dynamic>.from(_order!['items'] ?? []);
     if (index < 0 || index >= items.length) return;
 
-    // Obtener precio del item a eliminar
     final removedItem = items[index];
     final price = (removedItem['price'] as num?)?.toDouble() ?? 0.0;
     final quantity = removedItem['quantity'] ?? 1;
@@ -93,7 +116,6 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
 
     items.removeAt(index);
 
-    // Calcular nuevo total
     final currentTotal = (_order!['totalAmount'] as num?)?.toDouble() ?? 0.0;
     final newTotal = (currentTotal - amountToSubtract).clamp(
       0.0,
@@ -102,7 +124,7 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
 
     try {
       if (items.isEmpty) {
-        // Si no quedan items, cambiar estado de orden y liberar mesa
+        // Si no quedan items, cancela orden y libera mesa
         await _ordersService.changeOrderStatus(_order!['id'], 'cancelled');
         await _tablesService.changeTableStatus(_table!['id'], 'available');
 
@@ -110,13 +132,12 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
           AppRouter.navigateToHome(context);
         }
       } else {
-        // Actualizar orden con los items restantes
         await _ordersService.updateOrderItems(
           _order!['id'],
           items.map((e) => Map<String, dynamic>.from(e)).toList(),
         );
 
-        // Actualizar total
+        // Actualiza el total
         final gateway = IceStorage.instance.gateway;
         if (gateway != null) {
           final docRef = FirebaseFirestore.instance
@@ -144,6 +165,48 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     Navigator.pushNamed(context, '/new-order', arguments: _table);
   }
 
+  // Obtiene color según el estado de la orden
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'pending':
+        return AppColors.warning;
+      case 'preparing':
+        return AppColors.info;
+      case 'completed':
+        return AppColors.success;
+      default:
+        return AppColors.textMuted;
+    }
+  }
+
+  // Obtiene texto del estado en español
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'pending':
+        return 'PENDIENTE';
+      case 'preparing':
+        return 'EN PREPARACIÓN';
+      case 'completed':
+        return 'LISTO PARA SERVIR';
+      default:
+        return status.toUpperCase();
+    }
+  }
+
+  // Obtiene icono según el estado
+  IconData _getStatusIcon(String status) {
+    switch (status) {
+      case 'pending':
+        return Icons.schedule;
+      case 'preparing':
+        return Icons.restaurant;
+      case 'completed':
+        return Icons.check_circle;
+      default:
+        return Icons.info;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     AppThemes.init(context);
@@ -157,6 +220,11 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
           child: Column(
             children: [
               _buildHeader(),
+              // Banner de estado cuando la orden está en preparación o lista
+              if (_order != null &&
+                  (_order!['status'] == 'preparing' ||
+                      _order!['status'] == 'completed'))
+                _buildStatusBanner(_order!['status']),
               Expanded(
                 child: _isLoading
                     ? Center(child: AppLoader(size: ResponsiveScaler.width(40)))
@@ -172,9 +240,68 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     );
   }
 
+  // Banner que muestra el estado actual de la orden
+  Widget _buildStatusBanner(String status) {
+    final color = _getStatusColor(status);
+    final text = _getStatusText(status);
+    final icon = _getStatusIcon(status);
+
+    return Container(
+      margin: ResponsiveScaler.margin(
+        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      ),
+      padding: ResponsiveScaler.padding(
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: ResponsiveScaler.icon(24)),
+          SizedBox(width: ResponsiveScaler.width(12)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  text,
+                  style: GoogleFonts.poppins(
+                    fontSize: ResponsiveScaler.font(14),
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                if (status == 'completed')
+                  Text(
+                    'El pedido está listo para ser entregado al cliente',
+                    style: GoogleFonts.poppins(
+                      fontSize: ResponsiveScaler.font(12),
+                      color: color.withOpacity(0.8),
+                    ),
+                  ),
+                if (status == 'preparing')
+                  Text(
+                    'La cocina está preparando el pedido',
+                    style: GoogleFonts.poppins(
+                      fontSize: ResponsiveScaler.font(12),
+                      color: color.withOpacity(0.8),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     final items = _order?['items'] as List<dynamic>? ?? [];
     final status = _order?['status']?.toString() ?? 'pending';
+    final statusColor = _getStatusColor(status);
 
     return Container(
       padding: ResponsiveScaler.padding(
@@ -234,18 +361,29 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
                           ),
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.warning.withOpacity(0.15),
+                          color: statusColor.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(
                             ResponsiveScaler.radius(8),
                           ),
                         ),
-                        child: Text(
-                          status.toUpperCase(),
-                          style: GoogleFonts.poppins(
-                            fontSize: ResponsiveScaler.font(10),
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.warning,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getStatusIcon(status),
+                              size: ResponsiveScaler.icon(12),
+                              color: statusColor,
+                            ),
+                            SizedBox(width: ResponsiveScaler.width(4)),
+                            Text(
+                              _getStatusText(status),
+                              style: GoogleFonts.poppins(
+                                fontSize: ResponsiveScaler.font(10),
+                                fontWeight: FontWeight.bold,
+                                color: statusColor,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -262,7 +400,8 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
               ],
             ),
           ),
-          if (_order != null)
+          // Solo muestra botón de agregar si la orden está pendiente
+          if (_order != null && _order!['status'] == 'pending')
             GestureDetector(
               onTap: _navigateToAddItems,
               child: Container(
@@ -345,22 +484,29 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
 
   Widget _buildOrderContent() {
     final items = _order!['items'] as List<dynamic>? ?? [];
+    final status = _order!['status']?.toString() ?? 'pending';
+    // Solo permite eliminar items si la orden está pendiente
+    final canDeleteItems = status == 'pending';
 
     return ListView.builder(
       padding: ResponsiveScaler.padding(
         const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       ),
-      itemCount: items.length + 1, // +1 para el espaciado final
+      itemCount: items.length + 1,
       itemBuilder: (context, index) {
         if (index == items.length) {
           return SizedBox(height: ResponsiveScaler.height(80));
         }
-        return _buildOrderItem(items[index] as Map<String, dynamic>, index);
+        return _buildOrderItem(
+          items[index] as Map<String, dynamic>,
+          index,
+          canDeleteItems,
+        );
       },
     );
   }
 
-  Widget _buildOrderItem(Map<String, dynamic> item, int index) {
+  Widget _buildOrderItem(Map<String, dynamic> item, int index, bool canDelete) {
     final variantName = item['variantName'];
     final customerName = item['customerName'];
     final price = (item['price'] as num?)?.toDouble() ?? 0.0;
@@ -369,6 +515,106 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     final hasVariant = variantName != null && variantName.toString().isNotEmpty;
     final hasCustomer =
         customerName != null && customerName.toString().isNotEmpty;
+
+    final child = Container(
+      margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 10)),
+      padding: ResponsiveScaler.padding(
+        const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: ResponsiveScaler.width(36),
+            height: ResponsiveScaler.height(36),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(10)),
+            ),
+            child: Center(
+              child: Text(
+                'x$quantity',
+                style: GoogleFonts.poppins(
+                  fontSize: ResponsiveScaler.font(14),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: ResponsiveScaler.width(12)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['name'] ?? '',
+                  style: GoogleFonts.poppins(
+                    fontSize: ResponsiveScaler.font(15),
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                if (hasVariant) ...[
+                  SizedBox(height: ResponsiveScaler.height(2)),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.local_offer,
+                        size: ResponsiveScaler.icon(12),
+                        color: AppColors.primary,
+                      ),
+                      SizedBox(width: ResponsiveScaler.width(4)),
+                      Text(
+                        variantName.toString(),
+                        style: GoogleFonts.poppins(
+                          fontSize: ResponsiveScaler.font(12),
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                if (hasCustomer) ...[
+                  SizedBox(height: ResponsiveScaler.height(2)),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        size: ResponsiveScaler.icon(12),
+                        color: AppColors.textMuted,
+                      ),
+                      SizedBox(width: ResponsiveScaler.width(4)),
+                      Text(
+                        customerName.toString(),
+                        style: GoogleFonts.poppins(
+                          fontSize: ResponsiveScaler.font(12),
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Text(
+            'S/ ${subtotal.toStringAsFixed(2)}',
+            style: GoogleFonts.poppins(
+              fontSize: ResponsiveScaler.font(15),
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // Solo permite deslizar para eliminar si la orden está pendiente
+    if (!canDelete) return child;
 
     return Dismissible(
       key: Key('item-$index-${item['name']}'),
@@ -395,104 +641,7 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
         );
       },
       onDismissed: (direction) => _removeItem(index),
-      child: Container(
-        margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 10)),
-        padding: ResponsiveScaler.padding(
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: ResponsiveScaler.width(36),
-              height: ResponsiveScaler.height(36),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(
-                  ResponsiveScaler.radius(10),
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  'x$quantity',
-                  style: GoogleFonts.poppins(
-                    fontSize: ResponsiveScaler.font(14),
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: ResponsiveScaler.width(12)),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item['name'] ?? '',
-                    style: GoogleFonts.poppins(
-                      fontSize: ResponsiveScaler.font(15),
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  if (hasVariant) ...[
-                    SizedBox(height: ResponsiveScaler.height(2)),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.local_offer,
-                          size: ResponsiveScaler.icon(12),
-                          color: AppColors.primary,
-                        ),
-                        SizedBox(width: ResponsiveScaler.width(4)),
-                        Text(
-                          variantName.toString(),
-                          style: GoogleFonts.poppins(
-                            fontSize: ResponsiveScaler.font(12),
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  if (hasCustomer) ...[
-                    SizedBox(height: ResponsiveScaler.height(2)),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.person,
-                          size: ResponsiveScaler.icon(12),
-                          color: AppColors.textMuted,
-                        ),
-                        SizedBox(width: ResponsiveScaler.width(4)),
-                        Text(
-                          customerName.toString(),
-                          style: GoogleFonts.poppins(
-                            fontSize: ResponsiveScaler.font(12),
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            Text(
-              'S/ ${subtotal.toStringAsFixed(2)}',
-              style: GoogleFonts.poppins(
-                fontSize: ResponsiveScaler.font(15),
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: child,
     );
   }
 
@@ -540,7 +689,6 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
               foreground: AppGradients.totalAmountText,
             ),
           ),
-          // TODO: Agregar opción para imprimir cuenta
         ],
       ),
     );

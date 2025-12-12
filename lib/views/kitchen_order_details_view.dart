@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:refena_flutter/refena_flutter.dart';
 import '../components/composite/transparent_app_bar.dart';
+import '../components/ui/app_snackbar.dart';
 import '../design/colors/app_colors.dart';
 import '../design/responsive/responsive_scaler.dart';
 import '../design/themes/app_themes.dart';
@@ -9,6 +11,8 @@ import '../features/orders/components/composite/order_items_list.dart';
 import '../features/orders/components/composite/kitchen_action_buttons.dart';
 import '../features/orders/components/ui/order_status_badge.dart';
 import '../features/orders/components/ui/time_indicator.dart';
+import '../features/orders/controllers/orders_controller.dart';
+import '../features/orders/services/orders_service.dart';
 import '../utils/app_logger.dart';
 
 class KitchenOrderDetailsView extends StatefulWidget {
@@ -20,9 +24,10 @@ class KitchenOrderDetailsView extends StatefulWidget {
 }
 
 class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
-  Map<int, bool> itemStatus = {};
+  Map<int, bool> _itemStatus = {};
   String? _currentOrderStatus;
   bool _isInitialized = false;
+  bool _isUpdatingStatus = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,128 +35,177 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
 
     final order =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+
     if (order == null) {
       return const Scaffold(
         body: Center(child: Text('No se encontró información de la orden')),
       );
     }
 
+    // Inicializa el estado local de la orden
     if (!_isInitialized) {
       _currentOrderStatus = order['status'];
-      // Si la orden ya está en preparación o completada, marca todos los items.
       if (_currentOrderStatus == 'preparing' ||
           _currentOrderStatus == 'completed') {
         final items = order['items'] as List;
         for (var i = 0; i < items.length; i++) {
-          itemStatus[i] = true;
+          _itemStatus[i] = true;
         }
       }
       _isInitialized = true;
     }
 
-    // Verifica si todos los items están completados
     final allItemsCompleted = order['items'].asMap().entries.every(
-      (e) => itemStatus[e.key] ?? false,
+      (e) => _itemStatus[e.key] ?? false,
     );
 
     final isOrderFinalized = _currentOrderStatus == 'completed';
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: TransparentAppBar(backgroundColor: AppColors.appBarBackground),
-      body: Container(
-        color: AppColors.background,
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header con componente compartido
-              OrderHeader(
-                title: 'Orden #${order['id']}',
-                subtitle: 'Mesa ${order['tableNumber']} • ${order['waiter']}',
-                onBack: () => Navigator.pop(context),
-                actions: [
-                  OrderStatusBadge(
-                    status: _currentOrderStatus!,
-                    compact: false,
-                  ),
-                ],
-              ),
+    return Consumer(
+      builder: (context, ref) {
+        final ordersController = ref.notifier(ordersControllerProvider);
 
-              // Información de tiempo
-              _buildTimeInfo(order),
-
-              // Lista de items con componente compartido
-              Expanded(
-                child: Padding(
-                  padding: ResponsiveScaler.padding(
-                    const EdgeInsets.symmetric(horizontal: 20),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: ResponsiveScaler.padding(
-                          const EdgeInsets.only(left: 4.0, bottom: 16.0),
-                        ),
-                        child: Text(
-                          'Elementos del pedido',
-                          style: GoogleFonts.poppins(
-                            fontSize: ResponsiveScaler.font(20),
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: OrderItemsList(
-                          items: order['items'],
-                          showCheckboxes: true,
-                          showNotes: true,
-                          itemStatus: itemStatus,
-                          orderStatus: _currentOrderStatus!,
-                          onItemChecked: (index, isChecked) {
-                            // Bloquea la interacción si la orden ya está completada
-                            if (isOrderFinalized) return;
-
-                            setState(() => itemStatus[index] = isChecked);
-                            AppLogger.log(
-                              'Item ${isChecked ? "marcado" : "desmarcado"}: ${order['items'][index]['name']}',
-                              prefix: 'COCINA:',
-                            );
-                          },
-                        ),
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: TransparentAppBar(
+            backgroundColor: AppColors.appBarBackground,
+          ),
+          body: Container(
+            color: AppColors.background,
+            child: SafeArea(
+              child: Column(
+                children: [
+                  OrderHeader(
+                    title:
+                        'Orden #${order['orderNumber'] != null ? OrdersService.formatOrderNumber(order['orderNumber']) : order['id'].toString().substring(0, 6)}',
+                    subtitle:
+                        'Mesa ${order['tableNumber'] ?? '--'} • ${order['staffName'] ?? 'Sin asignar'}',
+                    onBack: () => Navigator.pop(context),
+                    actions: [
+                      OrderStatusBadge(
+                        status: _currentOrderStatus!,
+                        compact: false,
                       ),
                     ],
                   ),
-                ),
-              ),
 
-              // Botones de acción usando el nuevo componente
-              if (!isOrderFinalized)
-                KitchenActionButtons(
-                  orderStatus: _currentOrderStatus!,
-                  allItemsCompleted: allItemsCompleted,
-                  onStatusUpdate: (newStatus) {
-                    setState(() {
-                      _currentOrderStatus = newStatus;
-                      // Si se comienza la preparación, marca todos los items
-                      if (newStatus == 'preparing') {
-                        final items = order['items'] as List;
-                        for (var i = 0; i < items.length; i++) {
-                          itemStatus[i] = true;
-                        }
-                      }
-                    });
-                  },
-                ),
-            ],
+                  _buildTimeInfo(order),
+
+                  Expanded(
+                    child: Padding(
+                      padding: ResponsiveScaler.padding(
+                        const EdgeInsets.symmetric(horizontal: 20),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: ResponsiveScaler.padding(
+                              const EdgeInsets.only(left: 4.0, bottom: 16.0),
+                            ),
+                            child: Text(
+                              'Elementos del pedido',
+                              style: GoogleFonts.poppins(
+                                fontSize: ResponsiveScaler.font(20),
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: OrderItemsList(
+                              items: (order['items'] as List)
+                                  .map((item) => item as Map<String, dynamic>)
+                                  .toList(),
+                              showCheckboxes: true,
+                              showNotes: true,
+                              itemStatus: _itemStatus,
+                              orderStatus: _currentOrderStatus!,
+                              onItemChecked: (index, isChecked) {
+                                if (isOrderFinalized) return;
+                                setState(() => _itemStatus[index] = isChecked);
+                                AppLogger.log(
+                                  'Item ${isChecked ? "marcado" : "desmarcado"}: ${order['items'][index]['name']}',
+                                  prefix: 'COCINA:',
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  if (!isOrderFinalized)
+                    KitchenActionButtons(
+                      orderStatus: _currentOrderStatus!,
+                      allItemsCompleted: allItemsCompleted,
+                      isLoading: _isUpdatingStatus,
+                      onStatusUpdate: (newStatus) => _handleStatusUpdate(
+                        ordersController,
+                        order['id'],
+                        newStatus,
+                        order['items'] as List,
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
+  Future<void> _handleStatusUpdate(
+    OrdersController controller,
+    String orderId,
+    String newStatus,
+    List items,
+  ) async {
+    setState(() => _isUpdatingStatus = true);
+
+    try {
+      await controller.changeStatus(orderId, newStatus);
+
+      setState(() {
+        _currentOrderStatus = newStatus;
+        if (newStatus == 'preparing') {
+          for (var i = 0; i < items.length; i++) {
+            _itemStatus[i] = true;
+          }
+        }
+      });
+    } catch (e) {
+      AppLogger.log('Error actualizando estado: $e', prefix: 'COCINA_ERROR:');
+      if (mounted) {
+        AppSnackbar.error(context, 'Error al actualizar el estado');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUpdatingStatus = false);
+      }
+    }
+  }
+
   Widget _buildTimeInfo(Map<String, dynamic> order) {
+    DateTime? createdAt;
+    if (order['createdAt'] != null) {
+      final timestamp = order['createdAt'];
+      if (timestamp is DateTime) {
+        createdAt = timestamp;
+      } else if (timestamp.toDate != null) {
+        createdAt = timestamp.toDate();
+      }
+    }
+
+    String formattedTime = '--:--';
+    if (createdAt != null) {
+      final hour = createdAt.hour.toString().padLeft(2, '0');
+      final minute = createdAt.minute.toString().padLeft(2, '0');
+      formattedTime = '$hour:$minute';
+    }
+
     return Container(
       margin: ResponsiveScaler.margin(const EdgeInsets.all(20)),
       padding: ResponsiveScaler.padding(const EdgeInsets.all(16)),
@@ -165,7 +219,7 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
           _buildInfoItem(
             icon: Icons.access_time,
             label: 'Hora de pedido',
-            value: order['time'],
+            value: formattedTime,
           ),
           Container(
             height: ResponsiveScaler.height(40),
@@ -187,11 +241,21 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
                   color: AppColors.textMuted,
                 ),
               ),
-              TimeIndicator(
-                orderTime: order['orderTime'],
-                showIcon: false,
-                compact: true,
-              ),
+              if (createdAt != null)
+                TimeIndicator(
+                  orderTime: createdAt,
+                  showIcon: false,
+                  compact: true,
+                )
+              else
+                Text(
+                  '--:--',
+                  style: GoogleFonts.poppins(
+                    fontSize: ResponsiveScaler.font(14),
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
             ],
           ),
         ],

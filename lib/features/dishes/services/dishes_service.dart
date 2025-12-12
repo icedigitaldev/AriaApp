@@ -3,7 +3,7 @@ import 'package:ice_storage/ice_storage.dart';
 import '../../../auth/current_user.dart';
 import '../../../utils/app_logger.dart';
 
-class MenuService {
+class DishesService {
   // Obtiene el businessId del usuario autenticado
   String? get _businessId => CurrentUserAuth.instance.businessId;
 
@@ -16,12 +16,12 @@ class MenuService {
     final gateway = _gateway;
 
     if (businessId == null || businessId.isEmpty) {
-      AppLogger.log('BusinessId no disponible', prefix: 'MENU_ERROR:');
+      AppLogger.log('BusinessId no disponible', prefix: 'DISHES_ERROR:');
       return Stream.value([]);
     }
 
     if (gateway == null) {
-      AppLogger.log('Gateway no inicializado', prefix: 'MENU_ERROR:');
+      AppLogger.log('Gateway no inicializado', prefix: 'DISHES_ERROR:');
       return Stream.value([]);
     }
 
@@ -39,7 +39,7 @@ class MenuService {
 
       AppLogger.log(
         'Platillos actualizados: ${dishes.length}',
-        prefix: 'MENU:',
+        prefix: 'DISHES:',
       );
       return dishes;
     });
@@ -103,7 +103,7 @@ class MenuService {
       categories.sort();
       return categories;
     } catch (e) {
-      AppLogger.log('Error obteniendo categorías: $e', prefix: 'MENU_ERROR:');
+      AppLogger.log('Error obteniendo categorías: $e', prefix: 'DISHES_ERROR:');
       return [];
     }
   }
@@ -126,7 +126,7 @@ class MenuService {
       data['id'] = doc.id;
       return data;
     } catch (e) {
-      AppLogger.log('Error obteniendo platillo: $e', prefix: 'MENU_ERROR:');
+      AppLogger.log('Error obteniendo platillo: $e', prefix: 'DISHES_ERROR:');
       return null;
     }
   }

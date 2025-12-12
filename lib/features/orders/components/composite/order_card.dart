@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../design/colors/app_colors.dart';
 import '../../../../design/colors/status_colors.dart';
 import '../../../../design/responsive/responsive_scaler.dart';
+import '../../services/orders_service.dart';
 import '../ui/order_status_badge.dart';
 import '../ui/order_item_tile.dart';
 import '../ui/time_indicator.dart';
@@ -29,25 +30,43 @@ class OrderCard extends StatelessWidget {
 
   Color _getStatusBorderColor(String status) {
     switch (status) {
-      case 'pending': return StatusColors.pendingBorder;
-      case 'preparing': return StatusColors.preparingBorder;
-      case 'ready': return StatusColors.readyBorder;
-      default: return StatusColors.unknownBorder;
+      case 'pending':
+        return StatusColors.pendingBorder;
+      case 'preparing':
+        return StatusColors.preparingBorder;
+      case 'ready':
+        return StatusColors.readyBorder;
+      default:
+        return StatusColors.unknownBorder;
     }
   }
 
   Color _getStatusBackgroundColor(String status) {
     switch (status) {
-      case 'pending': return StatusColors.pendingBackground;
-      case 'preparing': return StatusColors.preparingBackground;
-      case 'ready': return StatusColors.readyBackground;
-      default: return StatusColors.unknownBackground;
+      case 'pending':
+        return StatusColors.pendingBackground;
+      case 'preparing':
+        return StatusColors.preparingBackground;
+      case 'ready':
+        return StatusColors.readyBackground;
+      default:
+        return StatusColors.unknownBackground;
     }
+  }
+
+  // Convierte el Timestamp de Firebase a DateTime
+  DateTime? _getOrderTime(dynamic timestamp) {
+    if (timestamp == null) return null;
+    if (timestamp is DateTime) return timestamp;
+    // Timestamp de Firebase tiene método toDate()
+    if (timestamp.toDate != null) {
+      return timestamp.toDate();
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -95,7 +114,9 @@ class OrderCard extends StatelessWidget {
               if (showTableNumber) ...[
                 SizedBox(width: ResponsiveScaler.width(12)),
                 Text(
-                  'Mesa ${order['tableNumber']}',
+                  order['orderNumber'] != null
+                      ? '#${OrdersService.formatOrderNumber(order['orderNumber'])} - Mesa ${order['tableNumber']}'
+                      : 'Mesa ${order['tableNumber']}',
                   style: GoogleFonts.poppins(
                     fontSize: ResponsiveScaler.font(18),
                     fontWeight: FontWeight.bold,
@@ -105,11 +126,12 @@ class OrderCard extends StatelessWidget {
               ],
             ],
           ),
-          if (showTimer && order['orderTime'] != null)
-            TimeIndicator(
-              orderTime: order['orderTime'],
-              displayTime: order['time'],
-              compact: true,
+          if (showTimer && _getOrderTime(order['createdAt']) != null)
+            Builder(
+              builder: (context) {
+                final orderTime = _getOrderTime(order['createdAt'])!;
+                return TimeIndicator(orderTime: orderTime, compact: true);
+              },
             ),
         ],
       ),
@@ -126,7 +148,7 @@ class OrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (showWaiterInfo && order['waiter'] != null)
+          if (showWaiterInfo && order['staffName'] != null)
             Row(
               children: [
                 Icon(
@@ -136,7 +158,7 @@ class OrderCard extends StatelessWidget {
                 ),
                 SizedBox(width: ResponsiveScaler.width(4)),
                 Text(
-                  order['waiter'],
+                  order['staffName'],
                   style: GoogleFonts.poppins(
                     fontSize: ResponsiveScaler.font(14),
                     color: AppColors.textMuted,
@@ -147,12 +169,9 @@ class OrderCard extends StatelessWidget {
           if (showWaiterInfo && showItems)
             SizedBox(height: ResponsiveScaler.height(12)),
           if (showItems) ...[
-            ...itemsToShow.map<Widget>(
-                  (item) => OrderItemTile(
-                item: item,
-                compact: true,
-              ),
-            ).toList(),
+            ...itemsToShow
+                .map<Widget>((item) => OrderItemTile(item: item, compact: true))
+                .toList(),
             if (remainingItems > 0)
               Container(
                 padding: ResponsiveScaler.padding(

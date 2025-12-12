@@ -165,7 +165,6 @@ class _CustomerNameSheetState extends State<CustomerNameSheet> {
             TextField(
               controller: _customerNameController,
               textCapitalization: TextCapitalization.words,
-              autofocus: true,
               style: GoogleFonts.poppins(
                 fontSize: ResponsiveScaler.font(16),
                 color: AppColors.textPrimary,
@@ -193,64 +192,31 @@ class _CustomerNameSheetState extends State<CustomerNameSheet> {
             ),
             SizedBox(height: ResponsiveScaler.height(24)),
 
-            // Botones
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: ResponsiveScaler.padding(
-                        const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundGrey,
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveScaler.radius(12),
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Cancelar',
-                          style: GoogleFonts.poppins(
-                            fontSize: ResponsiveScaler.font(15),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ),
+            // Botón agregar pedido
+            GestureDetector(
+              onTap: _handleAddToOrder,
+              child: Container(
+                width: double.infinity,
+                padding: ResponsiveScaler.padding(
+                  const EdgeInsets.symmetric(vertical: 14),
+                ),
+                decoration: BoxDecoration(
+                  gradient: AppGradients.primaryButton,
+                  borderRadius: BorderRadius.circular(
+                    ResponsiveScaler.radius(12),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'Agregar al pedido',
+                    style: GoogleFonts.poppins(
+                      fontSize: ResponsiveScaler.font(15),
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textOnPrimary,
                     ),
                   ),
                 ),
-                SizedBox(width: ResponsiveScaler.width(12)),
-                Expanded(
-                  flex: 2,
-                  child: GestureDetector(
-                    onTap: _handleAddToOrder,
-                    child: Container(
-                      padding: ResponsiveScaler.padding(
-                        const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: AppGradients.primaryButton,
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveScaler.radius(12),
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Agregar al pedido',
-                          style: GoogleFonts.poppins(
-                            fontSize: ResponsiveScaler.font(15),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textOnPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),

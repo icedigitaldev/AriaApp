@@ -8,7 +8,7 @@ import '../components/ui/app_loader.dart';
 import '../design/colors/app_colors.dart';
 import '../design/responsive/responsive_scaler.dart';
 import '../design/themes/app_themes.dart';
-import '../features/menu/controllers/menu_controller.dart';
+import '../features/dishes/controllers/dishes_controller.dart';
 import '../features/orders/components/composite/order_header.dart';
 import '../features/orders/components/composite/order_filters_bar.dart';
 import '../features/orders/components/composite/dish_grid.dart';
@@ -39,7 +39,7 @@ class _NewOrderViewState extends State<NewOrderView> {
     super.initState();
     _pageController = PageController(initialPage: 0);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.notifier(menuControllerProvider).initialize();
+      context.notifier(dishesControllerProvider).initialize();
     });
   }
 
@@ -284,8 +284,8 @@ class _NewOrderViewState extends State<NewOrderView> {
 
     return Consumer(
       builder: (context, ref) {
-        final menuState = ref.watch(menuControllerProvider);
-        final menuController = ref.notifier(menuControllerProvider);
+        final menuState = ref.watch(dishesControllerProvider);
+        final dishesController = ref.notifier(dishesControllerProvider);
 
         final categoryFilters = <Map<String, dynamic>>[
           {'id': 'all', 'label': 'Todos', 'count': menuState.dishes.length},
@@ -371,7 +371,7 @@ class _NewOrderViewState extends State<NewOrderView> {
                   OrderFiltersBar(
                     selectedFilter: menuState.selectedCategory,
                     onFilterChanged: (category) {
-                      menuController.selectCategory(category);
+                      dishesController.selectCategory(category);
                       final pageIndex = categoryIds.indexOf(category);
                       if (pageIndex != -1 && _pageController.hasClients) {
                         _pageController.animateToPage(
@@ -410,7 +410,7 @@ class _NewOrderViewState extends State<NewOrderView> {
                             controller: _pageController,
                             onPageChanged: (index) {
                               final category = categoryIds[index];
-                              menuController.selectCategory(category);
+                              dishesController.selectCategory(category);
                             },
                             itemCount: categoryIds.length,
                             itemBuilder: (context, pageIndex) {

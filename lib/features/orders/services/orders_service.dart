@@ -92,42 +92,68 @@ class OrdersService {
     }
   }
 
-  // Crea una nueva orden
+  // Crea una nueva orden con número secuencial
   Future<String?> createOrder(Map<String, dynamic> orderData) async {
     final businessId = _businessId;
-    final gateway = _gateway;
 
     if (businessId == null || businessId.isEmpty) {
       AppLogger.log('BusinessId no disponible', prefix: 'ORDERS_ERROR:');
       return null;
     }
 
-    if (gateway == null) {
-      AppLogger.log('Gateway no inicializado', prefix: 'ORDERS_ERROR:');
-      return null;
-    }
-
     try {
-      // Generar nuevo documento con ID automático
-      final docRef = FirebaseFirestore.instance.collection('orders').doc();
+      final firestore = FirebaseFirestore.instance;
+      final orderDocRef = firestore.collection('orders').doc();
+      final counterDocRef = firestore
+          .collection('businesses')
+          .doc(businessId)
+          .collection('counters')
+          .doc('data');
 
-      await gateway.setDocument(
-        docRef: docRef,
-        data: {
+      // Transacción atómica para incrementar contador y crear orden
+      String? orderId;
+      await firestore.runTransaction((transaction) async {
+        // Leer contador actual
+        final counterSnapshot = await transaction.get(counterDocRef);
+        int currentOrderCount = 0;
+
+        if (counterSnapshot.exists) {
+          final data = counterSnapshot.data();
+          currentOrderCount = (data?['orders'] as int?) ?? 0;
+        }
+
+        // Incrementar contador
+        final newOrderNumber = currentOrderCount + 1;
+
+        // Actualizar contador
+        transaction.set(counterDocRef, {
+          'orders': newOrderNumber,
+        }, SetOptions(merge: true));
+
+        // Crear orden con el número secuencial
+        transaction.set(orderDocRef, {
           ...orderData,
           'businessId': businessId,
+          'orderNumber': newOrderNumber,
           'status': 'pending',
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
-        },
-      );
+        });
 
-      AppLogger.log('Orden creada: ${docRef.id}', prefix: 'ORDERS:');
-      return docRef.id;
+        orderId = orderDocRef.id;
+      });
+
+      AppLogger.log('Orden creada: $orderId', prefix: 'ORDERS:');
+      return orderId;
     } catch (e) {
       AppLogger.log('Error creando orden: $e', prefix: 'ORDERS_ERROR:');
       return null;
     }
+  }
+
+  // Formatea el número de orden con ceros a la izquierda
+  static String formatOrderNumber(int number) {
+    return number.toString().padLeft(3, '0');
   }
 
   // Actualiza los items de una orden

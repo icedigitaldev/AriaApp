@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'package:refena_flutter/refena_flutter.dart';
-import '../states/menu_state.dart';
-import '../services/menu_service.dart';
+import '../states/dishes_state.dart';
+import '../services/dishes_service.dart';
 import '../../../utils/app_logger.dart';
 
-class MenuController extends Notifier<MenuState> {
-  final MenuService _menuService = MenuService();
+class DishesController extends Notifier<DishesState> {
+  final DishesService _dishesService = DishesService();
   StreamSubscription? _dishesSubscription;
   bool _initialized = false;
 
   @override
-  MenuState init() => const MenuState();
+  DishesState init() => const DishesState();
 
   // Inicializa y suscribe a los platos
   void initialize() {
@@ -19,7 +19,7 @@ class MenuController extends Notifier<MenuState> {
 
     state = state.copyWith(isLoading: true);
 
-    _dishesSubscription = _menuService.streamDishes().listen(
+    _dishesSubscription = _dishesService.streamDishes().listen(
       (dishes) {
         // Extraer categorías únicas de los platos
         final categories = dishes
@@ -37,13 +37,16 @@ class MenuController extends Notifier<MenuState> {
         );
 
         AppLogger.log(
-          'Menú cargado: ${dishes.length} platos, ${categories.length} categorías',
-          prefix: 'MENU:',
+          'Platillos cargados: ${dishes.length} platos, ${categories.length} categorías',
+          prefix: 'DISHES:',
         );
       },
       onError: (error) {
         state = state.copyWith(isLoading: false, error: error.toString());
-        AppLogger.log('Error cargando menú: $error', prefix: 'MENU_ERROR:');
+        AppLogger.log(
+          'Error cargando platillos: $error',
+          prefix: 'DISHES_ERROR:',
+        );
       },
     );
   }
@@ -57,7 +60,7 @@ class MenuController extends Notifier<MenuState> {
   void reinitialize() {
     _dishesSubscription?.cancel();
     _initialized = false;
-    state = const MenuState();
+    state = const DishesState();
     initialize();
   }
 
@@ -69,6 +72,7 @@ class MenuController extends Notifier<MenuState> {
 }
 
 // Provider global del controlador
-final menuControllerProvider = NotifierProvider<MenuController, MenuState>(
-  (ref) => MenuController(),
-);
+final dishesControllerProvider =
+    NotifierProvider<DishesController, DishesState>(
+      (ref) => DishesController(),
+    );

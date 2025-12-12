@@ -8,6 +8,8 @@ import '../features/tables/components/composite/restaurant_header.dart';
 import '../features/tables/components/composite/floor_selector.dart';
 import '../features/tables/components/composite/tables_grid.dart';
 import '../features/tables/controllers/tables_controller.dart';
+import '../auth/current_user.dart';
+import '../utils/app_logger.dart';
 
 class TablesView extends StatefulWidget {
   const TablesView({Key? key}) : super(key: key);
@@ -45,6 +47,16 @@ class _TablesViewState extends State<TablesView> {
                   RestaurantHeader(
                     onProfileTap: () {
                       // Navegar al perfil o cerrar sesión
+                      AppLogger.log('Perfil presionado', prefix: 'MESAS:');
+                    },
+                    avatarUrl:
+                        (CurrentUserAuth.instance.imageUrl != null &&
+                            CurrentUserAuth.instance.imageUrl!.isNotEmpty)
+                        ? CurrentUserAuth.instance.imageUrl
+                        : CurrentUserAuth.instance.avatarUrl,
+                    onHistoryTap: () {
+                      AppLogger.log('Historial de mesas', prefix: 'MESAS:');
+                      Navigator.pushNamed(context, '/kitchen-history');
                     },
                   ),
                   FloorSelector(

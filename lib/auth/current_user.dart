@@ -33,6 +33,10 @@ class CurrentUserAuth {
   String? get avatarUrl =>
       IceStorage.instance.auth.customFields.value['avatarUrl'];
 
+  // URL de la imagen de perfil
+  String? get imageUrl =>
+      IceStorage.instance.auth.customFields.value['imageUrl'];
+
   // Todos los campos personalizados
   Map<String, dynamic> get customFields =>
       IceStorage.instance.auth.customFields.value;
