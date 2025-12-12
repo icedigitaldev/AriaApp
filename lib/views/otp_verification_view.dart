@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:refena_flutter/refena_flutter.dart';
+import '../components/composite/transparent_app_bar.dart';
 import '../components/ui/app_loader.dart';
 import '../components/ui/app_snackbar.dart';
+import '../components/ui/transparent_video_player.dart';
 import '../design/colors/app_colors.dart';
 import '../design/colors/app_gradients.dart';
 import '../design/responsive/responsive_scaler.dart';
-import '../features/authentication/components/composite/auth_header.dart';
 import '../features/authentication/controllers/auth_controller.dart';
 import '../router/app_router.dart';
 
@@ -30,6 +31,8 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
   late AnimationController _shakeController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _shakeAnimation;
+
+  bool isKeyboardVisible = false;
 
   @override
   void initState() {
@@ -135,8 +138,15 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
     }
   }
 
+  void _handleBack(AuthController authController) {
+    authController.goBack();
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final staffName = args?['staffName'] ?? '';
@@ -152,12 +162,15 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
           child: Scaffold(
             backgroundColor: AppColors.background,
             resizeToAvoidBottomInset: true,
+            appBar: TransparentAppBar(
+              showBackButton: true,
+              onBack: () => _handleBack(authController),
+            ),
             body: SafeArea(
               child: FadeTransition(
                 opacity: _fadeAnimation,
                 child: Column(
                   children: [
-                    _buildTopBar(authController),
                     Expanded(
                       child: SingleChildScrollView(
                         physics: const BouncingScrollPhysics(),
@@ -168,20 +181,133 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              SizedBox(height: ResponsiveScaler.height(40)),
-                              AuthHeader(
-                                icon: Icons.lock_rounded,
-                                title: staffName.isNotEmpty
+                              SizedBox(
+                                height: ResponsiveScaler.height(
+                                  isKeyboardVisible ? 20 : 40,
+                                ),
+                              ),
+
+                              // Video/Animación estilo phone_auth
+                              Center(
+                                child: Container(
+                                  width: ResponsiveScaler.width(
+                                    isKeyboardVisible ? 100 : 140,
+                                  ),
+                                  height: ResponsiveScaler.height(
+                                    isKeyboardVisible ? 100 : 140,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(
+                                      ResponsiveScaler.radius(28),
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.shadowPurple
+                                            .withOpacity(0.2),
+                                        blurRadius: 30,
+                                        offset: Offset(
+                                          0,
+                                          ResponsiveScaler.height(15),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(
+                                        ResponsiveScaler.radius(28),
+                                      ),
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(
+                                          ResponsiveScaler.radius(25),
+                                        ),
+                                      ),
+                                      child: TransparentVideoPlayer(
+                                        assetPath: 'assets/media/aria.webm',
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        borderRadius: BorderRadius.circular(
+                                          ResponsiveScaler.radius(23),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              SizedBox(
+                                height: ResponsiveScaler.height(
+                                  isKeyboardVisible ? 16 : 24,
+                                ),
+                              ),
+
+                              // Título
+                              Text(
+                                staffName.isNotEmpty
                                     ? '¡Hola, $staffName!'
                                     : 'Verificación',
-                                subtitle:
-                                    'Ingresa tu PIN de acceso\nde 6 dígitos',
-                                phoneNumber: phoneNumber,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.poppins(
+                                  fontSize: ResponsiveScaler.font(28),
+                                  fontWeight: FontWeight.bold,
+                                  foreground: Paint()
+                                    ..shader = AppGradients.headerText
+                                        .createShader(
+                                          const Rect.fromLTWH(
+                                            0.0,
+                                            0.0,
+                                            300.0,
+                                            70.0,
+                                          ),
+                                        ),
+                                ),
                               ),
-                              SizedBox(height: ResponsiveScaler.height(60)),
+
+                              SizedBox(height: ResponsiveScaler.height(8)),
+
+                              // Subtítulo
+                              Text(
+                                'Ingresa tu PIN de acceso\nde 6 dígitos',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.poppins(
+                                  fontSize: ResponsiveScaler.font(16),
+                                  color: AppColors.textSecondary,
+                                  height: 1.5,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+
+                              if (phoneNumber.isNotEmpty) ...[
+                                SizedBox(height: ResponsiveScaler.height(8)),
+                                Text(
+                                  phoneNumber,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: ResponsiveScaler.font(14),
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+
+                              SizedBox(
+                                height: ResponsiveScaler.height(
+                                  isKeyboardVisible ? 24 : 40,
+                                ),
+                              ),
+
+                              // PIN Inputs
                               _buildPinInputs(),
+
                               if (authState.errorMessage != null) ...[
-                                SizedBox(height: ResponsiveScaler.height(20)),
+                                SizedBox(height: ResponsiveScaler.height(16)),
                                 _buildErrorMessage(authState.errorMessage!),
                               ],
                             ],
@@ -216,56 +342,16 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
             size: ResponsiveScaler.icon(20),
           ),
           SizedBox(width: ResponsiveScaler.width(8)),
-          Text(
-            message,
-            style: GoogleFonts.poppins(
-              fontSize: ResponsiveScaler.font(13),
-              color: AppColors.error,
+          Flexible(
+            child: Text(
+              message,
+              style: GoogleFonts.poppins(
+                fontSize: ResponsiveScaler.font(13),
+                color: AppColors.error,
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTopBar(AuthController authController) {
-    return Container(
-      padding: ResponsiveScaler.padding(
-        const EdgeInsets.only(left: 16, top: 8),
-      ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Material(
-          color: AppColors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
-            onTap: () {
-              authController.goBack();
-              Navigator.pop(context);
-            },
-            child: Container(
-              padding: ResponsiveScaler.padding(const EdgeInsets.all(12)),
-              decoration: BoxDecoration(
-                color: AppColors.card.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(
-                  ResponsiveScaler.radius(16),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadow,
-                    blurRadius: 15,
-                    offset: Offset(0, ResponsiveScaler.height(5)),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.arrow_back_rounded,
-                color: AppColors.textPrimary,
-                size: ResponsiveScaler.icon(24),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -278,16 +364,16 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
           offset: Offset(_shakeAnimation.value, 0),
           child: Container(
             padding: ResponsiveScaler.padding(
-              const EdgeInsets.symmetric(vertical: 32, horizontal: 12),
+              const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
             ),
             decoration: BoxDecoration(
               color: AppColors.card,
-              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(24)),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(20)),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.shadow,
-                  blurRadius: 25,
-                  offset: Offset(0, ResponsiveScaler.height(10)),
+                  blurRadius: 20,
+                  offset: Offset(0, ResponsiveScaler.height(8)),
                 ),
               ],
             ),
@@ -304,9 +390,18 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
   Widget _buildSingleInput(int index) {
     final hasValue = _controllers[index].text.isNotEmpty;
 
+    // Calcular tamaño adaptativo basado en el ancho disponible
+    final screenWidth = MediaQuery.of(context).size.width;
+    final availableWidth =
+        screenWidth -
+        48 -
+        32 -
+        50; // padding horizontal + container padding + spacing
+    final inputSize = (availableWidth / 6).clamp(40.0, 52.0);
+
     return SizedBox(
-      width: ResponsiveScaler.width(44),
-      height: ResponsiveScaler.height(56),
+      width: ResponsiveScaler.width(inputSize),
+      height: ResponsiveScaler.height(inputSize * 1.2),
       child: RawKeyboardListener(
         focusNode: FocusNode(),
         onKey: (event) => _onKeyPressed(index, event),
@@ -318,26 +413,24 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
           maxLength: 1,
           showCursor: false,
           style: GoogleFonts.poppins(
-            fontSize: ResponsiveScaler.font(22),
+            fontSize: ResponsiveScaler.font(24),
             fontWeight: FontWeight.bold,
             color: AppColors.primary,
           ),
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: InputDecoration(
             counterText: '',
-            contentPadding: EdgeInsets.symmetric(
-              vertical: ResponsiveScaler.height(14),
-            ),
+            contentPadding: EdgeInsets.zero,
             filled: true,
             fillColor: hasValue
                 ? AppColors.primary.withOpacity(0.1)
                 : AppColors.backgroundGrey,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
               borderSide: BorderSide(color: AppColors.inputBorder, width: 2),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
               borderSide: BorderSide(
                 color: hasValue
                     ? AppColors.primary.withOpacity(0.5)
@@ -346,7 +439,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
               borderSide: BorderSide(
                 color: AppColors.inputFocusedBorder,
                 width: 2.5,
@@ -360,9 +453,11 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
   }
 
   Widget _buildBottomSection(bool isLoading, AuthController authController) {
+    final topPadding = isKeyboardVisible ? 0.0 : 30.0;
+
     return Padding(
       padding: ResponsiveScaler.padding(
-        const EdgeInsets.fromLTRB(24, 30, 24, 24),
+        EdgeInsets.fromLTRB(24, topPadding, 24, 24),
       ),
       child: ElevatedButton(
         onPressed: isLoading ? null : () => _verifyPin(authController),
@@ -389,7 +484,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
                       Icon(
                         Icons.check_circle_rounded,
                         color: AppColors.iconOnPrimary,
-                        size: ResponsiveScaler.icon(24),
+                        size: ResponsiveScaler.icon(22),
                       ),
                       SizedBox(width: ResponsiveScaler.width(10)),
                       Text(

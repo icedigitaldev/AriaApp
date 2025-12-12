@@ -125,13 +125,33 @@ class _NewOrderViewState extends State<NewOrderView> {
     });
   }
 
-  // Agrega un item con variante seleccionada al pedido
+  // Actualiza cantidad por index (para OrderSummaryModal)
+  void _updateQuantityByIndex(int index, int newQuantity) {
+    setState(() {
+      if (newQuantity <= 0) {
+        if (index >= 0 && index < _orderItems.length) {
+          _orderItems.removeAt(index);
+        }
+      } else {
+        if (index >= 0 && index < _orderItems.length) {
+          _orderItems[index]['quantity'] = newQuantity;
+        }
+      }
+    });
+  }
+
+  // Agrega un item (con variante o sin variante) al pedido
   void _addVariantItemToOrder(Map<String, dynamic> orderItem) {
+    // Soporta tanto variantPrice (de VariantSelectionSheet) como price (de CustomerNameSheet)
+    final price = orderItem['variantPrice'] ?? orderItem['price'] ?? 0.0;
+
     final newItem = {
       'dishId': orderItem['dishId']?.toString() ?? '',
       'dishName': orderItem['dishName'] ?? '',
       'dishImage': orderItem['dishImage'],
-      'price': orderItem['variantPrice'] ?? 0.0,
+      'category': orderItem['category'],
+      'description': orderItem['description'],
+      'price': (price as num).toDouble(),
       'variantName': orderItem['variantName'],
       'customerName': orderItem['customerName'],
       'quantity': 1,
@@ -139,10 +159,15 @@ class _NewOrderViewState extends State<NewOrderView> {
 
     setState(() => _orderItems.add(newItem));
 
-    final variantName = orderItem['variantName'] ?? '';
-    final customerName = orderItem['customerName'] ?? '';
+    final variantName = orderItem['variantName']?.toString() ?? '';
+    final customerName = orderItem['customerName']?.toString() ?? '';
+    final info = [
+      if (variantName.isNotEmpty) variantName,
+      if (customerName.isNotEmpty) customerName,
+    ].join(' - ');
+
     AppLogger.log(
-      'Añadido: ${orderItem['dishName']} ($variantName) ${customerName.isNotEmpty ? "- $customerName" : ""}',
+      'Añadido: ${orderItem['dishName']}${info.isNotEmpty ? " ($info)" : ""}',
       prefix: 'ORDEN:',
     );
   }
@@ -244,8 +269,7 @@ class _NewOrderViewState extends State<NewOrderView> {
     OrderSummaryModal.show(
       context,
       orderItems: _orderItems,
-      onUpdateQuantity: (dishId, qty) =>
-          _updateQuantityByDishId(dishId.toString(), qty),
+      onUpdateQuantity: (index, qty) => _updateQuantityByIndex(index, qty),
       onConfirm: (responsibleName) async =>
           await _confirmOrder(responsibleName),
       totalAmount: _calculateTotal(),

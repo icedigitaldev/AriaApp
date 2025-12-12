@@ -168,106 +168,129 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
     final imageUrl = item['dishImage'] ?? item['imageUrl'] ?? item['image'];
     final hasImage = imageUrl != null && imageUrl.toString().isNotEmpty;
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          if (expandedItemId == itemId) {
-            expandedItemId = null;
-          } else {
-            expandedItemId = itemId;
-          }
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+    return Dismissible(
+      key: Key('$itemId-$index'),
+      direction: DismissDirection.endToStart,
+      background: Container(
         margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 12)),
-        padding: ResponsiveScaler.padding(const EdgeInsets.all(12)),
+        padding: ResponsiveScaler.padding(const EdgeInsets.only(right: 20)),
         decoration: BoxDecoration(
-          color: isExpanded
-              ? AppColors.backgroundAlternate
-              : AppColors.backgroundGrey,
+          color: AppColors.error,
           borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
-          border: isExpanded
-              ? Border.all(
-                  color: AppColors.primary.withOpacity(0.3),
-                  width: 1.5,
-                )
-              : null,
         ),
-        child: Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: ResponsiveScaler.width(56),
-                  height: ResponsiveScaler.height(56),
-                  margin: ResponsiveScaler.margin(
-                    const EdgeInsets.only(right: 12),
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      ResponsiveScaler.radius(12),
+        alignment: Alignment.centerRight,
+        child: Icon(
+          Icons.delete_outline,
+          color: Colors.white,
+          size: ResponsiveScaler.icon(28),
+        ),
+      ),
+      onDismissed: (direction) {
+        widget.onUpdateQuantity(index, 0);
+        setState(() {});
+        if (widget.orderItems.isEmpty) Navigator.pop(context);
+      },
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            if (expandedItemId == itemId) {
+              expandedItemId = null;
+            } else {
+              expandedItemId = itemId;
+            }
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 12)),
+          padding: ResponsiveScaler.padding(const EdgeInsets.all(12)),
+          decoration: BoxDecoration(
+            color: isExpanded
+                ? AppColors.backgroundAlternate
+                : AppColors.backgroundGrey,
+            borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
+            border: isExpanded
+                ? Border.all(
+                    color: AppColors.primary.withOpacity(0.3),
+                    width: 1.5,
+                  )
+                : null,
+          ),
+          child: Column(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: ResponsiveScaler.width(56),
+                    height: ResponsiveScaler.height(56),
+                    margin: ResponsiveScaler.margin(
+                      const EdgeInsets.only(right: 12),
                     ),
-                    color: hasImage ? null : AppColors.inputBorder,
-                    image: hasImage
-                        ? DecorationImage(
-                            image: NetworkImage(imageUrl),
-                            fit: BoxFit.cover,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(
+                        ResponsiveScaler.radius(12),
+                      ),
+                      color: hasImage ? null : AppColors.inputBorder,
+                      image: hasImage
+                          ? DecorationImage(
+                              image: NetworkImage(imageUrl),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: !hasImage
+                        ? Icon(
+                            Icons.restaurant,
+                            color: AppColors.iconMuted,
+                            size: ResponsiveScaler.icon(22),
                           )
                         : null,
                   ),
-                  child: !hasImage
-                      ? Icon(
-                          Icons.restaurant,
-                          color: AppColors.iconMuted,
-                          size: ResponsiveScaler.icon(22),
-                        )
-                      : null,
-                ),
-                Expanded(
-                  child: SizedBox(
-                    height: ResponsiveScaler.height(56),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item['dishName'] ?? item['name'] ?? '',
-                          style: GoogleFonts.poppins(
-                            fontSize: ResponsiveScaler.font(15),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                  Expanded(
+                    child: SizedBox(
+                      height: ResponsiveScaler.height(56),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item['dishName'] ?? item['name'] ?? '',
+                            style: GoogleFonts.poppins(
+                              fontSize: ResponsiveScaler.font(15),
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: ResponsiveScaler.height(2)),
-                        Text(
-                          _formatItemPrice(item),
-                          style: GoogleFonts.poppins(
-                            fontSize: ResponsiveScaler.font(13),
-                            color: AppColors.textMuted,
+                          SizedBox(height: ResponsiveScaler.height(2)),
+                          Text(
+                            _formatItemPrice(item),
+                            style: GoogleFonts.poppins(
+                              fontSize: ResponsiveScaler.font(13),
+                              color: AppColors.textMuted,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                _buildQuantityControls(item),
-                Icon(
-                  isExpanded
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down,
-                  color: AppColors.iconMuted,
-                  size: ResponsiveScaler.icon(22),
-                ),
-              ],
-            ),
-            if (isExpanded) _buildExpandedDetails(item),
-          ],
+                  _buildQuantityControls(item, index),
+                  Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: AppColors.iconMuted,
+                    size: ResponsiveScaler.icon(22),
+                  ),
+                ],
+              ),
+              if (isExpanded) _buildExpandedDetails(item),
+            ],
+          ),
         ),
       ),
     );
@@ -355,13 +378,13 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
     );
   }
 
-  Widget _buildQuantityControls(Map<String, dynamic> item) {
+  Widget _buildQuantityControls(Map<String, dynamic> item, int index) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         GestureDetector(
           onTap: () {
-            widget.onUpdateQuantity(item['id'], item['quantity'] - 1);
+            widget.onUpdateQuantity(index, item['quantity'] - 1);
             setState(() {});
             if (widget.orderItems.isEmpty) Navigator.pop(context);
           },
@@ -396,7 +419,7 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
         ),
         GestureDetector(
           onTap: () {
-            widget.onUpdateQuantity(item['id'], item['quantity'] + 1);
+            widget.onUpdateQuantity(index, item['quantity'] + 1);
             setState(() {});
           },
           child: Container(

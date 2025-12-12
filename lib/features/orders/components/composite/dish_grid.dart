@@ -5,6 +5,7 @@ import '../../../../design/colors/app_colors.dart';
 import '../../../../design/colors/app_gradients.dart';
 import '../../../../design/colors/status_colors.dart';
 import '../../../../design/responsive/responsive_scaler.dart';
+import 'customer_name_sheet.dart';
 import 'variant_selection_sheet.dart';
 
 class DishGrid extends StatelessWidget {
@@ -271,6 +272,13 @@ class DishGrid extends StatelessWidget {
         onTap: () {
           if (hasVariants && onAddVariantItem != null) {
             VariantSelectionSheet.show(
+              context,
+              dish: dish,
+              onAddToOrder: onAddVariantItem!,
+            );
+          } else if (onAddVariantItem != null) {
+            // Plato sin variantes - mostrar sheet para nombre cliente
+            CustomerNameSheet.show(
               context,
               dish: dish,
               onAddToOrder: onAddVariantItem!,

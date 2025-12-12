@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ice_storage/ice_storage.dart';
+import '../components/composite/confirm_dialog.dart';
 import '../components/composite/transparent_app_bar.dart';
 import '../components/ui/app_loader.dart';
 import '../design/colors/app_colors.dart';
@@ -9,6 +10,9 @@ import '../design/colors/app_gradients.dart';
 import '../design/responsive/responsive_scaler.dart';
 import '../design/themes/app_themes.dart';
 import '../auth/current_user.dart';
+import '../features/orders/services/orders_service.dart';
+import '../features/tables/services/tables_service.dart';
+import '../router/app_router.dart';
 import '../utils/app_logger.dart';
 
 class OrderDetailsView extends StatefulWidget {
@@ -22,6 +26,9 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
   Map<String, dynamic>? _table;
   Map<String, dynamic>? _order;
   bool _isLoading = true;
+
+  final OrdersService _ordersService = OrdersService();
+  final TablesService _tablesService = TablesService();
 
   @override
   void didChangeDependencies() {
@@ -72,6 +79,67 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     }
   }
 
+  Future<void> _removeItem(int index) async {
+    if (_order == null) return;
+
+    final items = List<dynamic>.from(_order!['items'] ?? []);
+    if (index < 0 || index >= items.length) return;
+
+    // Obtener precio del item a eliminar
+    final removedItem = items[index];
+    final price = (removedItem['price'] as num?)?.toDouble() ?? 0.0;
+    final quantity = removedItem['quantity'] ?? 1;
+    final amountToSubtract = price * quantity;
+
+    items.removeAt(index);
+
+    // Calcular nuevo total
+    final currentTotal = (_order!['totalAmount'] as num?)?.toDouble() ?? 0.0;
+    final newTotal = (currentTotal - amountToSubtract).clamp(
+      0.0,
+      double.infinity,
+    );
+
+    try {
+      if (items.isEmpty) {
+        // Si no quedan items, cambiar estado de orden y liberar mesa
+        await _ordersService.changeOrderStatus(_order!['id'], 'cancelled');
+        await _tablesService.changeTableStatus(_table!['id'], 'available');
+
+        if (mounted) {
+          AppRouter.navigateToHome(context);
+        }
+      } else {
+        // Actualizar orden con los items restantes
+        await _ordersService.updateOrderItems(
+          _order!['id'],
+          items.map((e) => Map<String, dynamic>.from(e)).toList(),
+        );
+
+        // Actualizar total
+        final gateway = IceStorage.instance.gateway;
+        if (gateway != null) {
+          final docRef = FirebaseFirestore.instance
+              .collection('orders')
+              .doc(_order!['id']);
+          await gateway.updateDocument(
+            docRef: docRef,
+            data: {'totalAmount': newTotal},
+          );
+        }
+
+        setState(() {
+          _order!['items'] = items;
+          _order!['totalAmount'] = newTotal;
+        });
+      }
+
+      AppLogger.log('Item eliminado de la orden', prefix: 'ORDEN:');
+    } catch (e) {
+      AppLogger.log('Error eliminando item: $e', prefix: 'ORDEN_ERROR:');
+    }
+  }
+
   void _navigateToAddItems() {
     Navigator.pushNamed(context, '/new-order', arguments: _table);
   }
@@ -115,7 +183,7 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => Navigator.pop(context),
+            onTap: () => AppRouter.navigateToHome(context),
             child: Container(
               padding: ResponsiveScaler.padding(const EdgeInsets.all(10)),
               decoration: BoxDecoration(
@@ -278,18 +346,21 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
   Widget _buildOrderContent() {
     final items = _order!['items'] as List<dynamic>? ?? [];
 
-    return ListView(
+    return ListView.builder(
       padding: ResponsiveScaler.padding(
         const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       ),
-      children: [
-        ...items.map((item) => _buildOrderItem(item as Map<String, dynamic>)),
-        SizedBox(height: ResponsiveScaler.height(80)),
-      ],
+      itemCount: items.length + 1, // +1 para el espaciado final
+      itemBuilder: (context, index) {
+        if (index == items.length) {
+          return SizedBox(height: ResponsiveScaler.height(80));
+        }
+        return _buildOrderItem(items[index] as Map<String, dynamic>, index);
+      },
     );
   }
 
-  Widget _buildOrderItem(Map<String, dynamic> item) {
+  Widget _buildOrderItem(Map<String, dynamic> item, int index) {
     final variantName = item['variantName'];
     final customerName = item['customerName'];
     final price = (item['price'] as num?)?.toDouble() ?? 0.0;
@@ -299,100 +370,128 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     final hasCustomer =
         customerName != null && customerName.toString().isNotEmpty;
 
-    return Container(
-      margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 10)),
-      padding: ResponsiveScaler.padding(
-        const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    return Dismissible(
+      key: Key('item-$index-${item['name']}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 10)),
+        padding: ResponsiveScaler.padding(const EdgeInsets.only(right: 20)),
+        decoration: BoxDecoration(
+          color: AppColors.error,
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
+        ),
+        alignment: Alignment.centerRight,
+        child: Icon(
+          Icons.delete_outline,
+          color: Colors.white,
+          size: ResponsiveScaler.icon(28),
+        ),
       ),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: ResponsiveScaler.width(36),
-            height: ResponsiveScaler.height(36),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(10)),
-            ),
-            child: Center(
-              child: Text(
-                'x$quantity',
-                style: GoogleFonts.poppins(
-                  fontSize: ResponsiveScaler.font(14),
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+      confirmDismiss: (direction) async {
+        return await ConfirmDialog.showDelete(
+          context,
+          itemName: 'item',
+          customMessage: '¿Deseas eliminar "${item['name']}" del pedido?',
+        );
+      },
+      onDismissed: (direction) => _removeItem(index),
+      child: Container(
+        margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 10)),
+        padding: ResponsiveScaler.padding(
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: ResponsiveScaler.width(36),
+              height: ResponsiveScaler.height(36),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(
+                  ResponsiveScaler.radius(10),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  'x$quantity',
+                  style: GoogleFonts.poppins(
+                    fontSize: ResponsiveScaler.font(14),
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(width: ResponsiveScaler.width(12)),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['name'] ?? '',
-                  style: GoogleFonts.poppins(
-                    fontSize: ResponsiveScaler.font(15),
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+            SizedBox(width: ResponsiveScaler.width(12)),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item['name'] ?? '',
+                    style: GoogleFonts.poppins(
+                      fontSize: ResponsiveScaler.font(15),
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                if (hasVariant) ...[
-                  SizedBox(height: ResponsiveScaler.height(2)),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.local_offer,
-                        size: ResponsiveScaler.icon(12),
-                        color: AppColors.primary,
-                      ),
-                      SizedBox(width: ResponsiveScaler.width(4)),
-                      Text(
-                        variantName.toString(),
-                        style: GoogleFonts.poppins(
-                          fontSize: ResponsiveScaler.font(12),
+                  if (hasVariant) ...[
+                    SizedBox(height: ResponsiveScaler.height(2)),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.local_offer,
+                          size: ResponsiveScaler.icon(12),
                           color: AppColors.primary,
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-                if (hasCustomer) ...[
-                  SizedBox(height: ResponsiveScaler.height(2)),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.person,
-                        size: ResponsiveScaler.icon(12),
-                        color: AppColors.textMuted,
-                      ),
-                      SizedBox(width: ResponsiveScaler.width(4)),
-                      Text(
-                        customerName.toString(),
-                        style: GoogleFonts.poppins(
-                          fontSize: ResponsiveScaler.font(12),
+                        SizedBox(width: ResponsiveScaler.width(4)),
+                        Text(
+                          variantName.toString(),
+                          style: GoogleFonts.poppins(
+                            fontSize: ResponsiveScaler.font(12),
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (hasCustomer) ...[
+                    SizedBox(height: ResponsiveScaler.height(2)),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.person,
+                          size: ResponsiveScaler.icon(12),
                           color: AppColors.textMuted,
                         ),
-                      ),
-                    ],
-                  ),
+                        SizedBox(width: ResponsiveScaler.width(4)),
+                        Text(
+                          customerName.toString(),
+                          style: GoogleFonts.poppins(
+                            fontSize: ResponsiveScaler.font(12),
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-          Text(
-            'S/ ${subtotal.toStringAsFixed(2)}',
-            style: GoogleFonts.poppins(
-              fontSize: ResponsiveScaler.font(15),
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+            Text(
+              'S/ ${subtotal.toStringAsFixed(2)}',
+              style: GoogleFonts.poppins(
+                fontSize: ResponsiveScaler.font(15),
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

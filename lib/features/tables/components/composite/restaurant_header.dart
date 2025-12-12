@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../design/colors/app_colors.dart';
 import '../../../../design/colors/app_gradients.dart';
-import '../../../../utils/app_logger.dart';
 
 class RestaurantHeader extends StatelessWidget {
   final VoidCallback? onProfileTap;
