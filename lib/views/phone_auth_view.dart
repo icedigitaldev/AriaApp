@@ -9,7 +9,8 @@ import '../features/authentication/components/ui/phone_input_field.dart';
 import '../features/authentication/controllers/auth_controller.dart';
 import '../router/app_router.dart';
 import '../components/composite/transparent_app_bar.dart';
-import '../components/ui/transparent_video_player.dart';
+import '../components/ui/aria_video_player.dart';
+import '../controllers/aria_video_controller.dart';
 
 class PhoneAuthView extends StatefulWidget {
   const PhoneAuthView({Key? key}) : super(key: key);
@@ -37,6 +38,11 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.forward();
+
+    // Inicializar video de Aria
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.ref.notifier(ariaVideoControllerProvider).initialize();
+    });
   }
 
   @override
@@ -138,8 +144,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                                         ResponsiveScaler.radius(27),
                                       ),
                                     ),
-                                    child: TransparentVideoPlayer(
-                                      assetPath: 'assets/media/aria.webm',
+                                    child: AriaVideoPlayer(
                                       fit: BoxFit.cover,
                                       width: double.infinity,
                                       height: double.infinity,

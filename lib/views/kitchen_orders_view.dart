@@ -135,10 +135,14 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                         ],
                       ),
                       child: (displayImage == null)
-                          ? Icon(
-                              Icons.restaurant_menu,
-                              color: AppColors.iconOnPrimary,
-                              size: ResponsiveScaler.icon(28),
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                ResponsiveScaler.radius(12),
+                              ),
+                              child: Image.asset(
+                                'assets/images/aria-logo.png',
+                                fit: BoxFit.cover,
+                              ),
                             )
                           : null,
                     ),

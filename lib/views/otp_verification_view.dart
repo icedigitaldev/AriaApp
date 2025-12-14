@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:refena_flutter/refena_flutter.dart';
-import '../components/composite/transparent_app_bar.dart';
+
 import '../components/ui/app_loader.dart';
 import '../components/ui/app_snackbar.dart';
-import '../components/ui/transparent_video_player.dart';
+import '../components/ui/aria_video_player.dart';
 import '../design/colors/app_colors.dart';
 import '../design/colors/app_gradients.dart';
 import '../design/responsive/responsive_scaler.dart';
@@ -162,163 +162,174 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
           child: Scaffold(
             backgroundColor: AppColors.background,
             resizeToAvoidBottomInset: true,
-            appBar: TransparentAppBar(
-              showBackButton: true,
-              onBack: () => _handleBack(authController),
-            ),
-            body: SafeArea(
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        child: Padding(
-                          padding: ResponsiveScaler.padding(
-                            const EdgeInsets.symmetric(horizontal: 24.0),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              SizedBox(
-                                height: ResponsiveScaler.height(
-                                  isKeyboardVisible ? 20 : 40,
-                                ),
+            body: Stack(
+              children: [
+                SafeArea(
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            child: Padding(
+                              padding: ResponsiveScaler.padding(
+                                const EdgeInsets.symmetric(horizontal: 24.0),
                               ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  SizedBox(height: ResponsiveScaler.height(40)),
 
-                              // Video/Animación estilo phone_auth
-                              Center(
-                                child: Container(
-                                  width: ResponsiveScaler.width(
-                                    isKeyboardVisible ? 100 : 140,
-                                  ),
-                                  height: ResponsiveScaler.height(
-                                    isKeyboardVisible ? 100 : 140,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(
-                                      ResponsiveScaler.radius(28),
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppColors.shadowPurple
-                                            .withOpacity(0.2),
-                                        blurRadius: 30,
-                                        offset: Offset(
-                                          0,
-                                          ResponsiveScaler.height(15),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(3),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(
-                                        ResponsiveScaler.radius(28),
-                                      ),
-                                    ),
+                                  // Video/Animación estilo phone_auth
+                                  Center(
                                     child: Container(
-                                      padding: const EdgeInsets.all(2),
+                                      width: ResponsiveScaler.width(160),
+                                      height: ResponsiveScaler.height(160),
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
                                         borderRadius: BorderRadius.circular(
-                                          ResponsiveScaler.radius(25),
+                                          ResponsiveScaler.radius(28),
                                         ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.shadowPurple
+                                                .withOpacity(0.2),
+                                            blurRadius: 30,
+                                            offset: Offset(
+                                              0,
+                                              ResponsiveScaler.height(15),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      child: TransparentVideoPlayer(
-                                        assetPath: 'assets/media/aria.webm',
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                        borderRadius: BorderRadius.circular(
-                                          ResponsiveScaler.radius(23),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              SizedBox(
-                                height: ResponsiveScaler.height(
-                                  isKeyboardVisible ? 16 : 24,
-                                ),
-                              ),
-
-                              // Título
-                              Text(
-                                staffName.isNotEmpty
-                                    ? '¡Hola, $staffName!'
-                                    : 'Verificación',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                  fontSize: ResponsiveScaler.font(28),
-                                  fontWeight: FontWeight.bold,
-                                  foreground: Paint()
-                                    ..shader = AppGradients.headerText
-                                        .createShader(
-                                          const Rect.fromLTWH(
-                                            0.0,
-                                            0.0,
-                                            300.0,
-                                            70.0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary.withOpacity(
+                                            0.2,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            ResponsiveScaler.radius(28),
                                           ),
                                         ),
-                                ),
-                              ),
-
-                              SizedBox(height: ResponsiveScaler.height(8)),
-
-                              // Subtítulo
-                              Text(
-                                'Ingresa tu PIN de acceso\nde 6 dígitos',
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                  fontSize: ResponsiveScaler.font(16),
-                                  color: AppColors.textSecondary,
-                                  height: 1.5,
-                                  letterSpacing: 0.3,
-                                ),
-                              ),
-
-                              if (phoneNumber.isNotEmpty) ...[
-                                SizedBox(height: ResponsiveScaler.height(8)),
-                                Text(
-                                  phoneNumber,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: ResponsiveScaler.font(14),
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w600,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                              ResponsiveScaler.radius(25),
+                                            ),
+                                          ),
+                                          child: AriaVideoPlayer(
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            borderRadius: BorderRadius.circular(
+                                              ResponsiveScaler.radius(23),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ],
 
-                              SizedBox(
-                                height: ResponsiveScaler.height(
-                                  isKeyboardVisible ? 24 : 40,
-                                ),
+                                  SizedBox(height: ResponsiveScaler.height(24)),
+
+                                  // Título
+                                  Text(
+                                    staffName.isNotEmpty
+                                        ? '¡Hola, $staffName!'
+                                        : 'Verificación',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: ResponsiveScaler.font(28),
+                                      fontWeight: FontWeight.bold,
+                                      foreground: Paint()
+                                        ..shader = AppGradients.headerText
+                                            .createShader(
+                                              const Rect.fromLTWH(
+                                                0.0,
+                                                0.0,
+                                                300.0,
+                                                70.0,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+
+                                  SizedBox(height: ResponsiveScaler.height(8)),
+
+                                  // Subtítulo
+                                  Text(
+                                    'Ingresa tu PIN de acceso\nde 6 dígitos',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: ResponsiveScaler.font(16),
+                                      color: AppColors.textSecondary,
+                                      height: 1.5,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+
+                                  if (phoneNumber.isNotEmpty) ...[
+                                    SizedBox(
+                                      height: ResponsiveScaler.height(8),
+                                    ),
+                                    Text(
+                                      phoneNumber,
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: ResponsiveScaler.font(14),
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+
+                                  SizedBox(height: ResponsiveScaler.height(40)),
+
+                                  // PIN Inputs
+                                  _buildPinInputs(),
+
+                                  if (authState.errorMessage != null) ...[
+                                    SizedBox(
+                                      height: ResponsiveScaler.height(16),
+                                    ),
+                                    _buildErrorMessage(authState.errorMessage!),
+                                  ],
+                                  SizedBox(
+                                    height: ResponsiveScaler.height(
+                                      isKeyboardVisible ? 120 : 20,
+                                    ),
+                                  ),
+                                ],
                               ),
-
-                              // PIN Inputs
-                              _buildPinInputs(),
-
-                              if (authState.errorMessage != null) ...[
-                                SizedBox(height: ResponsiveScaler.height(16)),
-                                _buildErrorMessage(authState.errorMessage!),
-                              ],
-                            ],
+                            ),
                           ),
                         ),
-                      ),
+                        _buildBottomSection(
+                          authState.isLoading,
+                          authController,
+                        ),
+                      ],
                     ),
-                    _buildBottomSection(authState.isLoading, authController),
-                  ],
+                  ),
                 ),
-              ),
+                Positioned(
+                  top: 0,
+                  left: 4,
+                  child: SafeArea(
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.arrow_back_rounded,
+                        size: ResponsiveScaler.icon(28),
+                        color: AppColors.primary,
+                      ),
+                      onPressed: () => _handleBack(authController),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -364,7 +375,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
           offset: Offset(_shakeAnimation.value, 0),
           child: Container(
             padding: ResponsiveScaler.padding(
-              const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+              const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
             ),
             decoration: BoxDecoration(
               color: AppColors.card,
@@ -401,7 +412,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
 
     return SizedBox(
       width: ResponsiveScaler.width(inputSize),
-      height: ResponsiveScaler.height(inputSize * 1.2),
+      height: ResponsiveScaler.height(inputSize),
       child: RawKeyboardListener(
         focusNode: FocusNode(),
         onKey: (event) => _onKeyPressed(index, event),
@@ -409,6 +420,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
           controller: _controllers[index],
           focusNode: _focusNodes[index],
           textAlign: TextAlign.center,
+          textAlignVertical: TextAlignVertical.center,
           keyboardType: TextInputType.number,
           maxLength: 1,
           showCursor: false,

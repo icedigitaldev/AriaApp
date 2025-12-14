@@ -53,14 +53,13 @@ class RestaurantHeader extends StatelessWidget {
                 ],
               ),
               child: (avatarUrl == null || avatarUrl!.isEmpty)
-                  ? Center(
-                      child: Text(
-                        'A',
-                        style: GoogleFonts.poppins(
-                          color: AppColors.textOnPrimary,
-                          fontSize: ResponsiveScaler.font(24),
-                          fontWeight: FontWeight.bold,
-                        ),
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        ResponsiveScaler.radius(12),
+                      ),
+                      child: Image.asset(
+                        'assets/images/aria-logo.png',
+                        fit: BoxFit.cover,
                       ),
                     )
                   : null,

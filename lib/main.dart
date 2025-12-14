@@ -12,8 +12,13 @@ import 'router/app_router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Registrar fvp para soporte de videos con transparencia
-  fvp.registerWith();
+  // Registrar fvp para soporte de videos con transparencia (sin audio)
+  fvp.registerWith(
+    options: {
+      'video.decoders': ['FFmpeg'],
+      'avtrack.audio': -1,
+    },
+  );
 
   // Inicializar Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
