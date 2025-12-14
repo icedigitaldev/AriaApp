@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ice_storage/ice_storage.dart';
 import '../../../auth/current_user.dart';
 import '../../../utils/app_logger.dart';
+import 'context_service.dart';
 
 class OrdersService {
   // Obtiene el businessId del usuario autenticado
@@ -92,7 +93,7 @@ class OrdersService {
     }
   }
 
-  // Crea una nueva orden con número secuencial
+  // Crea una nueva orden con número secuencial y datos de contexto
   Future<String?> createOrder(Map<String, dynamic> orderData) async {
     final businessId = _businessId;
 
@@ -102,6 +103,12 @@ class OrdersService {
     }
 
     try {
+      // Obtener contexto automático (clima y feriados)
+      final contextService = ContextService();
+      final context = await contextService.getOrderContext(
+        specialEvent: orderData['specialEvent'] ?? false,
+      );
+
       final firestore = FirebaseFirestore.instance;
       final orderDocRef = firestore.collection('orders').doc();
       final counterDocRef = firestore
@@ -130,12 +137,15 @@ class OrdersService {
           'orders': newOrderNumber,
         }, SetOptions(merge: true));
 
-        // Crear orden con el número secuencial
+        // Crear orden con datos de contexto para predicción
         transaction.set(orderDocRef, {
           ...orderData,
           'businessId': businessId,
           'orderNumber': newOrderNumber,
           'status': 'pending',
+          'holiday': context['holiday'],
+          'specialEvent': context['specialEvent'],
+          'weather': context['weather'],
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });

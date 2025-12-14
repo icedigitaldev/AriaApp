@@ -172,7 +172,7 @@ class _NewOrderViewState extends State<NewOrderView> {
     );
   }
 
-  Future<bool> _confirmOrder(String responsibleName) async {
+  Future<bool> _confirmOrder(String responsibleName, bool specialEvent) async {
     if (_table == null) {
       AppSnackbar.show(
         context: context,
@@ -199,6 +199,7 @@ class _NewOrderViewState extends State<NewOrderView> {
             (item) => {
               'dishId': item['dishId'],
               'name': item['dishName'],
+              'category': item['category'],
               'price': item['price'],
               'quantity': item['quantity'],
               'variantName': item['variantName'],
@@ -230,6 +231,7 @@ class _NewOrderViewState extends State<NewOrderView> {
               : null,
           'items': itemsToSave,
           'totalAmount': totalAmount,
+          'specialEvent': specialEvent,
         };
 
         final orderId = await _ordersService.createOrder(orderData);
@@ -270,8 +272,8 @@ class _NewOrderViewState extends State<NewOrderView> {
       context,
       orderItems: _orderItems,
       onUpdateQuantity: (index, qty) => _updateQuantityByIndex(index, qty),
-      onConfirm: (responsibleName) async =>
-          await _confirmOrder(responsibleName),
+      onConfirm: (responsibleName, specialEvent) async =>
+          await _confirmOrder(responsibleName, specialEvent),
       totalAmount: _calculateTotal(),
     );
   }

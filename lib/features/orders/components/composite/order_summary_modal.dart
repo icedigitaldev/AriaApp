@@ -8,7 +8,8 @@ import '../../../../components/ui/app_loader.dart';
 class OrderSummaryModal extends StatefulWidget {
   final List<Map<String, dynamic>> orderItems;
   final Function(int, int) onUpdateQuantity;
-  final Future<bool> Function(String responsibleName) onConfirm;
+  final Future<bool> Function(String responsibleName, bool specialEvent)
+  onConfirm;
   final double totalAmount;
 
   const OrderSummaryModal({
@@ -23,7 +24,8 @@ class OrderSummaryModal extends StatefulWidget {
     BuildContext context, {
     required List<Map<String, dynamic>> orderItems,
     required Function(int, int) onUpdateQuantity,
-    required Future<bool> Function(String responsibleName) onConfirm,
+    required Future<bool> Function(String responsibleName, bool specialEvent)
+    onConfirm,
     required double totalAmount,
   }) {
     return showModalBottomSheet(
@@ -45,6 +47,7 @@ class OrderSummaryModal extends StatefulWidget {
 
 class _OrderSummaryModalState extends State<OrderSummaryModal> {
   bool isLoading = false;
+  bool _isSpecialEvent = false;
   String? expandedItemId;
   final _responsibleController = TextEditingController();
 
@@ -78,7 +81,10 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
   void _handleConfirm() async {
     setState(() => isLoading = true);
 
-    final success = await widget.onConfirm(_responsibleController.text.trim());
+    final success = await widget.onConfirm(
+      _responsibleController.text.trim(),
+      _isSpecialEvent,
+    );
 
     if (mounted) {
       setState(() => isLoading = false);
@@ -490,6 +496,71 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
               ),
               contentPadding: ResponsiveScaler.padding(
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+          ),
+          SizedBox(height: ResponsiveScaler.height(12)),
+          // Toggle de evento especial
+          GestureDetector(
+            onTap: () => setState(() => _isSpecialEvent = !_isSpecialEvent),
+            child: Container(
+              padding: ResponsiveScaler.padding(
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+              decoration: BoxDecoration(
+                color: _isSpecialEvent
+                    ? AppColors.primary.withOpacity(0.1)
+                    : AppColors.backgroundGrey,
+                borderRadius: BorderRadius.circular(
+                  ResponsiveScaler.radius(12),
+                ),
+                border: _isSpecialEvent
+                    ? Border.all(color: AppColors.primary.withOpacity(0.3))
+                    : null,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _isSpecialEvent
+                        ? Icons.celebration
+                        : Icons.celebration_outlined,
+                    color: _isSpecialEvent
+                        ? AppColors.primary
+                        : AppColors.iconMuted,
+                    size: ResponsiveScaler.icon(20),
+                  ),
+                  SizedBox(width: ResponsiveScaler.width(10)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Evento especial',
+                          style: GoogleFonts.poppins(
+                            fontSize: ResponsiveScaler.font(14),
+                            fontWeight: FontWeight.w500,
+                            color: _isSpecialEvent
+                                ? AppColors.primary
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          'Concierto, partido, feria u otro evento cercano',
+                          style: GoogleFonts.poppins(
+                            fontSize: ResponsiveScaler.font(11),
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: _isSpecialEvent,
+                    onChanged: (value) =>
+                        setState(() => _isSpecialEvent = value),
+                    activeColor: AppColors.primary,
+                  ),
+                ],
               ),
             ),
           ),
