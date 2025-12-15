@@ -1,7 +1,6 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ice_storage/ice_storage.dart';
+import '../../../../components/ui/cached_network_image.dart';
 import '../../../../design/colors/app_colors.dart';
 import '../../../../design/colors/app_gradients.dart';
 import '../../../../design/responsive/responsive_scaler.dart';
@@ -17,15 +16,6 @@ class RestaurantHeader extends StatelessWidget {
     this.onHistoryTap,
     this.avatarUrl,
   }) : super(key: key);
-
-  // Obtiene imagen desde caché o la descarga
-  Future<Uint8List?> _getCachedImage(String url) async {
-    final isCached = await IceStorage.instance.images.isImageCached(url);
-    if (isCached) {
-      return await IceStorage.instance.images.getCachedImage(url);
-    }
-    return await IceStorage.instance.images.downloadAndCacheImage(url);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,43 +47,30 @@ class RestaurantHeader extends StatelessWidget {
                 ],
               ),
               child: hasAvatar
-                  ? FutureBuilder<Uint8List?>(
-                      future: _getCachedImage(avatarUrl!),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(
-                            child: SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          );
-                        }
-                        if (snapshot.hasError || snapshot.data == null) {
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              ResponsiveScaler.radius(12),
-                            ),
-                            child: Image.asset(
-                              'assets/images/aria-logo.png',
-                              fit: BoxFit.cover,
-                            ),
-                          );
-                        }
-                        return ClipRRect(
-                          borderRadius: borderRadius,
-                          child: Image.memory(
-                            snapshot.data!,
-                            width: ResponsiveScaler.width(48),
-                            height: ResponsiveScaler.height(48),
-                            fit: BoxFit.cover,
+                  ? CachedNetworkImage(
+                      imageUrl: avatarUrl!,
+                      width: ResponsiveScaler.width(48),
+                      height: ResponsiveScaler.height(48),
+                      borderRadius: borderRadius,
+                      placeholder: Center(
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primary,
                           ),
-                        );
-                      },
+                        ),
+                      ),
+                      errorWidget: ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveScaler.radius(12),
+                        ),
+                        child: Image.asset(
+                          'assets/images/aria-logo.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     )
                   : ClipRRect(
                       borderRadius: BorderRadius.circular(

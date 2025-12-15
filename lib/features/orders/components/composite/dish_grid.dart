@@ -1,8 +1,7 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ice_storage/ice_storage.dart';
+import '../../../../components/ui/cached_network_image.dart';
 import '../../../../design/colors/app_colors.dart';
 import '../../../../design/colors/app_gradients.dart';
 import '../../../../design/colors/status_colors.dart';
@@ -58,15 +57,6 @@ class DishGrid extends StatelessWidget {
     final price = (dish['price'] as num?)?.toDouble();
     if (price == null) return 'S/ --';
     return 'S/ ${price.toStringAsFixed(2)}';
-  }
-
-  // Obtiene imagen desde caché o la descarga
-  Future<Uint8List?> _getCachedImage(String url) async {
-    final isCached = await IceStorage.instance.images.isImageCached(url);
-    if (isCached) {
-      return await IceStorage.instance.images.getCachedImage(url);
-    }
-    return await IceStorage.instance.images.downloadAndCacheImage(url);
   }
 
   @override
@@ -142,34 +132,22 @@ class DishGrid extends StatelessWidget {
             color: AppColors.backgroundGrey,
           ),
           child: hasImage
-              ? FutureBuilder<Uint8List?>(
-                  future: _getCachedImage(imageUrl),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: SizedBox(
-                          width: ResponsiveScaler.width(20),
-                          height: ResponsiveScaler.width(20),
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      );
-                    }
-                    if (snapshot.hasError || snapshot.data == null) {
-                      return placeholderIcon;
-                    }
-                    return ClipRRect(
-                      borderRadius: borderRadius,
-                      child: Image.memory(
-                        snapshot.data!,
-                        width: double.infinity,
-                        height: ResponsiveScaler.height(140),
-                        fit: BoxFit.cover,
+              ? CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  width: double.infinity,
+                  height: ResponsiveScaler.height(140),
+                  borderRadius: borderRadius,
+                  placeholder: Center(
+                    child: SizedBox(
+                      width: ResponsiveScaler.width(20),
+                      height: ResponsiveScaler.width(20),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
                       ),
-                    );
-                  },
+                    ),
+                  ),
+                  errorWidget: placeholderIcon,
                 )
               : placeholderIcon,
         ),

@@ -45,8 +45,10 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
     // Inicializa el estado local de la orden
     if (!_isInitialized) {
       _currentOrderStatus = order['status'];
+      // Marca todos los items como completados si la orden ya está en progreso o finalizada
       if (_currentOrderStatus == 'preparing' ||
-          _currentOrderStatus == 'completed') {
+          _currentOrderStatus == 'completed' ||
+          _currentOrderStatus == 'paid') {
         final items = order['items'] as List;
         for (var i = 0; i < items.length; i++) {
           _itemStatus[i] = true;
@@ -59,7 +61,9 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
       (e) => _itemStatus[e.key] ?? false,
     );
 
-    final isOrderFinalized = _currentOrderStatus == 'completed';
+    // Orden finalizada si está completada o pagada (solo lectura)
+    final isOrderFinalized =
+        _currentOrderStatus == 'completed' || _currentOrderStatus == 'paid';
 
     return Consumer(
       builder: (context, ref) {

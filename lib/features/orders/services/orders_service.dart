@@ -58,10 +58,20 @@ class OrdersService {
       final docRef = FirebaseFirestore.instance
           .collection('orders')
           .doc(orderId);
-      await gateway.updateDocument(
-        docRef: docRef,
-        data: {'status': status, 'updatedAt': FieldValue.serverTimestamp()},
-      );
+
+      final Map<String, dynamic> updateData = {
+        'status': status,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      // Timestamps para métricas de tiempo de preparación
+      if (status == 'preparing') {
+        updateData['preparingAt'] = FieldValue.serverTimestamp();
+      } else if (status == 'completed') {
+        updateData['completedAt'] = FieldValue.serverTimestamp();
+      }
+
+      await gateway.updateDocument(docRef: docRef, data: updateData);
 
       AppLogger.log('Estado de orden cambiado a $status', prefix: 'ORDERS:');
     } catch (e) {

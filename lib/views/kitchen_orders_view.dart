@@ -1,9 +1,9 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:ice_storage/ice_storage.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 import '../components/composite/transparent_app_bar.dart';
 import '../components/ui/app_loader.dart';
+import '../components/ui/cached_network_image.dart';
+import '../components/ui/empty_state.dart';
 import '../design/colors/app_colors.dart';
 import '../design/colors/app_gradients.dart';
 import '../design/responsive/responsive_scaler.dart';
@@ -43,15 +43,6 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
-  }
-
-  // Obtiene imagen desde caché o la descarga
-  Future<Uint8List?> _getCachedImage(String url) async {
-    final isCached = await IceStorage.instance.images.isImageCached(url);
-    if (isCached) {
-      return await IceStorage.instance.images.getCachedImage(url);
-    }
-    return await IceStorage.instance.images.downloadAndCacheImage(url);
   }
 
   void _onPageChanged(int index, OrdersController controller) {
@@ -183,44 +174,30 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                         ],
                       ),
                       child: (displayImage != null)
-                          ? FutureBuilder<Uint8List?>(
-                              future: _getCachedImage(displayImage),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  );
-                                }
-                                if (snapshot.hasError ||
-                                    snapshot.data == null) {
-                                  return ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                      ResponsiveScaler.radius(12),
-                                    ),
-                                    child: Image.asset(
-                                      'assets/images/aria-logo.png',
-                                      fit: BoxFit.cover,
-                                    ),
-                                  );
-                                }
-                                return ClipRRect(
-                                  borderRadius: borderRadius,
-                                  child: Image.memory(
-                                    snapshot.data!,
-                                    width: ResponsiveScaler.width(48),
-                                    height: ResponsiveScaler.height(48),
-                                    fit: BoxFit.cover,
+                          ? CachedNetworkImage(
+                              imageUrl: displayImage,
+                              width: ResponsiveScaler.width(48),
+                              height: ResponsiveScaler.height(48),
+                              borderRadius: borderRadius,
+                              placeholder: Center(
+                                child: SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
                                   ),
-                                );
-                              },
+                                ),
+                              ),
+                              errorWidget: ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                  ResponsiveScaler.radius(12),
+                                ),
+                                child: Image.asset(
+                                  'assets/images/aria-logo.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             )
                           : ClipRRect(
                               borderRadius: BorderRadius.circular(
@@ -239,7 +216,7 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                             'Historial de pedidos',
                             prefix: 'COCINA:',
                           );
-                          Navigator.pushNamed(context, '/kitchen-history');
+                          Navigator.pushNamed(context, '/orders-history');
                         },
                         icon: Container(
                           padding: ResponsiveScaler.padding(
@@ -295,14 +272,10 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                         final filteredOrders = getFilteredOrders(currentFilter);
 
                         if (filteredOrders.isEmpty) {
-                          return Center(
-                            child: Text(
-                              'No hay órdenes',
-                              style: TextStyle(
-                                fontSize: ResponsiveScaler.font(16),
-                                color: Colors.grey,
-                              ),
-                            ),
+                          return const EmptyState(
+                            icon: Icons.receipt_long_outlined,
+                            title: 'No hay órdenes',
+                            description: 'No hay órdenes en esta categoría.',
                           );
                         }
 

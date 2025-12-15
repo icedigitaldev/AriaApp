@@ -5,6 +5,7 @@ import '../auth/current_user.dart';
 import '../components/composite/transparent_app_bar.dart';
 import '../components/ui/app_snackbar.dart';
 import '../components/ui/app_loader.dart';
+import '../components/ui/empty_state.dart';
 import '../design/colors/app_colors.dart';
 import '../design/responsive/responsive_scaler.dart';
 import '../design/themes/app_themes.dart';
@@ -400,13 +401,10 @@ class _NewOrderViewState extends State<NewOrderView> {
                             child: AppLoader(size: ResponsiveScaler.width(40)),
                           )
                         : menuState.dishes.isEmpty
-                        ? Center(
-                            child: Text(
-                              'No hay platos disponibles',
-                              style: GoogleFonts.poppins(
-                                color: AppColors.textMuted,
-                              ),
-                            ),
+                        ? const EmptyState(
+                            icon: Icons.restaurant_menu_outlined,
+                            title: 'No hay platos',
+                            description: 'No hay platos disponibles.',
                           )
                         : PageView.builder(
                             controller: _pageController,

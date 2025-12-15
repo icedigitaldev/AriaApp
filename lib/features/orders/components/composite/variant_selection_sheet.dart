@@ -66,213 +66,221 @@ class _VariantSelectionSheetState extends State<VariantSelectionSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(ResponsiveScaler.radius(24)),
         ),
       ),
-      child: Padding(
-        padding: ResponsiveScaler.padding(
-          EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: ResponsiveScaler.height(16)),
+          Center(
+            child: Container(
+              width: ResponsiveScaler.width(40),
+              height: ResponsiveScaler.height(4),
+              decoration: BoxDecoration(
+                color: AppColors.inputBorder,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Handle
-            Center(
-              child: Container(
-                width: ResponsiveScaler.width(40),
-                height: ResponsiveScaler.height(4),
-                decoration: BoxDecoration(
-                  color: AppColors.inputBorder,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+          Flexible(
+            fit: FlexFit.loose,
+            child: SingleChildScrollView(
+              padding: ResponsiveScaler.padding(
+                const EdgeInsets.symmetric(horizontal: 24),
               ),
-            ),
-            SizedBox(height: ResponsiveScaler.height(20)),
-
-            // Título del plato
-            Text(
-              widget.dish['name'] ?? '',
-              style: GoogleFonts.poppins(
-                fontSize: ResponsiveScaler.font(20),
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            SizedBox(height: ResponsiveScaler.height(4)),
-            Text(
-              'Selecciona una opción',
-              style: GoogleFonts.poppins(
-                fontSize: ResponsiveScaler.font(14),
-                color: AppColors.textMuted,
-              ),
-            ),
-            SizedBox(height: ResponsiveScaler.height(20)),
-
-            // Lista de variantes
-            ...variants.asMap().entries.map((entry) {
-              final index = entry.key;
-              final variant = entry.value;
-              final isSelected = selectedVariantIndex == index;
-              final price = (variant['price'] as num).toDouble();
-
-              return GestureDetector(
-                onTap: () => setState(() => selectedVariantIndex = index),
-                child: Container(
-                  margin: ResponsiveScaler.margin(
-                    const EdgeInsets.only(bottom: 12),
-                  ),
-                  padding: ResponsiveScaler.padding(const EdgeInsets.all(16)),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.primary.withOpacity(0.1)
-                        : AppColors.backgroundGrey,
-                    borderRadius: BorderRadius.circular(
-                      ResponsiveScaler.radius(12),
-                    ),
-                    border: Border.all(
-                      color: isSelected
-                          ? AppColors.primary
-                          : Colors.transparent,
-                      width: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: ResponsiveScaler.height(20)),
+                  Text(
+                    widget.dish['name'] ?? '',
+                    style: GoogleFonts.poppins(
+                      fontSize: ResponsiveScaler.font(20),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: ResponsiveScaler.width(24),
-                            height: ResponsiveScaler.height(24),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
+                  SizedBox(height: ResponsiveScaler.height(4)),
+                  Text(
+                    'Selecciona una opción',
+                    style: GoogleFonts.poppins(
+                      fontSize: ResponsiveScaler.font(14),
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                  SizedBox(height: ResponsiveScaler.height(20)),
+                  ...variants.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final variant = entry.value;
+                    final isSelected = selectedVariantIndex == index;
+                    final price = (variant['price'] as num).toDouble();
+
+                    return GestureDetector(
+                      onTap: () => setState(() => selectedVariantIndex = index),
+                      child: Container(
+                        margin: ResponsiveScaler.margin(
+                          const EdgeInsets.only(bottom: 12),
+                        ),
+                        padding: ResponsiveScaler.padding(
+                          const EdgeInsets.all(16),
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.primary.withOpacity(0.1)
+                              : AppColors.backgroundGrey,
+                          borderRadius: BorderRadius.circular(
+                            ResponsiveScaler.radius(12),
+                          ),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.primary
+                                : Colors.transparent,
+                            width: 2,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: ResponsiveScaler.width(24),
+                                  height: ResponsiveScaler.height(24),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? AppColors.primary
+                                          : AppColors.inputBorder,
+                                      width: 2,
+                                    ),
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : Colors.transparent,
+                                  ),
+                                  child: isSelected
+                                      ? Icon(
+                                          Icons.check,
+                                          size: ResponsiveScaler.icon(16),
+                                          color: AppColors.iconOnPrimary,
+                                        )
+                                      : null,
+                                ),
+                                SizedBox(width: ResponsiveScaler.width(12)),
+                                Text(
+                                  variant['name'] ?? '',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: ResponsiveScaler.font(16),
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              'S/ ${price.toStringAsFixed(2)}',
+                              style: GoogleFonts.poppins(
+                                fontSize: ResponsiveScaler.font(16),
+                                fontWeight: FontWeight.bold,
                                 color: isSelected
                                     ? AppColors.primary
-                                    : AppColors.inputBorder,
-                                width: 2,
+                                    : AppColors.textPrimary,
                               ),
-                              color: isSelected
-                                  ? AppColors.primary
-                                  : Colors.transparent,
                             ),
-                            child: isSelected
-                                ? Icon(
-                                    Icons.check,
-                                    size: ResponsiveScaler.icon(16),
-                                    color: AppColors.iconOnPrimary,
-                                  )
-                                : null,
-                          ),
-                          SizedBox(width: ResponsiveScaler.width(12)),
-                          Text(
-                            variant['name'] ?? '',
-                            style: GoogleFonts.poppins(
-                              fontSize: ResponsiveScaler.font(16),
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        'S/ ${price.toStringAsFixed(2)}',
-                        style: GoogleFonts.poppins(
-                          fontSize: ResponsiveScaler.font(16),
-                          fontWeight: FontWeight.bold,
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.textPrimary,
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-
-            SizedBox(height: ResponsiveScaler.height(8)),
-
-            // Campo nombre del cliente
-            Text(
-              'Nombre del cliente (opcional)',
-              style: GoogleFonts.poppins(
-                fontSize: ResponsiveScaler.font(14),
-                color: AppColors.textMuted,
+                    );
+                  }),
+                ],
               ),
             ),
-            SizedBox(height: ResponsiveScaler.height(8)),
-            TextField(
-              controller: _customerNameController,
-              textCapitalization: TextCapitalization.words,
-              style: GoogleFonts.poppins(
-                fontSize: ResponsiveScaler.font(16),
-                color: AppColors.textPrimary,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Ej: Juan',
-                hintStyle: GoogleFonts.poppins(color: AppColors.textMuted),
-                filled: true,
-                fillColor: AppColors.backgroundGrey,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(
-                    ResponsiveScaler.radius(12),
-                  ),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: ResponsiveScaler.padding(
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-              ),
-            ),
-            SizedBox(height: ResponsiveScaler.height(24)),
-
-            // Botón agregar
-            GestureDetector(
-              onTap: selectedVariantIndex != null ? _handleAddToOrder : null,
-              child: Container(
-                width: double.infinity,
-                padding: ResponsiveScaler.padding(
-                  const EdgeInsets.symmetric(vertical: 16),
-                ),
-                decoration: BoxDecoration(
-                  gradient: selectedVariantIndex != null
-                      ? AppGradients.primaryButton
-                      : null,
-                  color: selectedVariantIndex == null
-                      ? AppColors.inputBorder
-                      : null,
-                  borderRadius: BorderRadius.circular(
-                    ResponsiveScaler.radius(12),
+          ),
+          Padding(
+            padding: ResponsiveScaler.padding(const EdgeInsets.all(24)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Nombre del cliente (opcional)',
+                  style: GoogleFonts.poppins(
+                    fontSize: ResponsiveScaler.font(14),
+                    color: AppColors.textMuted,
                   ),
                 ),
-                child: Center(
-                  child: Text(
-                    'Agregar al pedido',
-                    style: GoogleFonts.poppins(
-                      fontSize: ResponsiveScaler.font(16),
-                      fontWeight: FontWeight.w600,
-                      color: selectedVariantIndex != null
-                          ? AppColors.textOnPrimary
-                          : AppColors.textMuted,
+                SizedBox(height: ResponsiveScaler.height(8)),
+                TextField(
+                  controller: _customerNameController,
+                  textCapitalization: TextCapitalization.words,
+                  style: GoogleFonts.poppins(
+                    fontSize: ResponsiveScaler.font(16),
+                    color: AppColors.textPrimary,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Ej: Juan',
+                    hintStyle: GoogleFonts.poppins(color: AppColors.textMuted),
+                    filled: true,
+                    fillColor: AppColors.backgroundGrey,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        ResponsiveScaler.radius(12),
+                      ),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: ResponsiveScaler.padding(
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                   ),
                 ),
-              ),
+                SizedBox(height: ResponsiveScaler.height(24)),
+                GestureDetector(
+                  onTap: selectedVariantIndex != null
+                      ? _handleAddToOrder
+                      : null,
+                  child: Container(
+                    width: double.infinity,
+                    padding: ResponsiveScaler.padding(
+                      const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: selectedVariantIndex != null
+                          ? AppGradients.primaryButton
+                          : null,
+                      color: selectedVariantIndex == null
+                          ? AppColors.inputBorder
+                          : null,
+                      borderRadius: BorderRadius.circular(
+                        ResponsiveScaler.radius(12),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Agregar al pedido',
+                        style: GoogleFonts.poppins(
+                          fontSize: ResponsiveScaler.font(16),
+                          fontWeight: FontWeight.w600,
+                          color: selectedVariantIndex != null
+                              ? AppColors.textOnPrimary
+                              : AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

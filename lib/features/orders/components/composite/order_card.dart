@@ -35,7 +35,10 @@ class OrderCard extends StatelessWidget {
       case 'preparing':
         return StatusColors.preparingBorder;
       case 'ready':
+      case 'completed':
         return StatusColors.readyBorder;
+      case 'paid':
+        return StatusColors.deliveredBorder;
       default:
         return StatusColors.unknownBorder;
     }
@@ -48,7 +51,10 @@ class OrderCard extends StatelessWidget {
       case 'preparing':
         return StatusColors.preparingBackground;
       case 'ready':
+      case 'completed':
         return StatusColors.readyBackground;
+      case 'paid':
+        return StatusColors.deliveredBackground;
       default:
         return StatusColors.unknownBackground;
     }
@@ -108,30 +114,17 @@ class OrderCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              OrderStatusBadge(status: order['status']),
-              if (showTableNumber) ...[
-                SizedBox(width: ResponsiveScaler.width(12)),
-                Text(
-                  order['orderNumber'] != null
-                      ? '#${OrdersService.formatOrderNumber(order['orderNumber'])} - Mesa ${order['tableNumber']}'
-                      : 'Mesa ${order['tableNumber']}',
-                  style: GoogleFonts.poppins(
-                    fontSize: ResponsiveScaler.font(18),
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ],
-          ),
-          if (showTimer && _getOrderTime(order['createdAt']) != null)
-            Builder(
-              builder: (context) {
-                final orderTime = _getOrderTime(order['createdAt'])!;
-                return TimeIndicator(orderTime: orderTime, compact: true);
-              },
+          OrderStatusBadge(status: order['status']),
+          if (showTableNumber)
+            Text(
+              order['orderNumber'] != null
+                  ? '#${OrdersService.formatOrderNumber(order['orderNumber'])} - Mesa ${order['tableNumber']}'
+                  : 'Mesa ${order['tableNumber']}',
+              style: GoogleFonts.poppins(
+                fontSize: ResponsiveScaler.font(18),
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
         ],
       ),
@@ -150,20 +143,57 @@ class OrderCard extends StatelessWidget {
         children: [
           if (showWaiterInfo && order['staffName'] != null)
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(
-                  Icons.person,
-                  size: ResponsiveScaler.icon(16),
-                  color: AppColors.iconMuted,
+                Row(
+                  children: [
+                    Icon(
+                      Icons.person,
+                      size: ResponsiveScaler.icon(16),
+                      color: AppColors.iconMuted,
+                    ),
+                    SizedBox(width: ResponsiveScaler.width(4)),
+                    Text(
+                      order['staffName'],
+                      style: GoogleFonts.poppins(
+                        fontSize: ResponsiveScaler.font(14),
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(width: ResponsiveScaler.width(4)),
-                Text(
-                  order['staffName'],
-                  style: GoogleFonts.poppins(
-                    fontSize: ResponsiveScaler.font(14),
-                    color: AppColors.textMuted,
+                if (showTimer && order['status'] != 'paid')
+                  Builder(
+                    builder: (context) {
+                      final status = order['status']?.toString() ?? '';
+                      DateTime? startTime;
+                      DateTime? endTime;
+
+                      if (status == 'pending') {
+                        // Tiempo de espera desde creación
+                        startTime = _getOrderTime(order['createdAt']);
+                      } else if (status == 'preparing') {
+                        // Tiempo de preparación en curso
+                        startTime =
+                            _getOrderTime(order['preparingAt']) ??
+                            _getOrderTime(order['createdAt']);
+                      } else if (status == 'completed') {
+                        // Tiempo fijo de preparación
+                        startTime =
+                            _getOrderTime(order['preparingAt']) ??
+                            _getOrderTime(order['createdAt']);
+                        endTime = _getOrderTime(order['completedAt']);
+                      }
+
+                      if (startTime == null) return const SizedBox.shrink();
+
+                      return TimeIndicator(
+                        orderTime: startTime,
+                        endTime: endTime,
+                        compact: true,
+                      );
+                    },
                   ),
-                ),
               ],
             ),
           if (showWaiterInfo && showItems)

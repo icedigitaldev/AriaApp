@@ -1,7 +1,6 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ice_storage/ice_storage.dart';
+import '../../../../components/ui/cached_network_image.dart';
 import '../../../../design/colors/app_colors.dart';
 import '../../../../design/colors/app_gradients.dart';
 import '../../../../design/responsive/responsive_scaler.dart';
@@ -43,15 +42,6 @@ class _CustomerNameSheetState extends State<CustomerNameSheet> {
     super.dispose();
   }
 
-  // Obtiene imagen desde caché o la descarga
-  Future<Uint8List?> _getCachedImage(String url) async {
-    final isCached = await IceStorage.instance.images.isImageCached(url);
-    if (isCached) {
-      return await IceStorage.instance.images.getCachedImage(url);
-    }
-    return await IceStorage.instance.images.downloadAndCacheImage(url);
-  }
-
   void _handleAddToOrder() {
     final price = (widget.dish['price'] as num?)?.toDouble() ?? 0.0;
     final orderItem = {
@@ -85,13 +75,12 @@ class _CustomerNameSheetState extends State<CustomerNameSheet> {
         ),
       ),
       child: Padding(
-        padding: ResponsiveScaler.padding(
-          EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-          ),
+        padding: EdgeInsets.fromLTRB(
+          ResponsiveScaler.width(24),
+          ResponsiveScaler.height(16),
+          ResponsiveScaler.width(24),
+          MediaQuery.of(context).viewInsets.bottom +
+              ResponsiveScaler.height(24),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -121,39 +110,26 @@ class _CustomerNameSheetState extends State<CustomerNameSheet> {
                     color: AppColors.backgroundGrey,
                   ),
                   child: hasImage
-                      ? FutureBuilder<Uint8List?>(
-                          future: _getCachedImage(imageUrl),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(
-                                child: SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              );
-                            }
-                            if (snapshot.hasError || snapshot.data == null) {
-                              return Icon(
-                                Icons.restaurant,
-                                color: AppColors.iconMuted,
-                                size: ResponsiveScaler.icon(28),
-                              );
-                            }
-                            return ClipRRect(
-                              borderRadius: borderRadius,
-                              child: Image.memory(
-                                snapshot.data!,
-                                width: ResponsiveScaler.width(60),
-                                height: ResponsiveScaler.height(60),
-                                fit: BoxFit.cover,
+                      ? CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          width: ResponsiveScaler.width(60),
+                          height: ResponsiveScaler.height(60),
+                          borderRadius: borderRadius,
+                          placeholder: Center(
+                            child: SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primary,
                               ),
-                            );
-                          },
+                            ),
+                          ),
+                          errorWidget: Icon(
+                            Icons.restaurant,
+                            color: AppColors.iconMuted,
+                            size: ResponsiveScaler.icon(28),
+                          ),
                         )
                       : Icon(
                           Icons.restaurant,

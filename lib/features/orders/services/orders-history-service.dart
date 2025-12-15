@@ -1,78 +1,119 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ice_storage/ice_storage.dart';
+import 'package:rxdart/rxdart.dart';
 import '../../../auth/current_user.dart';
 import '../../../utils/app_logger.dart';
 
 class OrdersHistoryService {
   // Cantidad de órdenes por página
-  static const int pageSize = 10;
+  static const int pageSize = 20;
 
   String? get _businessId => CurrentUserAuth.instance.businessId;
   FirestoreGateway? get _gateway => IceStorage.instance.gateway;
 
-  // Consulta paginada de órdenes completadas por fecha
-  Future<List<Map<String, dynamic>>> fetchCompletedOrders({
+  // Stream reactivo de órdenes finalizadas (completed y paid) por fecha
+  Stream<List<Map<String, dynamic>>> streamCompletedOrders({
     required DateTime date,
-    DocumentSnapshot? lastDocument,
-  }) async {
+  }) {
     final businessId = _businessId;
     final gateway = _gateway;
 
     if (businessId == null || businessId.isEmpty) {
       AppLogger.log('BusinessId no disponible', prefix: 'HISTORY_ERROR:');
-      return [];
+      return Stream.value([]);
     }
 
     if (gateway == null) {
       AppLogger.log('Gateway no inicializado', prefix: 'HISTORY_ERROR:');
-      return [];
+      return Stream.value([]);
     }
 
-    try {
-      // Rango de fecha para filtrar órdenes del día seleccionado
-      final startOfDay = DateTime(date.year, date.month, date.day);
-      final endOfDay = startOfDay.add(const Duration(days: 1));
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
 
-      // Construcción de la consulta base
-      Query query = FirebaseFirestore.instance
-          .collection('orders')
-          .where('businessId', isEqualTo: businessId)
-          .where('status', isEqualTo: 'completed')
-          .where(
-            'completedAt',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
-          )
-          .where('completedAt', isLessThan: Timestamp.fromDate(endOfDay))
-          .orderBy('completedAt', descending: true)
-          .limit(pageSize);
+    // Query para órdenes completed
+    final completedQuery = FirebaseFirestore.instance
+        .collection('orders')
+        .where('businessId', isEqualTo: businessId)
+        .where('status', isEqualTo: 'completed')
+        .where(
+          'completedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+        )
+        .where('completedAt', isLessThan: Timestamp.fromDate(endOfDay))
+        .orderBy('completedAt', descending: true)
+        .limit(pageSize);
 
-      // Si hay documento previo, continúa desde ahí
-      if (lastDocument != null) {
-        query = query.startAfterDocument(lastDocument);
-      }
+    // Query para órdenes paid
+    final paidQuery = FirebaseFirestore.instance
+        .collection('orders')
+        .where('businessId', isEqualTo: businessId)
+        .where('status', isEqualTo: 'paid')
+        .where('paidAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('paidAt', isLessThan: Timestamp.fromDate(endOfDay))
+        .orderBy('paidAt', descending: true)
+        .limit(pageSize);
 
-      final snapshot = await gateway.getDocuments(
-        query: query as Query<Map<String, dynamic>>,
-      );
+    // Combina ambos streams con rxdart
+    final completedStream = gateway.streamDocuments(query: completedQuery);
+    final paidStream = gateway.streamDocuments(query: paidQuery);
 
-      final orders = snapshot.docs.map((doc) {
+    return Rx.combineLatest2<
+      QuerySnapshot<Map<String, dynamic>>,
+      QuerySnapshot<Map<String, dynamic>>,
+      List<Map<String, dynamic>>
+    >(completedStream, paidStream, (completedSnap, paidSnap) {
+      final allOrders = <Map<String, dynamic>>[];
+
+      // Procesa órdenes completed
+      for (final doc in completedSnap.docs) {
         final data = doc.data();
         data['id'] = doc.id;
-        // Referencia al documento para paginación
-        data['_docSnapshot'] = doc;
-        return data;
-      }).toList();
+        data['_sortDate'] = data['completedAt'];
+        allOrders.add(data);
+      }
+
+      // Procesa órdenes paid
+      for (final doc in paidSnap.docs) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        data['_sortDate'] = data['paidAt'];
+        allOrders.add(data);
+      }
+
+      // Ordena por fecha descendente
+      allOrders.sort((a, b) {
+        final aDate = a['_sortDate'];
+        final bDate = b['_sortDate'];
+        if (aDate == null && bDate == null) return 0;
+        if (aDate == null) return 1;
+        if (bDate == null) return -1;
+
+        DateTime aDateTime;
+        DateTime bDateTime;
+
+        if (aDate is Timestamp) {
+          aDateTime = aDate.toDate();
+        } else {
+          aDateTime = aDate as DateTime;
+        }
+
+        if (bDate is Timestamp) {
+          bDateTime = bDate.toDate();
+        } else {
+          bDateTime = bDate as DateTime;
+        }
+
+        return bDateTime.compareTo(aDateTime);
+      });
 
       AppLogger.log(
-        'Historial cargado: ${orders.length} órdenes del ${date.day}/${date.month}/${date.year}',
+        'Historial stream: ${allOrders.length} órdenes del ${date.day}/${date.month}/${date.year}',
         prefix: 'HISTORY:',
       );
 
-      return orders;
-    } catch (e) {
-      AppLogger.log('Error cargando historial: $e', prefix: 'HISTORY_ERROR:');
-      return [];
-    }
+      return allOrders;
+    });
   }
 
   // Calcula tiempo de preparación de una orden

@@ -11,7 +11,7 @@ import '../views/new_order_view.dart';
 import '../views/order_details_view.dart';
 import '../views/kitchen_orders_view.dart';
 import '../views/kitchen_order_details_view.dart';
-import '../views/kitchen_history_view.dart';
+import '../views/orders_history_view.dart';
 import '../views/account_blocked_view.dart';
 
 class AppRouter {
@@ -27,7 +27,7 @@ class AppRouter {
   // Rutas de cocina
   static const String kitchenOrders = '/kitchen-orders';
   static const String kitchenOrderDetails = '/kitchen-order-details';
-  static const String kitchenHistory = '/kitchen-history';
+  static const String ordersHistory = '/orders-history';
 
   // Ruta de bloqueo
   static const String accountBlocked = '/account-blocked';
@@ -64,8 +64,8 @@ class AppRouter {
         const AccountStatusWrapper(child: KitchenOrdersView()),
     kitchenOrderDetails: (context) =>
         const AccountStatusWrapper(child: KitchenOrderDetailsView()),
-    kitchenHistory: (context) =>
-        const AccountStatusWrapper(child: KitchenHistoryView()),
+    ordersHistory: (context) =>
+        const AccountStatusWrapper(child: OrdersHistoryView()),
   };
 
   // Navega al home y libera el video de Aria

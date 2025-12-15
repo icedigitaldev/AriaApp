@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../components/ui/empty_state.dart';
 import '../../../../design/responsive/responsive_scaler.dart';
 import '../../../../utils/app_logger.dart';
 import '../ui/table_card.dart';
@@ -23,14 +24,10 @@ class TablesGrid extends StatelessWidget {
     final displayTables = tables;
 
     if (displayTables.isEmpty) {
-      return Center(
-        child: Text(
-          'No hay mesas en este piso',
-          style: TextStyle(
-            fontSize: ResponsiveScaler.font(16),
-            color: Colors.grey,
-          ),
-        ),
+      return const EmptyState(
+        icon: Icons.table_restaurant_outlined,
+        title: 'No hay mesas',
+        description: 'No hay mesas en este piso.',
       );
     }
 

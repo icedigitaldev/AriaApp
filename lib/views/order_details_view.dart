@@ -29,9 +29,6 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
   bool _isLoading = true;
   StreamSubscription? _orderSubscription;
 
-  // Almacena los items marcados como servidos localmente
-  final Set<int> _servedItems = {};
-
   final OrdersService _ordersService = OrdersService();
   final TablesService _tablesService = TablesService();
 
@@ -63,12 +60,12 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
 
     final businessId = CurrentUserAuth.instance.businessId;
 
-    // Busca órdenes activas (pending, preparing, completed)
+    // Busca órdenes activas (pending, preparing, completed, paid)
     final query = FirebaseFirestore.instance
         .collection('orders')
         .where('businessId', isEqualTo: businessId)
         .where('tableId', isEqualTo: _table!['id'])
-        .where('status', whereIn: ['pending', 'preparing', 'completed'])
+        .where('status', whereIn: ['pending', 'preparing', 'completed', 'paid'])
         .orderBy('createdAt', descending: true)
         .limit(1);
 
@@ -164,17 +161,6 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     }
   }
 
-  // Marca un item como servido
-  void _toggleServedItem(int index) {
-    setState(() {
-      if (_servedItems.contains(index)) {
-        _servedItems.remove(index);
-      } else {
-        _servedItems.add(index);
-      }
-    });
-  }
-
   void _navigateToAddItems() {
     Navigator.pushNamed(context, '/new-order', arguments: _table);
   }
@@ -188,6 +174,8 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
         return AppColors.info;
       case 'completed':
         return AppColors.success;
+      case 'paid':
+        return AppColors.primary;
       default:
         return AppColors.textMuted;
     }
@@ -202,6 +190,8 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
         return 'PREPARANDO';
       case 'completed':
         return 'LISTO';
+      case 'paid':
+        return 'PAGADO';
       default:
         return status.toUpperCase();
     }
@@ -216,6 +206,8 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
         return Icons.restaurant;
       case 'completed':
         return Icons.check_circle;
+      case 'paid':
+        return Icons.paid;
       default:
         return Icons.info;
     }
@@ -438,8 +430,6 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     final status = _order!['status']?.toString() ?? 'pending';
     // Solo permite eliminar items si la orden está pendiente
     final canDeleteItems = status == 'pending';
-    // Permite marcar items como servidos si la orden está completada
-    final canMarkServed = status == 'completed';
 
     return ListView.builder(
       padding: ResponsiveScaler.padding(
@@ -454,18 +444,12 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
           items[index] as Map<String, dynamic>,
           index,
           canDeleteItems,
-          canMarkServed,
         );
       },
     );
   }
 
-  Widget _buildOrderItem(
-    Map<String, dynamic> item,
-    int index,
-    bool canDelete,
-    bool canMarkServed,
-  ) {
+  Widget _buildOrderItem(Map<String, dynamic> item, int index, bool canDelete) {
     final variantName = item['variantName'];
     final customerName = item['customerName'];
     final price = (item['price'] as num?)?.toDouble() ?? 0.0;
@@ -474,112 +458,101 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
     final hasVariant = variantName != null && variantName.toString().isNotEmpty;
     final hasCustomer =
         customerName != null && customerName.toString().isNotEmpty;
-    final isServed = _servedItems.contains(index);
 
-    final child = GestureDetector(
-      onTap: canMarkServed ? () => _toggleServedItem(index) : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 10)),
-        padding: ResponsiveScaler.padding(
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        ),
-        decoration: BoxDecoration(
-          // Fondo verdecito suave cuando está servido
-          color: isServed
-              ? AppColors.success.withValues(alpha: 0.15)
-              : AppColors.card,
-          borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: ResponsiveScaler.width(36),
-              height: ResponsiveScaler.height(36),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(
-                  ResponsiveScaler.radius(10),
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  'x$quantity',
-                  style: GoogleFonts.poppins(
-                    fontSize: ResponsiveScaler.font(14),
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+    final child = Container(
+      margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 10)),
+      padding: ResponsiveScaler.padding(
+        const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: ResponsiveScaler.width(36),
+            height: ResponsiveScaler.height(36),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(ResponsiveScaler.radius(10)),
+            ),
+            child: Center(
+              child: Text(
+                'x$quantity',
+                style: GoogleFonts.poppins(
+                  fontSize: ResponsiveScaler.font(14),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
                 ),
               ),
             ),
-            SizedBox(width: ResponsiveScaler.width(12)),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item['name'] ?? '',
-                    style: GoogleFonts.poppins(
-                      fontSize: ResponsiveScaler.font(15),
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                      decoration: isServed ? TextDecoration.lineThrough : null,
-                    ),
+          ),
+          SizedBox(width: ResponsiveScaler.width(12)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['name'] ?? '',
+                  style: GoogleFonts.poppins(
+                    fontSize: ResponsiveScaler.font(15),
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
                   ),
-                  if (hasVariant) ...[
-                    SizedBox(height: ResponsiveScaler.height(2)),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.local_offer,
-                          size: ResponsiveScaler.icon(12),
+                ),
+                if (hasVariant) ...[
+                  SizedBox(height: ResponsiveScaler.height(2)),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.local_offer,
+                        size: ResponsiveScaler.icon(12),
+                        color: AppColors.primary,
+                      ),
+                      SizedBox(width: ResponsiveScaler.width(4)),
+                      Text(
+                        variantName.toString(),
+                        style: GoogleFonts.poppins(
+                          fontSize: ResponsiveScaler.font(12),
                           color: AppColors.primary,
                         ),
-                        SizedBox(width: ResponsiveScaler.width(4)),
-                        Text(
-                          variantName.toString(),
-                          style: GoogleFonts.poppins(
-                            fontSize: ResponsiveScaler.font(12),
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  if (hasCustomer) ...[
-                    SizedBox(height: ResponsiveScaler.height(2)),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.person,
-                          size: ResponsiveScaler.icon(12),
+                      ),
+                    ],
+                  ),
+                ],
+                if (hasCustomer) ...[
+                  SizedBox(height: ResponsiveScaler.height(2)),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        size: ResponsiveScaler.icon(12),
+                        color: AppColors.textMuted,
+                      ),
+                      SizedBox(width: ResponsiveScaler.width(4)),
+                      Text(
+                        customerName.toString(),
+                        style: GoogleFonts.poppins(
+                          fontSize: ResponsiveScaler.font(12),
                           color: AppColors.textMuted,
                         ),
-                        SizedBox(width: ResponsiveScaler.width(4)),
-                        Text(
-                          customerName.toString(),
-                          style: GoogleFonts.poppins(
-                            fontSize: ResponsiveScaler.font(12),
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ],
-              ),
+              ],
             ),
-            Text(
-              'S/ ${subtotal.toStringAsFixed(2)}',
-              style: GoogleFonts.poppins(
-                fontSize: ResponsiveScaler.font(15),
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
+          ),
+          Text(
+            'S/ ${subtotal.toStringAsFixed(2)}',
+            style: GoogleFonts.poppins(
+              fontSize: ResponsiveScaler.font(15),
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
 
@@ -617,6 +590,15 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
 
   Widget _buildBottomBar() {
     final total = (_order!['totalAmount'] as num?)?.toDouble() ?? 0.0;
+    final status = _order!['status']?.toString() ?? 'pending';
+    final isPaid = status == 'paid';
+    final department =
+        CurrentUserAuth.instance.department?.toLowerCase() ?? 'service';
+    final isServiceDepartment = department == 'service';
+
+    // Información de pago (solo visible para servicio cuando está pagado)
+    final paymentMethod = _order!['paymentMethod']?.toString();
+    final paidAmount = (_order!['paidAmount'] as num?)?.toDouble() ?? total;
 
     return Container(
       padding: ResponsiveScaler.padding(
@@ -640,27 +622,89 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Total a pagar',
-            style: GoogleFonts.poppins(
-              fontSize: ResponsiveScaler.font(14),
-              fontWeight: FontWeight.w500,
-              color: AppColors.textMuted,
+      child: isPaid
+          ? _buildPaidBottomContent(
+              total,
+              paidAmount,
+              paymentMethod,
+              isServiceDepartment,
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total a pagar',
+                  style: GoogleFonts.poppins(
+                    fontSize: ResponsiveScaler.font(14),
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+                Text(
+                  'S/ ${total.toStringAsFixed(2)}',
+                  style: GoogleFonts.poppins(
+                    fontSize: ResponsiveScaler.font(28),
+                    fontWeight: FontWeight.bold,
+                    foreground: AppGradients.totalAmountText,
+                  ),
+                ),
+              ],
             ),
-          ),
-          Text(
-            'S/ ${total.toStringAsFixed(2)}',
-            style: GoogleFonts.poppins(
-              fontSize: ResponsiveScaler.font(28),
-              fontWeight: FontWeight.bold,
-              foreground: AppGradients.totalAmountText,
+    );
+  }
+
+  // Contenido del bottom bar cuando la orden está pagada
+  Widget _buildPaidBottomContent(
+    double total,
+    double paidAmount,
+    String? paymentMethod,
+    bool showPaymentDetails,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: AppColors.success,
+                  size: ResponsiveScaler.icon(18),
+                ),
+                SizedBox(width: ResponsiveScaler.width(6)),
+                Text(
+                  'Pagado',
+                  style: GoogleFonts.poppins(
+                    fontSize: ResponsiveScaler.font(14),
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.success,
+                  ),
+                ),
+              ],
             ),
+            // Muestra método de pago solo para servicio
+            if (showPaymentDetails && paymentMethod != null)
+              Text(
+                paymentMethod,
+                style: GoogleFonts.poppins(
+                  fontSize: ResponsiveScaler.font(12),
+                  color: AppColors.textMuted,
+                ),
+              ),
+          ],
+        ),
+        Text(
+          'S/ ${paidAmount.toStringAsFixed(2)}',
+          style: GoogleFonts.poppins(
+            fontSize: ResponsiveScaler.font(28),
+            fontWeight: FontWeight.bold,
+            color: AppColors.success,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

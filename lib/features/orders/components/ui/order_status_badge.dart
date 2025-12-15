@@ -64,35 +64,42 @@ class OrderStatusBadge extends StatelessWidget {
           'backgroundColor': StatusColors.pendingBackground,
           'textColor': StatusColors.pendingText,
           'dotColor': StatusColors.pendingDot,
-          'text': 'Pendiente'
+          'text': 'Pendiente',
         };
       case 'preparing':
         return {
           'backgroundColor': StatusColors.preparingBackground,
           'textColor': StatusColors.preparingText,
           'dotColor': StatusColors.preparingDot,
-          'text': 'Preparando'
+          'text': 'Preparando',
         };
       case 'completed':
         return {
           'backgroundColor': StatusColors.readyBackground,
           'textColor': StatusColors.readyText,
           'dotColor': StatusColors.readyDot,
-          'text': 'Listo'
+          'text': 'Listo',
         };
       case 'delivered':
         return {
           'backgroundColor': StatusColors.deliveredBackground,
           'textColor': StatusColors.deliveredText,
           'dotColor': StatusColors.deliveredDot,
-          'text': 'Entregado'
+          'text': 'Entregado',
+        };
+      case 'paid':
+        return {
+          'backgroundColor': StatusColors.deliveredBackground,
+          'textColor': StatusColors.deliveredText,
+          'dotColor': StatusColors.deliveredDot,
+          'text': 'Pagado',
         };
       default:
         return {
           'backgroundColor': StatusColors.unknownBackground,
           'textColor': StatusColors.unknownText,
           'dotColor': StatusColors.unknownDot,
-          'text': 'Desconocido'
+          'text': 'Desconocido',
         };
     }
   }

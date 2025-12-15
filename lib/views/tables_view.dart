@@ -56,7 +56,7 @@ class _TablesViewState extends State<TablesView> {
                         : CurrentUserAuth.instance.avatarUrl,
                     onHistoryTap: () {
                       AppLogger.log('Historial de mesas', prefix: 'MESAS:');
-                      Navigator.pushNamed(context, '/kitchen-history');
+                      Navigator.pushNamed(context, '/orders-history');
                     },
                   ),
                   FloorSelector(

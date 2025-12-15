@@ -5,6 +5,7 @@ import '../../../../design/responsive/responsive_scaler.dart';
 
 class TimeIndicator extends StatelessWidget {
   final DateTime orderTime;
+  final DateTime? endTime;
   final String? displayTime;
   final bool showIcon;
   final bool compact;
@@ -13,6 +14,7 @@ class TimeIndicator extends StatelessWidget {
   const TimeIndicator({
     Key? key,
     required this.orderTime,
+    this.endTime,
     this.displayTime,
     this.showIcon = true,
     this.compact = false,
@@ -20,7 +22,9 @@ class TimeIndicator extends StatelessWidget {
   }) : super(key: key);
 
   String _getTimeDifference() {
-    final difference = DateTime.now().difference(orderTime);
+    // Si hay endTime, calcular diferencia fija (tiempo de preparación)
+    final referenceTime = endTime ?? DateTime.now();
+    final difference = referenceTime.difference(orderTime);
     if (difference.inMinutes < 60) {
       return '${difference.inMinutes} min';
     }
