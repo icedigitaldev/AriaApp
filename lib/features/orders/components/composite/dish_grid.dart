@@ -1,6 +1,8 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ice_storage/ice_storage.dart';
 import '../../../../design/colors/app_colors.dart';
 import '../../../../design/colors/app_gradients.dart';
 import '../../../../design/colors/status_colors.dart';
@@ -16,6 +18,7 @@ class DishGrid extends StatelessWidget {
   final Function(Map<String, dynamic> orderItem)? onAddVariantItem;
   final bool showRating;
   final bool showCategory;
+  final double bottomPadding;
 
   const DishGrid({
     Key? key,
@@ -26,6 +29,7 @@ class DishGrid extends StatelessWidget {
     this.onAddVariantItem,
     this.showRating = true,
     this.showCategory = true,
+    this.bottomPadding = 100,
   }) : super(key: key);
 
   // Formatea el precio considerando variantes
@@ -56,11 +60,20 @@ class DishGrid extends StatelessWidget {
     return 'S/ ${price.toStringAsFixed(2)}';
   }
 
+  // Obtiene imagen desde caché o la descarga
+  Future<Uint8List?> _getCachedImage(String url) async {
+    final isCached = await IceStorage.instance.images.isImageCached(url);
+    if (isCached) {
+      return await IceStorage.instance.images.getCachedImage(url);
+    }
+    return await IceStorage.instance.images.downloadAndCacheImage(url);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MasonryGridView.count(
       padding: ResponsiveScaler.padding(
-        const EdgeInsets.fromLTRB(20, 0, 20, 80),
+        EdgeInsets.fromLTRB(20, 0, 20, bottomPadding),
       ),
       crossAxisCount: 2,
       mainAxisSpacing: ResponsiveScaler.height(16),
@@ -106,31 +119,59 @@ class DishGrid extends StatelessWidget {
     final imageUrl = dish['imageUrl'] ?? dish['image'];
     final hasImage = imageUrl != null && imageUrl.toString().isNotEmpty;
 
+    final borderRadius = BorderRadius.vertical(
+      top: Radius.circular(ResponsiveScaler.radius(20)),
+    );
+
+    // Widget placeholder/error
+    Widget placeholderIcon = Center(
+      child: Icon(
+        Icons.restaurant,
+        size: ResponsiveScaler.icon(48),
+        color: AppColors.iconMuted,
+      ),
+    );
+
     return Stack(
       children: [
         Container(
           height: ResponsiveScaler.height(140),
+          width: double.infinity,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(ResponsiveScaler.radius(20)),
-            ),
-            color: hasImage ? null : AppColors.backgroundGrey,
-            image: hasImage
-                ? DecorationImage(
-                    image: NetworkImage(imageUrl),
-                    fit: BoxFit.cover,
-                  )
-                : null,
+            borderRadius: borderRadius,
+            color: AppColors.backgroundGrey,
           ),
-          child: !hasImage
-              ? Center(
-                  child: Icon(
-                    Icons.restaurant,
-                    size: ResponsiveScaler.icon(48),
-                    color: AppColors.iconMuted,
-                  ),
+          child: hasImage
+              ? FutureBuilder<Uint8List?>(
+                  future: _getCachedImage(imageUrl),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: SizedBox(
+                          width: ResponsiveScaler.width(20),
+                          height: ResponsiveScaler.width(20),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      );
+                    }
+                    if (snapshot.hasError || snapshot.data == null) {
+                      return placeholderIcon;
+                    }
+                    return ClipRRect(
+                      borderRadius: borderRadius,
+                      child: Image.memory(
+                        snapshot.data!,
+                        width: double.infinity,
+                        height: ResponsiveScaler.height(140),
+                        fit: BoxFit.cover,
+                      ),
+                    );
+                  },
                 )
-              : null,
+              : placeholderIcon,
         ),
         if (showRating && dish['rating'] != null)
           Positioned(

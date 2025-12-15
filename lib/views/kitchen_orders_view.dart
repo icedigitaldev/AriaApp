@@ -1,4 +1,6 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:ice_storage/ice_storage.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 import '../components/composite/transparent_app_bar.dart';
 import '../components/ui/app_loader.dart';
@@ -41,6 +43,15 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  // Obtiene imagen desde caché o la descarga
+  Future<Uint8List?> _getCachedImage(String url) async {
+    final isCached = await IceStorage.instance.images.isImageCached(url);
+    if (isCached) {
+      return await IceStorage.instance.images.getCachedImage(url);
+    }
+    return await IceStorage.instance.images.downloadAndCacheImage(url);
   }
 
   void _onPageChanged(int index, OrdersController controller) {
@@ -138,6 +149,7 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
         final String? displayImage = (imageUrl != null && imageUrl.isNotEmpty)
             ? imageUrl
             : (avatarUrl != null && avatarUrl.isNotEmpty ? avatarUrl : null);
+        final borderRadius = BorderRadius.circular(ResponsiveScaler.radius(16));
 
         return Scaffold(
           extendBodyBehindAppBar: true,
@@ -161,15 +173,7 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                             ? AppGradients.primaryButton
                             : null,
                         color: (displayImage != null) ? AppColors.card : null,
-                        borderRadius: BorderRadius.circular(
-                          ResponsiveScaler.radius(16),
-                        ),
-                        image: (displayImage != null)
-                            ? DecorationImage(
-                                image: NetworkImage(displayImage),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
+                        borderRadius: borderRadius,
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.shadowPurple,
@@ -178,8 +182,47 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                           ),
                         ],
                       ),
-                      child: (displayImage == null)
-                          ? ClipRRect(
+                      child: (displayImage != null)
+                          ? FutureBuilder<Uint8List?>(
+                              future: _getCachedImage(displayImage),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                    child: SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  );
+                                }
+                                if (snapshot.hasError ||
+                                    snapshot.data == null) {
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(
+                                      ResponsiveScaler.radius(12),
+                                    ),
+                                    child: Image.asset(
+                                      'assets/images/aria-logo.png',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                }
+                                return ClipRRect(
+                                  borderRadius: borderRadius,
+                                  child: Image.memory(
+                                    snapshot.data!,
+                                    width: ResponsiveScaler.width(48),
+                                    height: ResponsiveScaler.height(48),
+                                    fit: BoxFit.cover,
+                                  ),
+                                );
+                              },
+                            )
+                          : ClipRRect(
                               borderRadius: BorderRadius.circular(
                                 ResponsiveScaler.radius(12),
                               ),
@@ -187,8 +230,7 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                                 'assets/images/aria-logo.png',
                                 fit: BoxFit.cover,
                               ),
-                            )
-                          : null,
+                            ),
                     ),
                     actions: [
                       IconButton(

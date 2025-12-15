@@ -1,5 +1,7 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ice_storage/ice_storage.dart';
 import '../../../../design/colors/app_colors.dart';
 import '../../../../design/colors/app_gradients.dart';
 import '../../../../design/responsive/responsive_scaler.dart';
@@ -76,6 +78,15 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
       text = '$variantName - $text';
     }
     return text;
+  }
+
+  // Obtiene imagen desde caché o la descarga
+  Future<Uint8List?> _getCachedImage(String url) async {
+    final isCached = await IceStorage.instance.images.isImageCached(url);
+    if (isCached) {
+      return await IceStorage.instance.images.getCachedImage(url);
+    }
+    return await IceStorage.instance.images.downloadAndCacheImage(url);
   }
 
   void _handleConfirm() async {
@@ -173,6 +184,7 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
     final isExpanded = expandedItemId == itemId;
     final imageUrl = item['dishImage'] ?? item['imageUrl'] ?? item['image'];
     final hasImage = imageUrl != null && imageUrl.toString().isNotEmpty;
+    final borderRadius = BorderRadius.circular(ResponsiveScaler.radius(12));
 
     return Dismissible(
       key: Key('$itemId-$index'),
@@ -227,6 +239,7 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // Imagen con caché
                   Container(
                     width: ResponsiveScaler.width(56),
                     height: ResponsiveScaler.height(56),
@@ -234,24 +247,49 @@ class _OrderSummaryModalState extends State<OrderSummaryModal> {
                       const EdgeInsets.only(right: 12),
                     ),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(
-                        ResponsiveScaler.radius(12),
-                      ),
-                      color: hasImage ? null : AppColors.inputBorder,
-                      image: hasImage
-                          ? DecorationImage(
-                              image: NetworkImage(imageUrl),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
+                      borderRadius: borderRadius,
+                      color: AppColors.inputBorder,
                     ),
-                    child: !hasImage
-                        ? Icon(
+                    child: hasImage
+                        ? FutureBuilder<Uint8List?>(
+                            future: _getCachedImage(imageUrl),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Center(
+                                  child: SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                );
+                              }
+                              if (snapshot.hasError || snapshot.data == null) {
+                                return Icon(
+                                  Icons.restaurant,
+                                  color: AppColors.iconMuted,
+                                  size: ResponsiveScaler.icon(22),
+                                );
+                              }
+                              return ClipRRect(
+                                borderRadius: borderRadius,
+                                child: Image.memory(
+                                  snapshot.data!,
+                                  width: ResponsiveScaler.width(56),
+                                  height: ResponsiveScaler.height(56),
+                                  fit: BoxFit.cover,
+                                ),
+                              );
+                            },
+                          )
+                        : Icon(
                             Icons.restaurant,
                             color: AppColors.iconMuted,
                             size: ResponsiveScaler.icon(22),
-                          )
-                        : null,
+                          ),
                   ),
                   Expanded(
                     child: SizedBox(

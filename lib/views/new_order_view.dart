@@ -438,6 +438,9 @@ class _NewOrderViewState extends State<NewOrderView> {
                                 onUpdateQuantity: (id, qty) =>
                                     _updateQuantityByDishId(id.toString(), qty),
                                 onAddVariantItem: _addVariantItemToOrder,
+                                bottomPadding: _orderItems.isNotEmpty
+                                    ? 120
+                                    : 20,
                               );
                             },
                           ),
@@ -449,7 +452,7 @@ class _NewOrderViewState extends State<NewOrderView> {
           floatingActionButton: _orderItems.isNotEmpty
               ? Padding(
                   padding: ResponsiveScaler.padding(
-                    const EdgeInsets.only(bottom: 16.0),
+                    const EdgeInsets.only(bottom: 10.0),
                   ),
                   child: FloatingActionButton.extended(
                     onPressed: _showOrderSummary,
