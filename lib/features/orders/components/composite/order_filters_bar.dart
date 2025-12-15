@@ -29,11 +29,7 @@ class OrderFiltersBarState extends State<OrderFiltersBar> {
     if (widget.customFilters != null) return widget.customFilters!;
 
     return [
-      {
-        'id': 'all',
-        'label': 'Todos',
-        'count': widget.orders.length,
-      },
+      {'id': 'all', 'label': 'Todos', 'count': widget.orders.length},
       {
         'id': 'pending',
         'label': 'Pendientes',
@@ -66,7 +62,7 @@ class OrderFiltersBarState extends State<OrderFiltersBar> {
     if (!_scrollController.hasClients) return;
 
     final selectedIndex = _filters.indexWhere(
-          (filter) => filter['id'] == widget.selectedFilter,
+      (filter) => filter['id'] == widget.selectedFilter,
     );
 
     if (selectedIndex == -1) return;
@@ -74,7 +70,8 @@ class OrderFiltersBarState extends State<OrderFiltersBar> {
     final double chipWidth = ResponsiveScaler.width(120);
     final double targetPosition = selectedIndex * chipWidth;
     final double viewportWidth = _scrollController.position.viewportDimension;
-    final double scrollPosition = targetPosition - (viewportWidth / 2) + (chipWidth / 2);
+    final double scrollPosition =
+        targetPosition - (viewportWidth / 2) + (chipWidth / 2);
 
     _scrollController.animateTo(
       scrollPosition.clamp(
@@ -97,7 +94,7 @@ class OrderFiltersBarState extends State<OrderFiltersBar> {
     return Container(
       height: ResponsiveScaler.height(50),
       margin: ResponsiveScaler.margin(
-        const EdgeInsets.symmetric(horizontal: 20),
+        const EdgeInsets.symmetric(horizontal: 16),
       ),
       child: ListView.builder(
         controller: _scrollController,

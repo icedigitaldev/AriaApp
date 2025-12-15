@@ -19,7 +19,9 @@ class RestaurantHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: ResponsiveScaler.padding(const EdgeInsets.all(20)),
+      padding: ResponsiveScaler.padding(
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
       child: Row(
         children: [
           // Logo / Avatar

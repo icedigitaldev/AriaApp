@@ -35,12 +35,12 @@ class StatCard extends StatelessWidget {
       children: [
         Container(
           padding: ResponsiveScaler.padding(
-              EdgeInsets.all(compact ? 6.0 : 10.0)
+            EdgeInsets.all(compact ? 5.0 : 8.0),
           ),
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(
-                ResponsiveScaler.radius(compact ? 8 : 12)
+              ResponsiveScaler.radius(compact ? 8 : 12),
             ),
           ),
           child: Icon(
@@ -49,11 +49,11 @@ class StatCard extends StatelessWidget {
             size: ResponsiveScaler.icon(compact ? 20 : 24),
           ),
         ),
-        SizedBox(height: ResponsiveScaler.height(compact ? 6 : 10)),
+        SizedBox(height: ResponsiveScaler.height(compact ? 4 : 6)),
         Text(
           value,
           style: GoogleFonts.poppins(
-            fontSize: ResponsiveScaler.font(compact ? 16 : 20),
+            fontSize: ResponsiveScaler.font(compact ? 15 : 18),
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
           ),
@@ -63,7 +63,7 @@ class StatCard extends StatelessWidget {
         Text(
           label,
           style: GoogleFonts.poppins(
-            fontSize: ResponsiveScaler.font(compact ? 10 : 12),
+            fontSize: ResponsiveScaler.font(compact ? 9 : 11),
             color: AppColors.textSecondary,
           ),
           textAlign: TextAlign.center,
@@ -72,10 +72,7 @@ class StatCard extends StatelessWidget {
     );
 
     if (!showBackground) {
-      return GestureDetector(
-        onTap: onTap,
-        child: content,
-      );
+      return GestureDetector(onTap: onTap, child: content);
     }
 
     return GestureDetector(

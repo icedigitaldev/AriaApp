@@ -94,7 +94,7 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
                   Expanded(
                     child: Padding(
                       padding: ResponsiveScaler.padding(
-                        const EdgeInsets.symmetric(horizontal: 20),
+                        const EdgeInsets.symmetric(horizontal: 16),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +207,7 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
     }
 
     return Container(
-      margin: ResponsiveScaler.margin(const EdgeInsets.all(20)),
+      margin: ResponsiveScaler.margin(const EdgeInsets.all(16)),
       padding: ResponsiveScaler.padding(const EdgeInsets.all(16)),
       decoration: BoxDecoration(
         color: AppColors.card.withOpacity(0.9),

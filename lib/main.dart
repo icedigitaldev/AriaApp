@@ -12,10 +12,11 @@ import 'router/app_router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Registrar fvp para soporte de videos con transparencia (sin audio)
+  // Registrar fvp para soporte de videos con transparencia
   fvp.registerWith(
     options: {
       'video.decoders': ['FFmpeg'],
+      'ao': 'AudioTrack',
       'avtrack.audio': -1,
     },
   );

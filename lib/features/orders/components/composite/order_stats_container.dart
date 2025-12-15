@@ -48,7 +48,9 @@ class OrderStatsContainer extends StatelessWidget {
     }
 
     if (showPreparing) {
-      final preparingCount = orders.where((o) => o['status'] == 'preparing').length;
+      final preparingCount = orders
+          .where((o) => o['status'] == 'preparing')
+          .length;
       stats.add(
         Expanded(
           child: StatCard(
@@ -69,7 +71,7 @@ class OrderStatsContainer extends StatelessWidget {
         Expanded(
           child: StatCard(
             icon: Icons.timer_outlined,
-            label: 'Tiempo promedio',
+            label: 'Promedio',
             value: averageTime ?? '12 min',
             color: AppColors.info,
             backgroundColor: AppColors.info.withOpacity(0.1),
@@ -109,12 +111,12 @@ class OrderStatsContainer extends StatelessWidget {
 
     return Container(
       margin: ResponsiveScaler.margin(
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       padding: ResponsiveScaler.padding(
         EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: activeStatsCount > 3 ? 12 : 16,
+          horizontal: 12,
+          vertical: activeStatsCount > 3 ? 8 : 10,
         ),
       ),
       decoration: BoxDecoration(
@@ -152,7 +154,7 @@ class OrderStatsContainer extends StatelessWidget {
   Widget _buildDivider() {
     return Container(
       margin: ResponsiveScaler.margin(
-          const EdgeInsets.symmetric(horizontal: 12)
+        const EdgeInsets.symmetric(horizontal: 12),
       ),
       width: 1,
       color: AppColors.textMuted.withOpacity(0.2),

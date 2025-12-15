@@ -69,8 +69,10 @@ class ResponsiveScaler {
   static EdgeInsets margin(EdgeInsets m) => _scale(m);
 
   // Otros
-  static Size size(Size s) => Size(s.width * _heightFactor, s.height * _heightFactor);
+  static Size size(Size s) =>
+      Size(s.width * _heightFactor, s.height * _heightFactor);
   static double radius(double r) => r * _heightFactor;
   static double icon(double s) => s * _heightFactor;
-  static double font(double s) => s * (_heightFactor < 0.92 ? _heightFactor + 0.05 : _heightFactor);
+  static double font(double s) =>
+      s * (_heightFactor < 0.92 ? _heightFactor + 0.05 : _heightFactor);
 }

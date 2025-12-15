@@ -26,10 +26,11 @@ class OrderHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       color: backgroundColor ?? AppColors.transparent,
-      padding: ResponsiveScaler.padding(const EdgeInsets.all(20)),
+      padding: ResponsiveScaler.padding(
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
       child: Row(
         children: [
           if (showBackButton && onBack != null)
@@ -39,7 +40,9 @@ class OrderHeader extends StatelessWidget {
                 padding: ResponsiveScaler.padding(const EdgeInsets.all(8)),
                 decoration: BoxDecoration(
                   color: AppColors.card.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
+                  borderRadius: BorderRadius.circular(
+                    ResponsiveScaler.radius(12),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.shadow,
@@ -67,8 +70,9 @@ class OrderHeader extends StatelessWidget {
                     fontSize: ResponsiveScaler.font(24),
                     fontWeight: FontWeight.bold,
                     foreground: Paint()
-                      ..shader = AppGradients.headerText
-                          .createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                      ..shader = AppGradients.headerText.createShader(
+                        const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
+                      ),
                   ),
                 ),
                 if (subtitle != null)

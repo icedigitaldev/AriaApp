@@ -73,12 +73,56 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
         final ordersState = ref.watch(ordersControllerProvider);
         final ordersController = ref.notifier(ordersControllerProvider);
 
-        // Función auxiliar para filtrar órdenes
+        // Filtra órdenes por estado
         List<Map<String, dynamic>> getFilteredOrders(String filter) {
           if (filter == 'all') return ordersState.orders;
           return ordersState.orders
               .where((o) => o['status'] == filter)
               .toList();
+        }
+
+        // Calcula el tiempo promedio de preparación basado en órdenes completadas
+        String getAverageTime() {
+          final completedOrders = ordersState.orders
+              .where((o) => o['status'] == 'completed')
+              .toList();
+
+          if (completedOrders.isEmpty) return '--';
+
+          int totalMinutes = 0;
+          int validOrders = 0;
+
+          for (final order in completedOrders) {
+            final createdAt = order['createdAt'];
+            final completedAt = order['completedAt'];
+
+            if (createdAt != null && completedAt != null) {
+              DateTime? start;
+              DateTime? end;
+
+              if (createdAt is DateTime) {
+                start = createdAt;
+              } else if (createdAt.toDate != null) {
+                start = createdAt.toDate();
+              }
+
+              if (completedAt is DateTime) {
+                end = completedAt;
+              } else if (completedAt.toDate != null) {
+                end = completedAt.toDate();
+              }
+
+              if (start != null && end != null) {
+                totalMinutes += end.difference(start).inMinutes;
+                validOrders++;
+              }
+            }
+          }
+
+          if (validOrders == 0) return '--';
+
+          final avgMinutes = (totalMinutes / validOrders).round();
+          return '$avgMinutes min';
         }
 
         if (ordersState.isLoading) {
@@ -195,7 +239,7 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                     showPending: true,
                     showPreparing: true,
                     showAverageTime: true,
-                    averageTime: '12 min',
+                    averageTime: getAverageTime(),
                   ),
 
                   Expanded(
@@ -222,7 +266,7 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
 
                         return ListView.builder(
                           padding: ResponsiveScaler.padding(
-                            const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                            const EdgeInsets.fromLTRB(16, 0, 16, 16),
                           ),
                           itemCount: filteredOrders.length,
                           itemBuilder: (context, index) => OrderCard(

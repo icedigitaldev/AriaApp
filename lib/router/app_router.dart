@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ice_storage/ice_storage.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 import '../controllers/aria_video_controller.dart';
+import '../components/composite/account_status_wrapper.dart';
 
 import '../views/phone_auth_view.dart';
 import '../views/otp_verification_view.dart';
@@ -11,6 +12,7 @@ import '../views/order_details_view.dart';
 import '../views/kitchen_orders_view.dart';
 import '../views/kitchen_order_details_view.dart';
 import '../views/kitchen_history_view.dart';
+import '../views/account_blocked_view.dart';
 
 class AppRouter {
   // Rutas de autenticación
@@ -26,6 +28,9 @@ class AppRouter {
   static const String kitchenOrders = '/kitchen-orders';
   static const String kitchenOrderDetails = '/kitchen-order-details';
   static const String kitchenHistory = '/kitchen-history';
+
+  // Ruta de bloqueo
+  static const String accountBlocked = '/account-blocked';
 
   // Obtiene la ruta inicial según estado de autenticación
   static String getInitialRoute() {
@@ -49,12 +54,18 @@ class AppRouter {
   static Map<String, WidgetBuilder> routes = {
     phoneAuth: (context) => const PhoneAuthView(),
     otpVerification: (context) => const OtpVerificationView(),
-    tables: (context) => const TablesView(),
-    newOrder: (context) => const NewOrderView(),
-    orderDetails: (context) => const OrderDetailsView(),
-    kitchenOrders: (context) => const KitchenOrdersView(),
-    kitchenOrderDetails: (context) => const KitchenOrderDetailsView(),
-    kitchenHistory: (context) => const KitchenHistoryView(),
+    accountBlocked: (context) => const AccountBlockedView(),
+    // Vistas principales envueltas con monitoreo de status
+    tables: (context) => const AccountStatusWrapper(child: TablesView()),
+    newOrder: (context) => const AccountStatusWrapper(child: NewOrderView()),
+    orderDetails: (context) =>
+        const AccountStatusWrapper(child: OrderDetailsView()),
+    kitchenOrders: (context) =>
+        const AccountStatusWrapper(child: KitchenOrdersView()),
+    kitchenOrderDetails: (context) =>
+        const AccountStatusWrapper(child: KitchenOrderDetailsView()),
+    kitchenHistory: (context) =>
+        const AccountStatusWrapper(child: KitchenHistoryView()),
   };
 
   // Navega al home y libera el video de Aria

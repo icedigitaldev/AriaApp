@@ -80,7 +80,7 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
                   // Selector de fecha
                   Container(
                     margin: ResponsiveScaler.margin(
-                      const EdgeInsets.symmetric(horizontal: 20),
+                      const EdgeInsets.symmetric(horizontal: 16),
                     ),
                     child: DateSelector(
                       selectedDate: historyState.selectedDate,
@@ -110,7 +110,7 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
   Widget _buildDayStats(OrdersHistoryState historyState) {
     return Container(
       margin: ResponsiveScaler.margin(
-        const EdgeInsets.symmetric(horizontal: 20),
+        const EdgeInsets.symmetric(horizontal: 16),
       ),
       padding: ResponsiveScaler.padding(
         const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -215,7 +215,7 @@ class _KitchenHistoryViewState extends State<KitchenHistoryView> {
     return ListView.builder(
       controller: _scrollController,
       padding: ResponsiveScaler.padding(
-        const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        const EdgeInsets.fromLTRB(16, 12, 16, 16),
       ),
       // Agrega un item extra si está cargando más
       itemCount:
