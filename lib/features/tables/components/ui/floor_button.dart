@@ -5,14 +5,14 @@ import '../../../../design/colors/app_gradients.dart';
 import '../../../../design/responsive/responsive_scaler.dart';
 
 class FloorButton extends StatelessWidget {
-  final int floor;
+  final String floorId;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
   const FloorButton({
     Key? key,
-    required this.floor,
+    required this.floorId,
     required this.label,
     required this.isSelected,
     required this.onTap,
@@ -30,19 +30,21 @@ class FloorButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
             boxShadow: isSelected
                 ? [
-              BoxShadow(
-                color: AppColors.shadowPurple,
-                blurRadius: 8,
-                offset: Offset(0, ResponsiveScaler.height(2)),
-              ),
-            ]
+                    BoxShadow(
+                      color: AppColors.shadowPurple,
+                      blurRadius: 8,
+                      offset: Offset(0, ResponsiveScaler.height(2)),
+                    ),
+                  ]
                 : null,
           ),
           child: Center(
             child: Text(
               label,
               style: GoogleFonts.poppins(
-                color: isSelected ? AppColors.textOnPrimary : AppColors.textMuted,
+                color: isSelected
+                    ? AppColors.textOnPrimary
+                    : AppColors.textMuted,
                 fontSize: ResponsiveScaler.font(14),
                 fontWeight: FontWeight.w600,
               ),

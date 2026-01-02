@@ -38,7 +38,7 @@ class TablesController extends TablesStateNotifier {
   }
 
   // Cambia el piso seleccionado
-  void selectFloor(int floor) {
+  void selectFloor(String? floor) {
     setSelectedFloor(floor);
     AppLogger.log('Piso seleccionado: $floor', prefix: 'TABLES:');
   }

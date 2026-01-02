@@ -134,18 +134,19 @@ class TablesService {
     }
   }
 
-  // Convierte el valor de floor a int de forma segura
-  int _parseFloor(dynamic value) {
-    if (value is int) return value;
-    if (value is String) return int.tryParse(value) ?? 1;
-    return 1;
-  }
-
   // Obtiene los pisos únicos de las mesas
-  Future<List<int>> getFloors() async {
+  Future<List<Map<String, String>>> getFloors() async {
     final tables = await getTables();
-    final floors = tables.map((t) => _parseFloor(t['floor'])).toSet().toList();
-    floors.sort();
-    return floors;
+    final Map<String, String> floorsMap = {};
+    for (final table in tables) {
+      final floorId = table['floor']?.toString();
+      final floorName = table['floorName']?.toString() ?? floorId;
+      if (floorId != null && floorId.isNotEmpty) {
+        floorsMap[floorId] = floorName ?? floorId;
+      }
+    }
+    return floorsMap.entries
+        .map((e) => {'id': e.key, 'name': e.value})
+        .toList();
   }
 }

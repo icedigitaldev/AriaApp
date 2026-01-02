@@ -22,13 +22,13 @@ class CachedNetworkImage extends StatefulWidget {
     this.errorWidget,
   }) : super(key: key);
 
+  static final Map<String, Uint8List> _memoryCache = {};
+
   @override
   State<CachedNetworkImage> createState() => _CachedNetworkImageState();
 }
 
 class _CachedNetworkImageState extends State<CachedNetworkImage> {
-  static final Map<String, Uint8List> _memoryCache = {};
-
   Uint8List? _imageData;
   bool _isLoading = true;
   bool _hasError = false;
@@ -50,10 +50,10 @@ class _CachedNetworkImageState extends State<CachedNetworkImage> {
   Future<void> _loadImage() async {
     final url = widget.imageUrl;
 
-    if (_memoryCache.containsKey(url)) {
+    if (CachedNetworkImage._memoryCache.containsKey(url)) {
       if (mounted) {
         setState(() {
-          _imageData = _memoryCache[url];
+          _imageData = CachedNetworkImage._memoryCache[url];
           _isLoading = false;
           _hasError = false;
         });
@@ -77,7 +77,7 @@ class _CachedNetworkImageState extends State<CachedNetworkImage> {
       }
 
       if (data != null) {
-        _memoryCache[url] = data;
+        CachedNetworkImage._memoryCache[url] = data;
       }
 
       if (mounted) {
@@ -95,14 +95,6 @@ class _CachedNetworkImageState extends State<CachedNetworkImage> {
         });
       }
     }
-  }
-
-  static void clearMemoryCache() {
-    _memoryCache.clear();
-  }
-
-  static void removeFromMemoryCache(String url) {
-    _memoryCache.remove(url);
   }
 
   @override

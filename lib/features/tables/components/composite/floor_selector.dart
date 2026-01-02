@@ -4,32 +4,38 @@ import '../../../../utils/app_logger.dart';
 import '../ui/floor_button.dart';
 
 class FloorSelector extends StatelessWidget {
-  final int selectedFloor;
-  final Function(int) onFloorChanged;
-  final List<int> availableFloors;
+  final String? selectedFloor;
+  final Function(String?) onFloorChanged;
+  final List<Map<String, String>> availableFloors;
 
   const FloorSelector({
     Key? key,
     required this.selectedFloor,
     required this.onFloorChanged,
-    this.availableFloors = const [1, 2],
+    this.availableFloors = const [],
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    if (availableFloors.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     List<Widget> children = [];
 
     for (var i = 0; i < availableFloors.length; i++) {
       final floor = availableFloors[i];
+      final floorId = floor['id'] ?? '';
+      final floorName = floor['name'] ?? floorId;
 
       children.add(
         FloorButton(
-          floor: floor,
-          label: 'Piso $floor',
-          isSelected: selectedFloor == floor,
+          floorId: floorId,
+          label: floorName,
+          isSelected: selectedFloor == floorId,
           onTap: () {
-            AppLogger.log('Piso seleccionado: $floor', prefix: 'FILTRO:');
-            onFloorChanged(floor);
+            AppLogger.log('Piso seleccionado: $floorName', prefix: 'FILTRO:');
+            onFloorChanged(floorId);
           },
         ),
       );
@@ -41,7 +47,9 @@ class FloorSelector extends StatelessWidget {
 
     return Container(
       height: ResponsiveScaler.height(50),
-      margin: ResponsiveScaler.margin(const EdgeInsets.symmetric(horizontal: 20)),
+      margin: ResponsiveScaler.margin(
+        const EdgeInsets.symmetric(horizontal: 20),
+      ),
       child: Row(children: children),
     );
   }

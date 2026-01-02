@@ -6,7 +6,7 @@ import '../ui/table_card.dart';
 
 class TablesGrid extends StatelessWidget {
   final List<Map<String, dynamic>> tables;
-  final int selectedFloor;
+  final String selectedFloor;
   final Function(Map<String, dynamic>)? onTableTap;
   final Function(String, String)? onStatusChange;
 

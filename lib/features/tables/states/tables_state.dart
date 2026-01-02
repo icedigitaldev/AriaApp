@@ -2,36 +2,36 @@ import 'package:refena_flutter/refena_flutter.dart';
 
 class TablesState {
   final List<Map<String, dynamic>> tables;
-  final int selectedFloor;
+  final String? selectedFloor;
   final bool isLoading;
   final String? errorMessage;
 
   const TablesState({
     this.tables = const [],
-    this.selectedFloor = 1,
+    this.selectedFloor,
     this.isLoading = false,
     this.errorMessage,
   });
 
-  // Convierte el valor de floor a int de forma segura
-  static int _parseFloor(dynamic value) {
-    if (value is int) return value;
-    if (value is String) return int.tryParse(value) ?? 1;
-    return 1;
-  }
-
   // Filtra las mesas por piso seleccionado
   List<Map<String, dynamic>> get filteredTables {
-    return tables
-        .where((t) => _parseFloor(t['floor']) == selectedFloor)
-        .toList();
+    if (selectedFloor == null) return tables;
+    return tables.where((t) => t['floor'] == selectedFloor).toList();
   }
 
-  // Obtiene los pisos disponibles
-  List<int> get availableFloors {
-    final floors = tables.map((t) => _parseFloor(t['floor'])).toSet().toList();
-    floors.sort();
-    return floors.isEmpty ? [1] : floors;
+  // Obtiene los pisos disponibles con id y nombre
+  List<Map<String, String>> get availableFloors {
+    final Map<String, String> floorsMap = {};
+    for (final table in tables) {
+      final floorId = table['floor']?.toString();
+      final floorName = table['floorName']?.toString() ?? floorId;
+      if (floorId != null && floorId.isNotEmpty) {
+        floorsMap[floorId] = floorName ?? floorId;
+      }
+    }
+    return floorsMap.entries
+        .map((e) => {'id': e.key, 'name': e.value})
+        .toList();
   }
 
   // Estadísticas por estado
@@ -44,14 +44,15 @@ class TablesState {
 
   TablesState copyWith({
     List<Map<String, dynamic>>? tables,
-    int? selectedFloor,
+    String? selectedFloor,
     bool? isLoading,
     String? errorMessage,
     bool clearError = false,
+    bool clearFloor = false,
   }) {
     return TablesState(
       tables: tables ?? this.tables,
-      selectedFloor: selectedFloor ?? this.selectedFloor,
+      selectedFloor: clearFloor ? null : (selectedFloor ?? this.selectedFloor),
       isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
@@ -66,8 +67,8 @@ class TablesStateNotifier extends Notifier<TablesState> {
     state = state.copyWith(tables: tables, isLoading: false);
   }
 
-  void setSelectedFloor(int floor) {
-    state = state.copyWith(selectedFloor: floor);
+  void setSelectedFloor(String? floor) {
+    state = state.copyWith(selectedFloor: floor, clearFloor: floor == null);
   }
 
   void setLoading(bool loading) {

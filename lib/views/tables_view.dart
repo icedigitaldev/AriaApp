@@ -73,7 +73,7 @@ class _TablesViewState extends State<TablesView> {
                           )
                         : TablesGrid(
                             tables: tablesState.filteredTables,
-                            selectedFloor: tablesState.selectedFloor,
+                            selectedFloor: tablesState.selectedFloor ?? '',
                             onTableTap: (table) {
                               final status =
                                   table['status']?.toString() ?? 'available';
