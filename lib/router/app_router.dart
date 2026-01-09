@@ -52,20 +52,19 @@ class AppRouter {
   }
 
   static Map<String, WidgetBuilder> routes = {
-    phoneAuth: (context) => const PhoneAuthView(),
-    otpVerification: (context) => const OtpVerificationView(),
-    accountBlocked: (context) => const AccountBlockedView(),
+    phoneAuth: (context) => PhoneAuthView(),
+    otpVerification: (context) => OtpVerificationView(),
+    accountBlocked: (context) => AccountBlockedView(),
     // Vistas principales envueltas con monitoreo de status
-    tables: (context) => const AccountStatusWrapper(child: TablesView()),
-    newOrder: (context) => const AccountStatusWrapper(child: NewOrderView()),
-    orderDetails: (context) =>
-        const AccountStatusWrapper(child: OrderDetailsView()),
+    tables: (context) => AccountStatusWrapper(child: TablesView()),
+    newOrder: (context) => AccountStatusWrapper(child: NewOrderView()),
+    orderDetails: (context) => AccountStatusWrapper(child: OrderDetailsView()),
     kitchenOrders: (context) =>
-        const AccountStatusWrapper(child: KitchenOrdersView()),
+        AccountStatusWrapper(child: KitchenOrdersView()),
     kitchenOrderDetails: (context) =>
-        const AccountStatusWrapper(child: KitchenOrderDetailsView()),
+        AccountStatusWrapper(child: KitchenOrderDetailsView()),
     ordersHistory: (context) =>
-        const AccountStatusWrapper(child: OrdersHistoryView()),
+        AccountStatusWrapper(child: OrdersHistoryView()),
   };
 
   // Navega al home y libera el video de Aria

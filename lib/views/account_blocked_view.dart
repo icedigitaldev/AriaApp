@@ -10,7 +10,7 @@ import '../router/app_router.dart';
 import '../auth/current_user.dart';
 
 class AccountBlockedView extends StatelessWidget {
-  const AccountBlockedView({Key? key}) : super(key: key);
+  AccountBlockedView({Key? key}) : super(key: key);
 
   Future<void> _handleLogout(BuildContext context) async {
     await IceStorage.instance.auth.clearAuth();
@@ -37,10 +37,10 @@ class AccountBlockedView extends StatelessWidget {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
+                physics: BouncingScrollPhysics(),
                 child: Padding(
                   padding: ResponsiveScaler.padding(
-                    const EdgeInsets.symmetric(horizontal: 24),
+                    EdgeInsets.symmetric(horizontal: 24),
                   ),
                   child: Column(
                     children: [
@@ -72,7 +72,7 @@ class AccountBlockedView extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           foreground: Paint()
                             ..shader = AppGradients.headerText.createShader(
-                              const Rect.fromLTWH(0.0, 0.0, 280.0, 70.0),
+                              Rect.fromLTWH(0.0, 0.0, 280.0, 70.0),
                             ),
                         ),
                       ),
@@ -96,7 +96,7 @@ class AccountBlockedView extends StatelessWidget {
                       Container(
                         width: double.infinity,
                         padding: ResponsiveScaler.padding(
-                          const EdgeInsets.symmetric(
+                          EdgeInsets.symmetric(
                             horizontal: 24,
                             vertical: 28,
                           ),
@@ -150,7 +150,7 @@ class AccountBlockedView extends StatelessWidget {
                             // Contacto
                             Container(
                               padding: ResponsiveScaler.padding(
-                                const EdgeInsets.symmetric(
+                                EdgeInsets.symmetric(
                                   horizontal: 16,
                                   vertical: 10,
                                 ),
@@ -193,7 +193,7 @@ class AccountBlockedView extends StatelessWidget {
             // Botón inferior
             Padding(
               padding: ResponsiveScaler.padding(
-                const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                EdgeInsets.fromLTRB(24, 20, 24, 24),
               ),
               child: ElevatedButton(
                 onPressed: () => _handleLogout(context),

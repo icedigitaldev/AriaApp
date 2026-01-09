@@ -13,7 +13,7 @@ import '../features/authentication/controllers/auth_controller.dart';
 import '../router/app_router.dart';
 
 class OtpVerificationView extends StatefulWidget {
-  const OtpVerificationView({Key? key}) : super(key: key);
+  OtpVerificationView({Key? key}) : super(key: key);
 
   @override
   State<OtpVerificationView> createState() => _OtpVerificationViewState();
@@ -46,12 +46,12 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
 
   void _setupAnimations() {
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: Duration(milliseconds: 800),
       vsync: this,
     );
 
     _shakeController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: Duration(milliseconds: 500),
       vsync: this,
     );
 
@@ -171,10 +171,10 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
                       children: [
                         Expanded(
                           child: SingleChildScrollView(
-                            physics: const BouncingScrollPhysics(),
+                            physics: BouncingScrollPhysics(),
                             child: Padding(
                               padding: ResponsiveScaler.padding(
-                                const EdgeInsets.symmetric(horizontal: 24.0),
+                                EdgeInsets.symmetric(horizontal: 24.0),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -203,7 +203,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
                                         ],
                                       ),
                                       child: Container(
-                                        padding: const EdgeInsets.all(3),
+                                        padding: EdgeInsets.all(3),
                                         decoration: BoxDecoration(
                                           color: AppColors.primary.withOpacity(
                                             0.2,
@@ -213,7 +213,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
                                           ),
                                         ),
                                         child: Container(
-                                          padding: const EdgeInsets.all(2),
+                                          padding: EdgeInsets.all(2),
                                           decoration: BoxDecoration(
                                             color: Colors.white,
                                             borderRadius: BorderRadius.circular(
@@ -247,7 +247,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
                                       foreground: Paint()
                                         ..shader = AppGradients.headerText
                                             .createShader(
-                                              const Rect.fromLTWH(
+                                              Rect.fromLTWH(
                                                 0.0,
                                                 0.0,
                                                 300.0,
@@ -339,7 +339,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
 
   Widget _buildErrorMessage(String message) {
     return Container(
-      padding: ResponsiveScaler.padding(const EdgeInsets.all(12)),
+      padding: ResponsiveScaler.padding(EdgeInsets.all(12)),
       decoration: BoxDecoration(
         color: AppColors.error.withOpacity(0.1),
         borderRadius: BorderRadius.circular(ResponsiveScaler.radius(12)),
@@ -375,7 +375,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView>
           offset: Offset(_shakeAnimation.value, 0),
           child: Container(
             padding: ResponsiveScaler.padding(
-              const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+              EdgeInsets.symmetric(vertical: 22, horizontal: 16),
             ),
             decoration: BoxDecoration(
               color: AppColors.card,

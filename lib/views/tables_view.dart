@@ -12,7 +12,7 @@ import '../auth/current_user.dart';
 import '../utils/app_logger.dart';
 
 class TablesView extends StatefulWidget {
-  const TablesView({Key? key}) : super(key: key);
+  TablesView({Key? key}) : super(key: key);
 
   @override
   State<TablesView> createState() => _TablesViewState();

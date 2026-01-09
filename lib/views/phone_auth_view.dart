@@ -13,7 +13,7 @@ import '../components/ui/aria_video_player.dart';
 import '../controllers/aria_video_controller.dart';
 
 class PhoneAuthView extends StatefulWidget {
-  const PhoneAuthView({Key? key}) : super(key: key);
+  PhoneAuthView({Key? key}) : super(key: key);
 
   @override
   State<PhoneAuthView> createState() => _PhoneAuthViewState();
@@ -31,7 +31,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: Duration(milliseconds: 800),
       vsync: this,
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -84,7 +84,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
         return Scaffold(
           backgroundColor: AppColors.background,
           resizeToAvoidBottomInset: true,
-          appBar: const TransparentAppBar(),
+          appBar: TransparentAppBar(),
           body: SafeArea(
             child: FadeTransition(
               opacity: _fadeAnimation,
@@ -92,10 +92,10 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                 children: [
                   Expanded(
                     child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
+                      physics: BouncingScrollPhysics(),
                       child: Padding(
                         padding: ResponsiveScaler.padding(
-                          const EdgeInsets.symmetric(horizontal: 24.0),
+                          EdgeInsets.symmetric(horizontal: 24.0),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -129,7 +129,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                                   ],
                                 ),
                                 child: Container(
-                                  padding: const EdgeInsets.all(3),
+                                  padding: EdgeInsets.all(3),
                                   decoration: BoxDecoration(
                                     color: AppColors.primary.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(
@@ -137,7 +137,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                                     ),
                                   ),
                                   child: Container(
-                                    padding: const EdgeInsets.all(2),
+                                    padding: EdgeInsets.all(2),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(
@@ -173,7 +173,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                                 foreground: Paint()
                                   ..shader = AppGradients.headerText
                                       .createShader(
-                                        const Rect.fromLTWH(
+                                        Rect.fromLTWH(
                                           0.0,
                                           0.0,
                                           300.0,
@@ -212,7 +212,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                               SizedBox(height: ResponsiveScaler.height(16)),
                               Container(
                                 padding: ResponsiveScaler.padding(
-                                  const EdgeInsets.all(12),
+                                  EdgeInsets.all(12),
                                 ),
                                 decoration: BoxDecoration(
                                   color: AppColors.error.withOpacity(0.1),
@@ -324,7 +324,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
   Widget _buildTermsText() {
     return Padding(
       padding: ResponsiveScaler.padding(
-        const EdgeInsets.symmetric(horizontal: 24),
+        EdgeInsets.symmetric(horizontal: 24),
       ),
       child: RichText(
         textAlign: TextAlign.center,
@@ -335,7 +335,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
             height: 1.5,
           ),
           children: [
-            const TextSpan(text: 'Al continuar, aceptas nuestros '),
+            TextSpan(text: 'Al continuar, aceptas nuestros '),
             TextSpan(
               text: 'Términos de Servicio',
               style: TextStyle(
@@ -344,7 +344,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                 decoration: TextDecoration.underline,
               ),
             ),
-            const TextSpan(text: ' y '),
+            TextSpan(text: ' y '),
             TextSpan(
               text: 'Política de Privacidad',
               style: TextStyle(

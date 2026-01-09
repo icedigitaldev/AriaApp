@@ -36,16 +36,19 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppThemes.init(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.system,
       builder: (context, child) {
+        AppThemes.init(context);
         ResponsiveScaler.init(context);
+
         return child!;
       },
       // Tema claro
       theme: ThemeData(
         brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFFFFFFF),
         textTheme: GoogleFonts.poppinsTextTheme(
           ThemeData(brightness: Brightness.light).textTheme,
         ),
@@ -54,6 +57,7 @@ class MainApp extends StatelessWidget {
       // Tema oscuro
       darkTheme: ThemeData(
         brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF131524),
         textTheme: GoogleFonts.poppinsTextTheme(
           ThemeData(brightness: Brightness.dark).textTheme,
         ),

@@ -17,7 +17,7 @@ import '../router/app_router.dart';
 import '../utils/app_logger.dart';
 
 class OrderDetailsView extends StatefulWidget {
-  const OrderDetailsView({Key? key}) : super(key: key);
+  OrderDetailsView({Key? key}) : super(key: key);
 
   @override
   State<OrderDetailsView> createState() => _OrderDetailsViewState();
@@ -248,14 +248,14 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
 
     return Container(
       padding: ResponsiveScaler.padding(
-        const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       ),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => AppRouter.navigateToHome(context),
             child: Container(
-              padding: ResponsiveScaler.padding(const EdgeInsets.all(10)),
+              padding: ResponsiveScaler.padding(EdgeInsets.all(10)),
               decoration: BoxDecoration(
                 color: AppColors.card.withOpacity(0.9),
                 borderRadius: BorderRadius.circular(
@@ -290,7 +290,7 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
                         fontWeight: FontWeight.bold,
                         foreground: Paint()
                           ..shader = AppGradients.headerText.createShader(
-                            const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
+                            Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
                           ),
                       ),
                     ),
@@ -298,7 +298,7 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
                       SizedBox(width: ResponsiveScaler.width(10)),
                       Container(
                         padding: ResponsiveScaler.padding(
-                          const EdgeInsets.symmetric(
+                          EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 4,
                           ),
@@ -348,7 +348,7 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
             GestureDetector(
               onTap: _navigateToAddItems,
               child: Container(
-                padding: ResponsiveScaler.padding(const EdgeInsets.all(10)),
+                padding: ResponsiveScaler.padding(EdgeInsets.all(10)),
                 decoration: BoxDecoration(
                   gradient: AppGradients.primaryButton,
                   borderRadius: BorderRadius.circular(
@@ -404,7 +404,7 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               padding: ResponsiveScaler.padding(
-                const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(
@@ -433,7 +433,7 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
 
     return ListView.builder(
       padding: ResponsiveScaler.padding(
-        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       ),
       itemCount: items.length + 1,
       itemBuilder: (context, index) {
@@ -460,9 +460,9 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
         customerName != null && customerName.toString().isNotEmpty;
 
     final child = Container(
-      margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 10)),
+      margin: ResponsiveScaler.margin(EdgeInsets.only(bottom: 10)),
       padding: ResponsiveScaler.padding(
-        const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
       decoration: BoxDecoration(
         color: AppColors.card,
@@ -563,8 +563,8 @@ class _OrderDetailsViewState extends State<OrderDetailsView> {
       key: Key('item-$index-${item['name']}'),
       direction: DismissDirection.endToStart,
       background: Container(
-        margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 10)),
-        padding: ResponsiveScaler.padding(const EdgeInsets.only(right: 20)),
+        margin: ResponsiveScaler.margin(EdgeInsets.only(bottom: 10)),
+        padding: ResponsiveScaler.padding(EdgeInsets.only(right: 20)),
         decoration: BoxDecoration(
           color: AppColors.error,
           borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),

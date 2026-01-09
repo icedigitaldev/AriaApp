@@ -40,7 +40,7 @@ class _AccountStatusWrapperState extends State<AccountStatusWrapper> {
 
         // Cuenta bloqueada
         if (accountState.isBlocked) {
-          return const AccountBlockedView();
+          return AccountBlockedView();
         }
 
         // Cuenta activa

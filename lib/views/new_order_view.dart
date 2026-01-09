@@ -20,7 +20,7 @@ import '../features/tables/services/tables_service.dart';
 import '../utils/app_logger.dart';
 
 class NewOrderView extends StatefulWidget {
-  const NewOrderView({Key? key}) : super(key: key);
+  NewOrderView({Key? key}) : super(key: key);
 
   @override
   State<NewOrderView> createState() => _NewOrderViewState();
@@ -327,7 +327,7 @@ class _NewOrderViewState extends State<NewOrderView> {
                         onTap: _showOrderSummary,
                         child: Container(
                           padding: ResponsiveScaler.padding(
-                            const EdgeInsets.symmetric(
+                            EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 8,
                             ),
@@ -379,7 +379,7 @@ class _NewOrderViewState extends State<NewOrderView> {
                       if (pageIndex != -1 && _pageController.hasClients) {
                         _pageController.animateToPage(
                           pageIndex,
-                          duration: const Duration(milliseconds: 300),
+                          duration: Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
                         );
                       }
@@ -389,7 +389,7 @@ class _NewOrderViewState extends State<NewOrderView> {
                     pageController: _pageController,
                   ),
                   Container(
-                    margin: ResponsiveScaler.margin(const EdgeInsets.all(20)),
+                    margin: ResponsiveScaler.margin(EdgeInsets.all(20)),
                     child: SearchBar(
                       hintText: 'Buscar platos...',
                       onChanged: (value) => setState(() => searchQuery = value),
@@ -401,7 +401,7 @@ class _NewOrderViewState extends State<NewOrderView> {
                             child: AppLoader(size: ResponsiveScaler.width(40)),
                           )
                         : menuState.dishes.isEmpty
-                        ? const EmptyState(
+                        ? EmptyState(
                             icon: Icons.restaurant_menu_outlined,
                             title: 'No hay platos',
                             description: 'No hay platos disponibles.',
@@ -450,12 +450,12 @@ class _NewOrderViewState extends State<NewOrderView> {
           floatingActionButton: _orderItems.isNotEmpty
               ? Padding(
                   padding: ResponsiveScaler.padding(
-                    const EdgeInsets.only(bottom: 10.0),
+                    EdgeInsets.only(bottom: 10.0),
                   ),
                   child: FloatingActionButton.extended(
                     onPressed: _showOrderSummary,
                     backgroundColor: AppColors.primary,
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.shopping_basket,
                       color: AppColors.iconOnPrimary,
                     ),

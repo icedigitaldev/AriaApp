@@ -13,7 +13,7 @@ import '../features/orders/controllers/orders-history-controller.dart';
 import '../features/orders/services/orders_service.dart';
 
 class OrdersHistoryView extends StatefulWidget {
-  const OrdersHistoryView({Key? key}) : super(key: key);
+  OrdersHistoryView({Key? key}) : super(key: key);
 
   @override
   State<OrdersHistoryView> createState() => _OrdersHistoryViewState();
@@ -98,7 +98,7 @@ class _OrdersHistoryViewState extends State<OrdersHistoryView> {
                     ),
                     Container(
                       margin: ResponsiveScaler.margin(
-                        const EdgeInsets.symmetric(horizontal: 16),
+                        EdgeInsets.symmetric(horizontal: 16),
                       ),
                       child: DateSelector(
                         selectedDate: historyState.selectedDate,
@@ -129,9 +129,9 @@ class _OrdersHistoryViewState extends State<OrdersHistoryView> {
         : AppColors.iconMuted;
 
     return Container(
-      margin: ResponsiveScaler.margin(const EdgeInsets.fromLTRB(16, 12, 16, 8)),
+      margin: ResponsiveScaler.margin(EdgeInsets.fromLTRB(16, 12, 16, 8)),
       padding: ResponsiveScaler.padding(
-        const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       ),
       decoration: BoxDecoration(
         color: AppColors.card,
@@ -198,7 +198,7 @@ class _OrdersHistoryViewState extends State<OrdersHistoryView> {
     }
 
     if (historyState.orders.isEmpty) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.history,
         title: 'Sin órdenes',
         description: 'No hay órdenes completadas para esta fecha.',
@@ -211,7 +211,7 @@ class _OrdersHistoryViewState extends State<OrdersHistoryView> {
     );
 
     if (filteredOrders.isEmpty) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.search_off,
         title: 'Sin resultados',
         description: 'No se encontraron órdenes con ese criterio.',
@@ -221,7 +221,7 @@ class _OrdersHistoryViewState extends State<OrdersHistoryView> {
     return ListView.builder(
       controller: _scrollController,
       padding: ResponsiveScaler.padding(
-        const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        EdgeInsets.fromLTRB(16, 8, 16, 16),
       ),
       itemCount: filteredOrders.length,
       itemBuilder: (context, index) {
@@ -252,8 +252,8 @@ class _OrdersHistoryViewState extends State<OrdersHistoryView> {
         );
       },
       child: Container(
-        margin: ResponsiveScaler.margin(const EdgeInsets.only(bottom: 12)),
-        padding: ResponsiveScaler.padding(const EdgeInsets.all(14)),
+        margin: ResponsiveScaler.margin(EdgeInsets.only(bottom: 12)),
+        padding: ResponsiveScaler.padding(EdgeInsets.all(14)),
         decoration: BoxDecoration(
           color: AppColors.card,
           borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
@@ -291,7 +291,7 @@ class _OrdersHistoryViewState extends State<OrdersHistoryView> {
                   children: [
                     Container(
                       padding: ResponsiveScaler.padding(
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       ),
                       decoration: BoxDecoration(
                         color: statusColor.withValues(alpha: 0.15),
@@ -320,7 +320,7 @@ class _OrdersHistoryViewState extends State<OrdersHistoryView> {
                 // Precio (contenedor adaptable)
                 Container(
                   padding: ResponsiveScaler.padding(
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),

@@ -17,7 +17,7 @@ import '../utils/app_logger.dart';
 import '../auth/current_user.dart';
 
 class KitchenOrdersView extends StatefulWidget {
-  const KitchenOrdersView({Key? key}) : super(key: key);
+  KitchenOrdersView({Key? key}) : super(key: key);
 
   @override
   State<KitchenOrdersView> createState() => _KitchenOrdersViewState();
@@ -59,7 +59,7 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
     if (pageIndex != -1 && _pageController.hasClients) {
       _pageController.animateToPage(
         pageIndex,
-        duration: const Duration(milliseconds: 300),
+        duration: Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     }
@@ -220,7 +220,7 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                         },
                         icon: Container(
                           padding: ResponsiveScaler.padding(
-                            const EdgeInsets.all(8),
+                            EdgeInsets.all(8),
                           ),
                           decoration: BoxDecoration(
                             color: AppColors.card.withOpacity(0.9),
@@ -272,7 +272,7 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
                         final filteredOrders = getFilteredOrders(currentFilter);
 
                         if (filteredOrders.isEmpty) {
-                          return const EmptyState(
+                          return EmptyState(
                             icon: Icons.receipt_long_outlined,
                             title: 'No hay órdenes',
                             description: 'No hay órdenes en esta categoría.',
@@ -281,7 +281,7 @@ class _KitchenOrdersViewState extends State<KitchenOrdersView> {
 
                         return ListView.builder(
                           padding: ResponsiveScaler.padding(
-                            const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            EdgeInsets.fromLTRB(16, 0, 16, 16),
                           ),
                           itemCount: filteredOrders.length,
                           itemBuilder: (context, index) => OrderCard(

@@ -16,7 +16,7 @@ import '../features/orders/services/orders_service.dart';
 import '../utils/app_logger.dart';
 
 class KitchenOrderDetailsView extends StatefulWidget {
-  const KitchenOrderDetailsView({Key? key}) : super(key: key);
+  KitchenOrderDetailsView({Key? key}) : super(key: key);
 
   @override
   State<KitchenOrderDetailsView> createState() =>
@@ -37,7 +37,7 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
 
     if (order == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(child: Text('No se encontró información de la orden')),
       );
     }
@@ -98,14 +98,14 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
                   Expanded(
                     child: Padding(
                       padding: ResponsiveScaler.padding(
-                        const EdgeInsets.symmetric(horizontal: 16),
+                        EdgeInsets.symmetric(horizontal: 16),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
                             padding: ResponsiveScaler.padding(
-                              const EdgeInsets.only(left: 4.0, bottom: 16.0),
+                              EdgeInsets.only(left: 4.0, bottom: 16.0),
                             ),
                             child: Text(
                               'Elementos del pedido',
@@ -211,8 +211,8 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
     }
 
     return Container(
-      margin: ResponsiveScaler.margin(const EdgeInsets.all(16)),
-      padding: ResponsiveScaler.padding(const EdgeInsets.all(16)),
+      margin: ResponsiveScaler.margin(EdgeInsets.all(16)),
+      padding: ResponsiveScaler.padding(EdgeInsets.all(16)),
       decoration: BoxDecoration(
         color: AppColors.card.withOpacity(0.9),
         borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
