@@ -8,7 +8,7 @@ import '../design/responsive/responsive_scaler.dart';
 import '../features/authentication/components/ui/phone_input_field.dart';
 import '../features/authentication/controllers/auth_controller.dart';
 import '../router/app_router.dart';
-import '../components/composite/transparent_app_bar.dart';
+import '../components/ui/status_app_bar.dart';
 import '../components/ui/aria_video_player.dart';
 import '../controllers/aria_video_controller.dart';
 
@@ -84,7 +84,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
         return Scaffold(
           backgroundColor: AppColors.background,
           resizeToAvoidBottomInset: true,
-          appBar: TransparentAppBar(),
+          appBar: StatusAppBar(),
           body: SafeArea(
             child: FadeTransition(
               opacity: _fadeAnimation,
@@ -173,12 +173,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
                                 foreground: Paint()
                                   ..shader = AppGradients.headerText
                                       .createShader(
-                                        Rect.fromLTWH(
-                                          0.0,
-                                          0.0,
-                                          300.0,
-                                          70.0,
-                                        ),
+                                        Rect.fromLTWH(0.0, 0.0, 300.0, 70.0),
                                       ),
                               ),
                             ),
@@ -323,9 +318,7 @@ class _PhoneAuthViewState extends State<PhoneAuthView>
 
   Widget _buildTermsText() {
     return Padding(
-      padding: ResponsiveScaler.padding(
-        EdgeInsets.symmetric(horizontal: 24),
-      ),
+      padding: ResponsiveScaler.padding(EdgeInsets.symmetric(horizontal: 24)),
       child: RichText(
         textAlign: TextAlign.center,
         text: TextSpan(

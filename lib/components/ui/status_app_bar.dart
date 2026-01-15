@@ -4,14 +4,14 @@ import '../../design/colors/app_colors.dart';
 import '../../design/responsive/responsive_scaler.dart';
 import '../../design/themes/app_themes.dart';
 
-class TransparentAppBar extends StatelessWidget implements PreferredSizeWidget {
+class StatusAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
   final Brightness? statusBarIconBrightness;
   final Brightness? statusBarBrightness;
   final VoidCallback? onBack;
   final bool showBackButton;
 
-  const TransparentAppBar({
+  const StatusAppBar({
     Key? key,
     this.backgroundColor,
     this.statusBarIconBrightness,
@@ -57,7 +57,7 @@ class TransparentAppBar extends StatelessWidget implements PreferredSizeWidget {
                           const EdgeInsets.all(10),
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.card.withOpacity(0.9),
+                          color: AppColors.card.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(
                             ResponsiveScaler.radius(14),
                           ),

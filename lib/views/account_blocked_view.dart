@@ -5,7 +5,7 @@ import '../design/colors/app_colors.dart';
 import '../design/colors/app_gradients.dart';
 import '../design/responsive/responsive_scaler.dart';
 import '../design/themes/app_themes.dart';
-import '../components/composite/transparent_app_bar.dart';
+import '../components/ui/status_app_bar.dart';
 import '../router/app_router.dart';
 import '../auth/current_user.dart';
 
@@ -31,7 +31,7 @@ class AccountBlockedView extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: AppColors.background,
-      appBar: TransparentAppBar(backgroundColor: AppColors.appBarBackground),
+      appBar: StatusAppBar(backgroundColor: AppColors.appBarBackground),
       body: SafeArea(
         child: Column(
           children: [
@@ -96,10 +96,7 @@ class AccountBlockedView extends StatelessWidget {
                       Container(
                         width: double.infinity,
                         padding: ResponsiveScaler.padding(
-                          EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 28,
-                          ),
+                          EdgeInsets.symmetric(horizontal: 24, vertical: 28),
                         ),
                         decoration: BoxDecoration(
                           color: AppColors.card,

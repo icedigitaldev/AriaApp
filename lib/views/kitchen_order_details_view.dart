@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:refena_flutter/refena_flutter.dart';
-import '../components/composite/transparent_app_bar.dart';
+import '../components/ui/status_app_bar.dart';
 import '../components/ui/app_snackbar.dart';
 import '../design/colors/app_colors.dart';
 import '../design/responsive/responsive_scaler.dart';
 import '../design/themes/app_themes.dart';
-import '../features/orders/components/composite/order_header.dart';
+import '../components/ui/app_header.dart';
 import '../features/orders/components/composite/order_items_list.dart';
 import '../features/orders/components/composite/kitchen_action_buttons.dart';
 import '../features/orders/components/ui/order_status_badge.dart';
@@ -71,15 +71,13 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
 
         return Scaffold(
           extendBodyBehindAppBar: true,
-          appBar: TransparentAppBar(
-            backgroundColor: AppColors.appBarBackground,
-          ),
+          appBar: StatusAppBar(backgroundColor: AppColors.appBarBackground),
           body: Container(
             color: AppColors.background,
             child: SafeArea(
               child: Column(
                 children: [
-                  OrderHeader(
+                  AppHeader(
                     title:
                         'Orden #${order['orderNumber'] != null ? OrdersService.formatOrderNumber(order['orderNumber']) : order['id'].toString().substring(0, 6)}',
                     subtitle:
@@ -214,7 +212,7 @@ class _KitchenOrderDetailsViewState extends State<KitchenOrderDetailsView> {
       margin: ResponsiveScaler.margin(EdgeInsets.all(16)),
       padding: ResponsiveScaler.padding(EdgeInsets.all(16)),
       decoration: BoxDecoration(
-        color: AppColors.card.withOpacity(0.9),
+        color: AppColors.card.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
       ),
       child: Row(

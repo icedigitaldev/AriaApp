@@ -59,6 +59,7 @@ class TablesState {
   }
 }
 
+// Notifier base con métodos de actualización de estado
 class TablesStateNotifier extends Notifier<TablesState> {
   @override
   TablesState init() => const TablesState();

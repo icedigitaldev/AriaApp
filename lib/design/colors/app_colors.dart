@@ -55,12 +55,12 @@ class AppColors {
   // Varios
   static const Color transparent = Colors.transparent;
   static Color get shadow => AppThemes.select(
-    Colors.black.withOpacity(0.08),
-    Colors.black.withOpacity(0.2),
+    Colors.black.withValues(alpha: 0.08),
+    Colors.black.withValues(alpha: 0.2),
   );
   static Color get shadowPurple => AppThemes.select(
-    const Color(0xFF9333EA).withOpacity(0.08),
-    const Color(0xFF9333EA).withOpacity(0.15),
+    const Color(0xFF9333EA).withValues(alpha: 0.08),
+    const Color(0xFF9333EA).withValues(alpha: 0.15),
   );
   static Color get success =>
       AppThemes.select(const Color(0xFF10B981), const Color(0xFF34D399));

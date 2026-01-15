@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../design/colors/app_colors.dart';
-import '../../../../design/colors/app_gradients.dart';
-import '../../../../design/responsive/responsive_scaler.dart';
+import '../../design/colors/app_colors.dart';
+import '../../design/colors/app_gradients.dart';
+import '../../design/responsive/responsive_scaler.dart';
 
-class OrderHeader extends StatelessWidget {
+class AppHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
+  final Widget? titleSuffix;
   final Widget? leadingIcon;
   final List<Widget>? actions;
   final VoidCallback? onBack;
   final bool showBackButton;
   final Color? backgroundColor;
 
-  const OrderHeader({
+  const AppHeader({
     Key? key,
     required this.title,
     this.subtitle,
+    this.titleSuffix,
     this.leadingIcon,
     this.actions,
     this.onBack,
@@ -29,17 +31,19 @@ class OrderHeader extends StatelessWidget {
     return Container(
       color: backgroundColor ?? AppColors.transparent,
       padding: ResponsiveScaler.padding(
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        // Padding horizontal estándar, vertical reducido para alineación compacta
+        const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 8),
       ),
       child: Row(
         children: [
+          // Botón de regreso o ícono personalizado
           if (showBackButton && onBack != null)
             IconButton(
               onPressed: onBack,
               icon: Container(
                 padding: ResponsiveScaler.padding(const EdgeInsets.all(8)),
                 decoration: BoxDecoration(
-                  color: AppColors.card.withOpacity(0.9),
+                  color: AppColors.card.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(
                     ResponsiveScaler.radius(12),
                   ),
@@ -57,23 +61,34 @@ class OrderHeader extends StatelessWidget {
           else if (leadingIcon != null)
             leadingIcon!,
 
+          // Separación entre leading y contenido
           if (showBackButton || leadingIcon != null)
-            SizedBox(width: ResponsiveScaler.width(16)),
+            SizedBox(width: ResponsiveScaler.width(12)),
 
+          // Título y subtítulo
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  title,
-                  style: GoogleFonts.poppins(
-                    fontSize: ResponsiveScaler.font(24),
-                    fontWeight: FontWeight.bold,
-                    foreground: Paint()
-                      ..shader = AppGradients.headerText.createShader(
-                        const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
+                Row(
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.poppins(
+                        fontSize: ResponsiveScaler.font(24),
+                        fontWeight: FontWeight.bold,
+                        foreground: Paint()
+                          ..shader = AppGradients.headerText.createShader(
+                            const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
+                          ),
                       ),
-                  ),
+                    ),
+                    if (titleSuffix != null) ...[
+                      SizedBox(width: ResponsiveScaler.width(10)),
+                      titleSuffix!,
+                    ],
+                  ],
                 ),
                 if (subtitle != null)
                   Text(
@@ -87,6 +102,7 @@ class OrderHeader extends StatelessWidget {
             ),
           ),
 
+          // Acciones (botones, badges, etc.)
           if (actions != null) ...actions!,
         ],
       ),

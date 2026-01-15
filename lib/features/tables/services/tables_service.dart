@@ -133,20 +133,4 @@ class TablesService {
       rethrow;
     }
   }
-
-  // Obtiene los pisos únicos de las mesas
-  Future<List<Map<String, String>>> getFloors() async {
-    final tables = await getTables();
-    final Map<String, String> floorsMap = {};
-    for (final table in tables) {
-      final floorId = table['floor']?.toString();
-      final floorName = table['floorName']?.toString() ?? floorId;
-      if (floorId != null && floorId.isNotEmpty) {
-        floorsMap[floorId] = floorName ?? floorId;
-      }
-    }
-    return floorsMap.entries
-        .map((e) => {'id': e.key, 'name': e.value})
-        .toList();
-  }
 }

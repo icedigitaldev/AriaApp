@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:refena_flutter/refena_flutter.dart';
-import '../components/composite/transparent_app_bar.dart';
+import '../components/ui/status_app_bar.dart';
 import '../components/ui/app_loader.dart';
 import '../components/ui/empty_state.dart';
 import '../design/colors/app_colors.dart';
 import '../design/responsive/responsive_scaler.dart';
 import '../design/themes/app_themes.dart';
-import '../features/orders/components/composite/order_header.dart';
+import '../components/ui/app_header.dart';
 import '../features/orders/components/composite/date_selector.dart';
 import '../features/orders/controllers/orders-history-controller.dart';
 import '../features/orders/services/orders_service.dart';
@@ -83,15 +83,13 @@ class _OrdersHistoryViewState extends State<OrdersHistoryView> {
           onTap: _unfocusSearch,
           child: Scaffold(
             extendBodyBehindAppBar: true,
-            appBar: TransparentAppBar(
-              backgroundColor: AppColors.appBarBackground,
-            ),
+            appBar: StatusAppBar(backgroundColor: AppColors.appBarBackground),
             body: Container(
               color: AppColors.background,
               child: SafeArea(
                 child: Column(
                   children: [
-                    OrderHeader(
+                    AppHeader(
                       title: 'Historial de Órdenes',
                       subtitle: 'Órdenes completadas',
                       onBack: () => Navigator.pop(context),
@@ -220,9 +218,7 @@ class _OrdersHistoryViewState extends State<OrdersHistoryView> {
 
     return ListView.builder(
       controller: _scrollController,
-      padding: ResponsiveScaler.padding(
-        EdgeInsets.fromLTRB(16, 8, 16, 16),
-      ),
+      padding: ResponsiveScaler.padding(EdgeInsets.fromLTRB(16, 8, 16, 16)),
       itemCount: filteredOrders.length,
       itemBuilder: (context, index) {
         return _buildOrderCard(filteredOrders[index]);

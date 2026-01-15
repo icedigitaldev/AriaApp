@@ -13,6 +13,7 @@ import '../views/kitchen_orders_view.dart';
 import '../views/kitchen_order_details_view.dart';
 import '../views/orders_history_view.dart';
 import '../views/account_blocked_view.dart';
+import '../views/profile_view.dart';
 
 class AppRouter {
   // Rutas de autenticación
@@ -31,6 +32,9 @@ class AppRouter {
 
   // Ruta de bloqueo
   static const String accountBlocked = '/account-blocked';
+
+  // Ruta de perfil
+  static const String profile = '/profile';
 
   // Obtiene la ruta inicial según estado de autenticación
   static String getInitialRoute() {
@@ -65,6 +69,7 @@ class AppRouter {
         AccountStatusWrapper(child: KitchenOrderDetailsView()),
     ordersHistory: (context) =>
         AccountStatusWrapper(child: OrdersHistoryView()),
+    profile: (context) => AccountStatusWrapper(child: ProfileView()),
   };
 
   // Navega al home y libera el video de Aria

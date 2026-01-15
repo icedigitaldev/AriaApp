@@ -23,7 +23,7 @@ class TablesController extends TablesStateNotifier {
 
     _tablesSubscription = _tablesService.streamTables().listen(
       (tables) {
-        setTables(tables);
+        _handleTablesUpdate(tables);
         AppLogger.log('Mesas cargadas: ${tables.length}', prefix: 'TABLES:');
       },
       onError: (error) {
@@ -35,6 +35,21 @@ class TablesController extends TablesStateNotifier {
         );
       },
     );
+  }
+
+  // Procesa la actualización de mesas y selecciona piso inicial si es necesario
+  void _handleTablesUpdate(List<Map<String, dynamic>> tables) {
+    setTables(tables);
+
+    // Selección automática del primer piso si no hay ninguno seleccionado
+    if (state.selectedFloor == null && state.availableFloors.isNotEmpty) {
+      final firstFloorId = state.availableFloors.first['id'];
+      setSelectedFloor(firstFloorId);
+      AppLogger.log(
+        'Piso inicial seleccionado: $firstFloorId',
+        prefix: 'TABLES:',
+      );
+    }
   }
 
   // Cambia el piso seleccionado
@@ -57,7 +72,15 @@ class TablesController extends TablesStateNotifier {
   // Limpia la suscripción
   void cleanup() {
     _tablesSubscription?.cancel();
+    _tablesSubscription = null;
     _initialized = false;
+  }
+
+  // Reinicializa el controlador (útil para cambio de usuario)
+  void reinitialize() {
+    cleanup();
+    state = const TablesState();
+    initialize();
   }
 }
 

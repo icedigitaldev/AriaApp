@@ -2,7 +2,7 @@ import 'package:flutter/material.dart' hide SearchBar;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 import '../auth/current_user.dart';
-import '../components/composite/transparent_app_bar.dart';
+import '../components/ui/status_app_bar.dart';
 import '../components/ui/app_snackbar.dart';
 import '../components/ui/app_loader.dart';
 import '../components/ui/empty_state.dart';
@@ -10,7 +10,7 @@ import '../design/colors/app_colors.dart';
 import '../design/responsive/responsive_scaler.dart';
 import '../design/themes/app_themes.dart';
 import '../features/dishes/controllers/dishes_controller.dart';
-import '../features/orders/components/composite/order_header.dart';
+import '../components/ui/app_header.dart';
 import '../features/orders/components/composite/order_filters_bar.dart';
 import '../features/orders/components/composite/dish_grid.dart';
 import '../features/orders/components/composite/order_summary_modal.dart';
@@ -308,15 +308,13 @@ class _NewOrderViewState extends State<NewOrderView> {
 
         return Scaffold(
           extendBodyBehindAppBar: true,
-          appBar: TransparentAppBar(
-            backgroundColor: AppColors.appBarBackground,
-          ),
+          appBar: StatusAppBar(backgroundColor: AppColors.appBarBackground),
           body: Container(
             decoration: BoxDecoration(color: AppColors.background),
             child: SafeArea(
               child: Column(
                 children: [
-                  OrderHeader(
+                  AppHeader(
                     title: table != null
                         ? 'Mesa ${table['number']}'
                         : 'Nueva Orden',
@@ -327,19 +325,16 @@ class _NewOrderViewState extends State<NewOrderView> {
                         onTap: _showOrderSummary,
                         child: Container(
                           padding: ResponsiveScaler.padding(
-                            EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.card.withOpacity(0.9),
+                            color: AppColors.card.withValues(alpha: 0.9),
                             borderRadius: BorderRadius.circular(
                               ResponsiveScaler.radius(20),
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withOpacity(0.1),
+                                color: AppColors.primary.withValues(alpha: 0.1),
                                 blurRadius: 8,
                                 offset: Offset(0, ResponsiveScaler.height(2)),
                               ),
