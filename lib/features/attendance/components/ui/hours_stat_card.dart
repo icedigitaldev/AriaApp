@@ -26,6 +26,7 @@ class HoursStatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(ResponsiveScaler.radius(16)),
+        border: Border.all(color: AppColors.borderSubtle, width: 1),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,

@@ -27,12 +27,12 @@ class AttendanceRecordTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(ResponsiveScaler.radius(14)),
-        border: isActive
-            ? Border.all(
-                color: AppColors.success.withValues(alpha: 0.5),
-                width: 1.5,
-              )
-            : null,
+        border: Border.all(
+          color: isActive
+              ? AppColors.success.withValues(alpha: 0.5)
+              : AppColors.borderSubtle,
+          width: isActive ? 1.5 : 1,
+        ),
       ),
       child: Row(
         children: [

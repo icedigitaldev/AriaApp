@@ -33,6 +33,10 @@ class AppColors {
       AppThemes.select(const Color(0xFFE9D5FF), const Color(0xFF4B5563));
   static Color get inputFocusedBorder =>
       AppThemes.select(const Color(0xFF9333EA), const Color(0xFFA855F7));
+  static Color get borderSubtle => AppThemes.select(
+    const Color(0xFF1F2937).withValues(alpha: 0.08),
+    Colors.transparent,
+  );
 
   // Textos
   static Color get textPrimary =>
@@ -74,4 +78,10 @@ class AppColors {
       AppThemes.select(const Color(0xFF3B82F6), const Color(0xFF60A5FA));
   static Color get infoVariant =>
       AppThemes.select(const Color(0xFF60A5FA), const Color(0xFF93C5FD));
+
+  // Dinero/Ganancias
+  static Color get money =>
+      AppThemes.select(const Color(0xFF16A34A), const Color(0xFF22C55E));
+  static Color get moneyVariant =>
+      AppThemes.select(const Color(0xFF22C55E), const Color(0xFF4ADE80));
 }

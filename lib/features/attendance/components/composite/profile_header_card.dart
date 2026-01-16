@@ -53,6 +53,7 @@ class ProfileHeaderCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: borderRadius,
+        border: Border.all(color: AppColors.borderSubtle, width: 1),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadowPurple,
@@ -69,7 +70,15 @@ class ProfileHeaderCard extends StatelessWidget {
             height: ResponsiveScaler.width(72),
             decoration: BoxDecoration(
               gradient: imageUrl == null ? AppGradients.primaryButton : null,
+              color: imageUrl != null ? AppColors.card : null,
               borderRadius: BorderRadius.circular(ResponsiveScaler.radius(18)),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadowPurple,
+                  blurRadius: 12,
+                  offset: Offset(0, ResponsiveScaler.height(4)),
+                ),
+              ],
             ),
             child: imageUrl != null
                 ? CachedNetworkImage(
@@ -89,9 +98,25 @@ class ProfileHeaderCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    errorWidget: _buildInitials(),
+                    errorWidget: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        ResponsiveScaler.radius(18),
+                      ),
+                      child: Image.asset(
+                        'assets/images/aria-logo.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   )
-                : _buildInitials(),
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveScaler.radius(18),
+                    ),
+                    child: Image.asset(
+                      'assets/images/aria-logo.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
           ),
           SizedBox(width: ResponsiveScaler.width(16)),
           // Info
@@ -154,23 +179,6 @@ class ProfileHeaderCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildInitials() {
-    final initials = name.isNotEmpty
-        ? name.split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join()
-        : '?';
-
-    return Center(
-      child: Text(
-        initials.toUpperCase(),
-        style: GoogleFonts.poppins(
-          fontSize: ResponsiveScaler.font(24),
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
       ),
     );
   }
