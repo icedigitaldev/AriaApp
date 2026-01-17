@@ -35,6 +35,14 @@ class _TablesViewState extends State<TablesView> {
         final tablesState = ref.watch(tablesControllerProvider);
         final tablesController = ref.notifier(tablesControllerProvider);
 
+        // Muestra loader mientras carga los datos iniciales
+        if (tablesState.isLoading) {
+          return Scaffold(
+            backgroundColor: AppColors.background,
+            body: Center(child: AppLoader(size: ResponsiveScaler.width(40))),
+          );
+        }
+
         // Lógica de selección de imagen
         final String? imageUrl = CurrentUserAuth.instance.imageUrl;
         final String? avatarUrl = CurrentUserAuth.instance.avatarUrl;
@@ -147,34 +155,30 @@ class _TablesViewState extends State<TablesView> {
                     },
                   ),
                   Expanded(
-                    child: tablesState.isLoading
-                        ? Center(
-                            child: AppLoader(size: ResponsiveScaler.width(40)),
-                          )
-                        : TablesGrid(
-                            tables: tablesState.filteredTables,
-                            selectedFloor: tablesState.selectedFloor ?? '',
-                            onTableTap: (table) {
-                              final status =
-                                  table['status']?.toString() ?? 'available';
-                              if (status == 'occupied') {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/order-details',
-                                  arguments: table,
-                                );
-                              } else {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/new-order',
-                                  arguments: table,
-                                );
-                              }
-                            },
-                            onStatusChange: (tableId, newStatus) {
-                              tablesController.changeStatus(tableId, newStatus);
-                            },
-                          ),
+                    child: TablesGrid(
+                      tables: tablesState.filteredTables,
+                      selectedFloor: tablesState.selectedFloor ?? '',
+                      onTableTap: (table) {
+                        final status =
+                            table['status']?.toString() ?? 'available';
+                        if (status == 'occupied') {
+                          Navigator.pushNamed(
+                            context,
+                            '/order-details',
+                            arguments: table,
+                          );
+                        } else {
+                          Navigator.pushNamed(
+                            context,
+                            '/new-order',
+                            arguments: table,
+                          );
+                        }
+                      },
+                      onStatusChange: (tableId, newStatus) {
+                        tablesController.changeStatus(tableId, newStatus);
+                      },
+                    ),
                   ),
                 ],
               ),

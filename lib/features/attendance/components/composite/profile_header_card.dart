@@ -169,13 +169,23 @@ class ProfileHeaderCard extends StatelessWidget {
               ],
             ),
           ),
-          // Ícono de configuración
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.settings_outlined,
-              color: AppColors.iconMuted,
-              size: ResponsiveScaler.icon(24),
+          // Botón de cerrar
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: ResponsiveScaler.width(40),
+              height: ResponsiveScaler.width(40),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceElement,
+                borderRadius: BorderRadius.circular(
+                  ResponsiveScaler.radius(12),
+                ),
+              ),
+              child: Icon(
+                Icons.close_rounded,
+                color: AppColors.textSecondary,
+                size: ResponsiveScaler.icon(22),
+              ),
             ),
           ),
         ],

@@ -37,6 +37,9 @@ class AppColors {
     const Color(0xFF1F2937).withValues(alpha: 0.08),
     Colors.transparent,
   );
+  // Fondo para elementos pequeños (iconos, badges)
+  static Color get surfaceElement =>
+      AppThemes.select(const Color(0xFFF3F4F6), const Color(0xFF3D4150));
 
   // Textos
   static Color get textPrimary =>

@@ -9,7 +9,7 @@ class OrdersState {
   const OrdersState({
     this.orders = const [],
     this.selectedFilter = 'pending',
-    this.isLoading = false,
+    this.isLoading = true,
     this.errorMessage,
   });
 

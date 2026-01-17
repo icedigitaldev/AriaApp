@@ -9,7 +9,7 @@ class TablesState {
   const TablesState({
     this.tables = const [],
     this.selectedFloor,
-    this.isLoading = false,
+    this.isLoading = true,
     this.errorMessage,
   });
 
